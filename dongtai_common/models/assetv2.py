@@ -26,6 +26,7 @@ from dongtai_common.models.vul_level import IastVulLevel
 from dongtai_common.utils.settings import get_managed
 from dongtai_common.models.department import Department
 from dongtai_common.models.talent import Talent
+from dongtai_common.utils.db import get_timestamp
 from django.db.models import IntegerChoices
 
 
@@ -50,7 +51,7 @@ class AssetV2(models.Model):
     signature_value = models.CharField(max_length=255, blank=True, null=True)
     dt = models.IntegerField(blank=True,
                              null=True,
-                             default=lambda: int(time.time()))
+                             default=get_timestamp)
     version = models.CharField(max_length=255, blank=True, null=True)
     project = models.ForeignKey(IastProject,
                                 on_delete=models.CASCADE,

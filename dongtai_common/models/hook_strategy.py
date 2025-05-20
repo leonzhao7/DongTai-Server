@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from dongtai_common.models.hook_type import HookType
 from dongtai_common.utils.settings import get_managed
 from dongtai_common.models.program_language import IastProgramLanguage
+from dongtai_common.utils.db import get_timestamp
 from time import time
 
 
@@ -38,10 +39,10 @@ class HookStrategy(models.Model):
     track = models.CharField(max_length=5, blank=True, null=True)
     create_time = models.IntegerField(blank=True,
                                       null=True,
-                                      default=lambda: int(time()))
+                                      default=get_timestamp)
     update_time = models.IntegerField(blank=True,
                                       null=True,
-                                      default=lambda: int(time()))
+                                      default=get_timestamp)
     created_by = models.IntegerField(
         blank=True,
         null=True,

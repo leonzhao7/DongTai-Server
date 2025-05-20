@@ -4,6 +4,7 @@ from dongtai_common.utils.settings import get_managed
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
 from dongtai_common.models.vul_level import IastVulLevel
+from dongtai_common.utils.db import get_timestamp
 import time
 
 
@@ -29,10 +30,10 @@ class IastDastIntegration(models.Model):
     dast_tag = models.CharField(max_length=255, blank=True, null=True)
     request_messages = models.JSONField(null=False, default=list)
     urls = models.JSONField(null=False, default=list)
-    create_time = models.IntegerField(default=lambda: int(time.time()),
+    create_time = models.IntegerField(default=get_timestamp,
                                       blank=True,
                                       null=True)
-    latest_time = models.IntegerField(default=lambda: int(time.time()),
+    latest_time = models.IntegerField(default=get_timestamp,
                                       blank=True,
                                       null=True)
     project = models.ForeignKey(IastProject,

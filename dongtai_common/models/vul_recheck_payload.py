@@ -5,6 +5,7 @@ from time import time
 from django.db.models import IntegerChoices
 from django.utils.translation import gettext_lazy as _
 from dongtai_common.models.strategy import IastStrategyModel
+from dongtai_common.utils.db import get_timestamp
 
 
 class IastVulRecheckPayload(models.Model):
@@ -15,7 +16,7 @@ class IastVulRecheckPayload(models.Model):
                                  null=True)
     value = models.CharField(blank=True, default=None, max_length=255)
     status = models.IntegerField(blank=True, default=None)
-    create_time = models.IntegerField(default=lambda: int(time()),
+    create_time = models.IntegerField(default=get_timestamp,
                                       blank=True,
                                       null=True)
     language_id = models.IntegerField(blank=True, default=0)

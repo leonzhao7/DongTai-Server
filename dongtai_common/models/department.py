@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from dongtai_common.models.talent import Talent
 from dongtai_common.utils.settings import get_managed
 from dongtai_common.utils.customfields import trans_char_field
+from dongtai_common.utils.db import get_timestamp
 from typing import Any
 
 
@@ -50,10 +51,10 @@ class Department(PermissionsMixin):
         },
     )
     create_time = models.IntegerField(_('create time'),
-                                      default=lambda: int(time.time()),
+                                      default=get_timestamp,
                                       blank=True)
     update_time = models.IntegerField(_('update time'),
-                                      default=lambda: int(time.time()),
+                                      default=get_timestamp,
                                       blank=True)
     created_by = models.IntegerField(_('created by'), blank=True)
     parent_id = models.IntegerField(_('parent id'), blank=True)

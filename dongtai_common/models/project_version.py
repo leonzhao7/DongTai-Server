@@ -10,6 +10,7 @@ from dongtai_common.models import User
 from dongtai_common.models.project import IastProject
 from django.utils.translation import gettext_lazy as _
 from dongtai_common.utils.settings import get_managed
+from dongtai_common.utils.db import get_timestamp
 
 
 class IastProjectVersion(models.Model):
@@ -18,10 +19,10 @@ class IastProjectVersion(models.Model):
     current_version = models.PositiveSmallIntegerField(blank=True, default=0)
     status = models.PositiveSmallIntegerField(blank=True, null=True)
     create_time = models.IntegerField(_('create time'),
-                                      default=lambda: int(time.time()),
+                                      default=get_timestamp,
                                       blank=True)
     update_time = models.IntegerField(_('update time'),
-                                      default=lambda: int(time.time()),
+                                      default=get_timestamp,
                                       blank=True)
     user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
     project = models.ForeignKey(IastProject, models.DO_NOTHING, blank=True, null=True)

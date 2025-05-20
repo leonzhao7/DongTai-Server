@@ -9,6 +9,7 @@
 import time
 from django.db import models
 from dongtai_common.utils.settings import get_managed
+from dongtai_common.utils.db import get_timestamp
 
 
 class VersionControl(models.Model):
@@ -18,7 +19,7 @@ class VersionControl(models.Model):
                                               blank=True,
                                               null=True)
     additional = models.CharField(max_length=255, blank=True, null=True)
-    update_time = models.IntegerField(default=lambda: int(time.time()),
+    update_time = models.IntegerField(default=get_timestamp,
                                       blank=True)
 
     class Meta:

@@ -9,6 +9,7 @@
 
 from django.db import models
 from dongtai_common.utils.settings import get_managed
+from dongtai_common.utils.db import get_timestamp
 from time import time
 
 
@@ -29,7 +30,7 @@ class IastMessage(models.Model):
                                     blank=True,
                                     null=False,
                                     default='')
-    create_time = models.IntegerField(blank=True, default=lambda: int(time()))
+    create_time = models.IntegerField(blank=True, default=get_timestamp)
     read_time = models.IntegerField(blank=True, default=0)
     is_read = models.IntegerField(blank=True, null=True, default=0)
     message_type = models.ForeignKey(IastMessageType,

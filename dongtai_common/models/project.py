@@ -10,6 +10,7 @@ from dongtai_common.models import User
 from dongtai_common.models.strategy_user import IastStrategyUser
 from dongtai_common.utils.settings import get_managed
 from dongtai_common.models.department import Department
+from dongtai_common.utils.db import get_timestamp
 import time
 
 
@@ -22,7 +23,7 @@ class VulValidation(models.IntegerChoices):
 
 class IastProjectTemplate(models.Model):
     template_name = models.CharField(max_length=255, blank=True, null=True)
-    latest_time = models.IntegerField(default=lambda: int(time.time()),
+    latest_time = models.IntegerField(default=get_timestamp,
                                       blank=True,
                                       null=True)
     user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
@@ -63,7 +64,7 @@ class IastProject(models.Model):
                             null=True)
     vul_count = models.PositiveIntegerField(blank=True, null=True)
     agent_count = models.IntegerField(blank=True, null=True)
-    latest_time = models.IntegerField(default=lambda: int(time.time()),
+    latest_time = models.IntegerField(default=get_timestamp,
                                       blank=True,
                                       null=True)
     user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
