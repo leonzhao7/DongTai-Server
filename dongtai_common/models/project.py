@@ -85,8 +85,8 @@ class IastProject(models.Model):
     test_req_header_value = models.CharField(max_length=511,
                                              blank=True,
                                              default='')
-    data_gather = models.JSONField()
-    data_gather_is_followglobal = models.IntegerField(default=1)
+    data_gather = models.JSONField(blank=True, default=dict)
+    data_gather_is_followglobal = models.IntegerField(default=1, blank=True)
     blacklist_is_followglobal = models.IntegerField(default=1)
     department = models.ForeignKey(Department,
                                    models.DO_NOTHING,
