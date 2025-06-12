@@ -15,6 +15,10 @@ from dongtai_common.models.program_language import IastProgramLanguage
 from dongtai_common.models.deploy import IastDeployDesc
 from dongtai_common.models.vul_level import IastVulLevel
 from dongtai_common.models.message import IastMessageType
+from dongtai_common.models.project import IastProjectTemplate
+from dongtai_common.models.strategy_user import IastStrategyUser
+from dongtai_common.models.profile import IastProfile
+
 
 class Command(BaseCommand):
     help = "load init_data"
@@ -23,15 +27,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
-    def other(self, *args, **options):
-        pass
-
     def handle(self, *args, **options):
         # 必须要在数据库中创建很多内容才能运行系统，这里只考虑在一个空白数据库的环境运行，如果数据库中已经有数据，要先清空
         # 1. 创建admin用户
-        Group.objects.create(name='system_admin')
-        group = Group.objects.create(name='talent_admin')
-        Group.objects.create(name='user')
+        Group.objects.get_or_create(name='system_admin')
+        group, created = Group.objects.get_or_create(name='talent_admin')
+        Group.objects.get_or_create(name='user')
         admin = User.objects.create_system_user(
             username='admin',
             password='admin',
@@ -48,7 +49,6 @@ class Command(BaseCommand):
         talent,created = Talent.objects.get_or_create(defaults={}, **kwargs)
         depart.talent.add(talent)
         admin.department.add(depart)
-
         
         vul_level_list = [
             {'name': 'high', 'name_value': '高危', 'name_type': '高危漏洞', 'name_type_en': 'HIGH', 'name_value_en': 'HIGH'},
@@ -80,3 +80,25 @@ class Command(BaseCommand):
 
         kwargs = {'name': 'report'}
         IastMessageType.objects.get_or_create(defaults={}, **kwargs)
+
+        strategy = IastStrategyUser.objects.create(
+            name='全部漏洞策略', 
+            user=admin, 
+            status=True, 
+            content='2,8,9,14,15,17,18,19,20,23,24,25,26,28,30,33,37,22,34,1,10,11,12,13,16,21,27,29,31,32,3,4,5,6,7,35,36')
+        IastProjectTemplate.objects.create(
+            template_name='全面扫描模板',
+            user=admin,
+            scan=strategy)
+
+        profile_list = [
+            {'enable_update', 'FALSE'},
+            {'cpu_limit', '100'},
+            {'vul_verify', '1'},
+            {'auto_audit', '0'},
+            {'circuit_break', '0'},
+            {'data_clean': '{"clean_time": "00:00:00", "days_before": 7, "enable": true}'},
+            {'dast_validation_settings': '{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32], "validation_status": true}'}
+        ]
+        for profile in profile_list:
+            IastProfile.objects.get_or_create(**profile)
