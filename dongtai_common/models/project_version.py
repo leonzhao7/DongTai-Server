@@ -30,3 +30,6 @@ class IastProjectVersion(models.Model):
     class Meta:
         managed = get_managed()
         db_table = 'iast_project_version'
+
+    def __str__(self):
+        return self.version_name

@@ -63,7 +63,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = IastProject
         fields = [
             'id', 'name', 'mode', 'vul_count', 'agent_count', 'owner',
-            'latest_time', 'agent_language', 'vul_validation'
+            'latest_time', 'agent_language', 'vul_validation', 'base_url'
         ]
 
     def get_agents(self, obj):
