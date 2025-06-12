@@ -54,6 +54,9 @@ class AgentListv2ArgsSerializer(serializers.Serializer):
     project_id = serializers.IntegerField(default=None,
                                           required=False,
                                           help_text=_('project_id'))
+    project_version_id = serializers.IntegerField(default=None,
+                                          required=False,
+                                          help_text=_('project_version_id'))
     project_name = serializers.CharField(default=None,
                                          help_text=_("project_name"))
     allow_report = serializers.IntegerField(default=None,
@@ -93,6 +96,9 @@ class AgentListv2(UserEndPoint, ViewSet):
             filter_condiction = filter_condiction & Q(
                 heartbeat__dt__gte=int(time()) -
                 60 * 60 * 24 * ser.validated_data['last_days'])
+        if ser.validated_data['project_version_id'] is not None:
+            filter_condiction = filter_condiction & Q(
+                project_version_id=ser.validated_data['project_version_id'])
 
         summary, queryset = self.get_paginator(query_agent(filter_condiction),
                                                ser.validated_data['page'],
@@ -256,6 +262,6 @@ def query_agent(filter_condiction=Q()) -> QuerySet:
         'server__ipaddresslist', 'events', 'server__hostname',
         'heartbeat__memory', 'heartbeat__cpu', 'heartbeat__disk',
         'register_time', 'is_core_running', 'is_control', 'online', 'id',
-        'bind_project__id', 'version', 'except_running_status',
+        'bind_project__id', 'project_version_id', 'version', 'except_running_status',
         'actual_running_status', 'state_status',
         'allow_report').order_by('-latest_time')
