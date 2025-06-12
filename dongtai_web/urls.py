@@ -109,6 +109,7 @@ from dongtai_web.views.version_update import MethodPoolVersionUpdate
 from dongtai_web.views.demo import Demo
 from static.i18n.views.setlang import LanguageSetting
 from dongtai_web.views.api_route_search import ApiRouteSearch
+from dongtai_web.views.api_route_v2_search import ApiRouteV2Search
 from dongtai_web.views.api_route_related_request import ApiRouteRelationRequest
 from dongtai_web.views.api_route_cover_rate import ApiRouteCoverRate
 
@@ -469,8 +470,9 @@ urlpatterns.extend([
     path('api/v2/sca_vul_summary', GetScaSummary.as_view()),
     path('api/v2/app_vul_list_content', GetAppVulsList.as_view()),
     path('api/v2/app_vul_summary', GetAppVulsSummary.as_view()),
-    path('api/v2/api_route/search', NewApiRouteSearch.as_view()),
     path('api/v2/project_version', NewProjectVersionList.as_view()),
+    # API V2 扫描
+    path('api/v2/api_route/search', ApiRouteV2Search.as_view()),
 ])
 
 # urlpatterns.extend(scaupload_urls) departured

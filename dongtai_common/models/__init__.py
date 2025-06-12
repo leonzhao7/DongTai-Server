@@ -7,6 +7,7 @@
 
 from .user import User
 from . import api_route
+from . import api_route_v2
 
 LANGUAGE_DICT = {'JAVA': 1, 'PYTHON': 2, 'PHP': 3, 'GO': 4}
 # aggregation
