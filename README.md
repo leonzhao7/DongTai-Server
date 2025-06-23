@@ -107,4 +107,5 @@ def get_show_en_ref_profile() -> dict[str, bool]:
 ```
 - python manage.py migrate
 - 恢复 get_sca_language_profile() 和 get_show_en_ref_profile()
-- 创建目录 /opt/dongtai 和 /opt/dongtai/static
+- python manage.py init_data
+- python manage.py load_hook_strategy

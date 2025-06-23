@@ -5,7 +5,7 @@ from dongtai_common.utils.settings import get_managed
 
 class IastProfile(models.Model):
     key = models.CharField(max_length=100)
-    value = models.CharField(max_length=100)
+    value = models.CharField(max_length=2048)
 
     class Meta:
         managed = get_managed()

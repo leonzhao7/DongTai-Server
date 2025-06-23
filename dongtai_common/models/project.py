@@ -75,7 +75,7 @@ class IastProject(models.Model):
     data_gather = models.JSONField(null=True)
     data_gather_is_followglobal = models.IntegerField(default=1)
     blacklist_is_followglobal = models.IntegerField(default=1)
-    department = models.ForeignKey(Department, models.DO_NOTHING)
+    # department = models.ForeignKey(Department, models.DO_NOTHING)
     template = models.ForeignKey(IastProjectTemplate, models.DO_NOTHING)
     enable_log = models.BooleanField(null=True)
     log_level = models.CharField(max_length=511, null=True, blank=True)

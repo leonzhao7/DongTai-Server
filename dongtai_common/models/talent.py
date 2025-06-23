@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dongtai_common.utils.customfields import trans_char_field
 from dongtai_common.utils.settings import get_managed
+from dongtai_common.utils.db import get_timestamp
 
 
 class Talent(models.Model):
@@ -19,8 +20,8 @@ class Talent(models.Model):
             "unique": _("A talent with that talent name already exists."),
         },
     )
-    create_time = models.IntegerField()
-    update_time = models.IntegerField()
+    create_time = models.IntegerField(default=get_timestamp)
+    update_time = models.IntegerField(default=get_timestamp)
     created_by = models.IntegerField()
     is_active = models.BooleanField(
         _("active"),

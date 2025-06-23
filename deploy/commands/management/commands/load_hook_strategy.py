@@ -10,6 +10,7 @@ from dongtai_common.models.hook_strategy import HookStrategy
 from dongtai_common.models.hook_type import HookType
 from dongtai_common.models.sensitive_info import IastSensitiveInfoRule
 from dongtai_common.models.strategy import IastStrategyModel
+from dongtai_common.models.user import User
 from dongtai_common.utils.validate import save_hook_stratefile_sha1sum
 from dongtai_conf.settings import BASE_DIR
 from dongtai_protocol.views.hook_profiles import LANGUAGE_DICT
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        user = User.objects.filter().first()
         POLICY_DIR = os.path.join(BASE_DIR, "static/data/")
         with open(os.path.join(POLICY_DIR, "vul_strategy.json")) as fp:
             full_strategies = json.load(fp, object_pairs_hook=OrderedDict)
@@ -184,7 +186,7 @@ class Command(BaseCommand):
                 sensitive_info_rule_ids.append(exist_rule.pk)
             else:
                 obj = IastSensitiveInfoRule.objects.create(
-                    user_id=1,
+                    user_id=user.id,
                     strategy=strategy,
                     pattern_type_id=rule["pattern_type"],
                     pattern=rule["pattern"],
