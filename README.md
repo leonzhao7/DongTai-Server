@@ -95,3 +95,16 @@ Any questions? Let's discuss in [#DongTai discussions](https://github.com/HXSecu
 ## Stats
 
 ![Alt](https://repobeats.axiom.co/api/embed/904e8c4c645fe5352cbb543cd1ad8dd518e5f94b.svg "Repobeats analytics image")
+
+## 从0开始运行
+- 在 dongtai_web/dongtai_sca/scan/utils.py 中，修改 get_sca_language_profile() 和 get_show_en_ref_profile()  
+```python script
+def get_sca_language_profile() -> dict[str, str]:
+    return DEFAULT_SCA_LANGUAGE
+    
+def get_show_en_ref_profile() -> dict[str, bool]:
+    return DEFAULT_SHOW_EN_REF_PROFILE
+```
+- python manage.py migrate
+- 恢复 get_sca_language_profile() 和 get_show_en_ref_profile()
+- 创建目录 /opt/dongtai 和 /opt/dongtai/static
