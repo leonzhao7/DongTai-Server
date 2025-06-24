@@ -37,6 +37,7 @@ class Command(BaseCommand):
             username='admin',
             password='admin',
             email='admin@e-sscard.com',
+            is_global_permission = True,
             phone='13912345678',
             default_language='zh'
         )

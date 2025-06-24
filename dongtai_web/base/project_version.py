@@ -47,6 +47,8 @@ def version_modify(projects: QuerySet[IastProject], versionData):
         version.update_time = int(time.time())
         version.version_name = version_name
         version.description = description
+        version.status = 1
+        version.user = project.user
         version.save()
     else:
         version, created = IastProjectVersion.objects.get_or_create(
@@ -54,9 +56,9 @@ def version_modify(projects: QuerySet[IastProject], versionData):
             current_version=current_version,
             version_name=version_name,
             description=description,
+            status=1,
+            user=project.user,
         )
-    version.status = 1
-    version.save()
     return {
         "status": "201",
         "msg": "success",
