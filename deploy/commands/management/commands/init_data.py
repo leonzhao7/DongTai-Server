@@ -92,13 +92,13 @@ class Command(BaseCommand):
             scan=strategy)
 
         profile_list = [
-            {'enable_update', 'FALSE'},
-            {'cpu_limit', '100'},
-            {'vul_verify', '1'},
-            {'auto_audit', '0'},
-            {'circuit_break', '0'},
-            {'data_clean': '{"clean_time": "00:00:00", "days_before": 7, "enable": true}'},
-            {'dast_validation_settings': '{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32], "validation_status": true}'}
+            {'key': 'enable_update', 'value': 'FALSE'},
+            {'key': 'cpu_limit', 'value': '100'},
+            {'key': 'vul_verify', 'value': '1'},
+            {'key': 'auto_audit', 'value': '0'},
+            {'key': 'circuit_break', 'value': '0'},
+            {'key': 'data_clean', 'value': '{"clean_time": "00:00:00", "days_before": 7, "enable": true}'},
+            {'key': 'dast_validation_settings', 'value': '{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32], "validation_status": true}'}
         ]
         for profile in profile_list:
             IastProfile.objects.get_or_create(**profile)
