@@ -312,9 +312,44 @@ urlpatterns: list[URLResolver | URLPattern] = [
         })),
     path('projecttemplate',
          IastProjectTemplateView.as_view({
-             'get': "list",
-             'post': 'create',
-         })),
+            'get': "list",
+            'post': 'create',
+        })),
+    path('dast_webhook', DastWebhook.as_view()),
+    path('dastvul/<int:pk>', DastVulsEndPoint.as_view({
+        'get': "single",
+    })),
+    path('dastvul',
+        DastVulsEndPoint.as_view({
+            'post': "page",
+            'delete': "delete",
+        })),
+    path(
+        'dastvul/relation',
+        DastVulsEndPoint.as_view({
+            'delete': "delete_relation",
+            'post': "create_relation",
+        })),
+    path('dastvul/relationlist',
+         DastVulsEndPoint.as_view({
+            'post': "get_relative_with_dast_vul",
+        })),
+    path('dastvul/summary', DastVulsEndPoint.as_view({
+        'post': "summary",
+    })),
+    path('dastvul/vultype', DastVulsEndPoint.as_view({
+        'get': "get_vul_type",
+    })),
+    path(
+        'dastvul/settings',
+        DastManageEndPoint.as_view({
+            'post': "change_validation_settings",
+            'get': "get_validation_settings",
+        })),
+    path('dastvul/settings/doc',
+         DastManageEndPoint.as_view({
+            'get': "get_doc_url",
+        })),
     path(
         "hook_rule/enum",
         HookRuleEnumEndPoint.as_view(

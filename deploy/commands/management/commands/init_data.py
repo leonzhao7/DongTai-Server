@@ -98,7 +98,7 @@ class Command(BaseCommand):
             {'key': 'auto_audit', 'value': '0'},
             {'key': 'circuit_break', 'value': '0'},
             {'key': 'data_clean', 'value': '{"clean_time": "00:00:00", "days_before": 7, "enable": true}'},
-            {'key': 'dast_validation_settings', 'value': '{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32], "validation_status": true}'}
+            {'key': 'dast_validation_settings', 'value': '{"{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32, 4, 5, 6, 7, 36, 38, 41, 45, 42, 3, 35, 39, 40, 43, 44], "validation_status": true}"'}
         ]
         for profile in profile_list:
             IastProfile.objects.get_or_create(**profile)
