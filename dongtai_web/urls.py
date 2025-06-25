@@ -14,6 +14,10 @@ from dongtai_web.base.update_project_version import UpdateProjectVersion
 from dongtai_web.dongtai_sca.urls import urlpatterns as sca_urls
 from dongtai_web.enum.hook_rules import HookRuleEnumEndPoint
 from dongtai_web.header_vul.base import HeaderVulViewSet
+from dongtai_web.projecttemplate.base import IastProjectTemplateView
+from dongtai_web.dast.webhook import DastWebhook
+from dongtai_web.dast.page import DastVulsEndPoint
+from dongtai_web.dast.manage import DastManageEndPoint
 from dongtai_web.systemmonitor.urls import urlpatterns as systemmonitor_urls
 from dongtai_web.versioncontrol.urls import urlpatterns as versioncontrol_urls
 from dongtai_web.views.agent import Agent
@@ -299,6 +303,18 @@ urlpatterns: list[URLResolver | URLPattern] = [
             }
         ),
     ),
+    path(
+        'projecttemplate/<int:pk>',
+        IastProjectTemplateView.as_view({
+            'get': "retrieve",
+            'put': 'update',
+            'delete': 'delete',
+        })),
+    path('projecttemplate',
+         IastProjectTemplateView.as_view({
+             'get': "list",
+             'post': 'create',
+         })),
     path(
         "hook_rule/enum",
         HookRuleEnumEndPoint.as_view(
