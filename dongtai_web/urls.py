@@ -90,6 +90,11 @@ from dongtai_web.views.sensitive_info_rule import (
     SensitiveInfoRuleBatchView,
     SensitiveInfoRuleViewSet,
 )
+from dongtai_web.views.scan_strategys import (
+    ScanStrategyViewSet,
+    ScanStrategyRelationProject,
+    ScanStrategyAllView,
+)
 from dongtai_web.views.strategy_delete import StrategyDelete
 from dongtai_web.views.strategy_disable import StrategyDisableEndpoint
 from dongtai_web.views.strategy_enable import StrategyEnableEndpoint
@@ -230,8 +235,23 @@ urlpatterns: list[URLResolver | URLPattern] = [
         "sensitive_info_rule/<str:pattern_type>_validation",
         SensitiveInfoPatternValidationView.as_view(),
     ),
+    path('scan_strategy',
+         ScanStrategyViewSet.as_view({
+             'get': 'list',
+             'post': 'create'
+         })),
+        path(
+        'scan_strategy/<int:pk>',
+        ScanStrategyViewSet.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'delete': 'destory'
+        })),
+    path('scan_strategy/<int:pk>/relationprojects',
+         ScanStrategyRelationProject.as_view()),
     path("sensitive_info_rule/batch_update", SensitiveInfoRuleBatchView.as_view()),
     path("sensitive_info_rule/all", SensitiveInfoRuleAllView.as_view()),
+    path('scan_strategy/all', ScanStrategyAllView.as_view()),
     path("agent/list/ids", AgentListWithid.as_view()),
     path("vul/list/ids", VulsListWithid.as_view()),
     path("sca/list/ids", ScaListWithid.as_view()),
