@@ -59,6 +59,9 @@ from dongtai_web.views.engine_hook_rules import EngineHookRulesEndPoint
 from dongtai_web.views.engine_method_pool_detail import MethodPoolDetailProxy
 from dongtai_web.views.engine_method_pool_search import MethodPoolSearchProxy
 from dongtai_web.views.engine_method_pool_time_range import MethodPoolTimeRangeProxy
+from dongtai_web.views.log_clear import LogClear
+from dongtai_web.views.log_export import LogExport
+from dongtai_web.views.logs import LogsEndpoint
 from dongtai_web.views.filereplace import FileReplace
 from dongtai_web.views.messages_del import MessagesDelEndpoint
 from dongtai_web.views.messages_list import MessagesEndpoint
@@ -203,6 +206,9 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("profile/batch/get", ProfileBatchGetEndpoint.as_view()),
     path("profile/batch/modified", ProfileBatchModifiedEndpoint.as_view()),
     path("system/info", SystemInfo.as_view()),
+    path('logs', LogsEndpoint.as_view()),
+    path('log/export', LogExport.as_view()),
+    path('log/clear', LogClear.as_view()),
     path("engine/method_pool/search", MethodPoolSearchProxy.as_view()),
     path("engine/method_pool/detail", MethodPoolDetailProxy.as_view()),
     path("engine/method_pool/timerange", MethodPoolTimeRangeProxy.as_view()),

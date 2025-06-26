@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import exceptions, status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -26,7 +27,7 @@ from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.asset import Asset
 from dongtai_common.models.asset_aggr import AssetAggr
 from dongtai_common.models.asset_vul import IastVulAssetRelation
-from dongtai_common.models.log import IastLog, OperateType
+from dongtai_common.models.access_log import AccessLog
 from dongtai_common.models.project import IastProject
 from dongtai_common.permissions import (
     UserPermission,
@@ -91,6 +92,8 @@ class EndPoint(APIView):
         :param kwargs:
         :return: HTTP响应体
         """
+        start_time = timezone.now()
+        user_id = request.user.id
         self.args = args
         self.kwargs = kwargs
         request = self.initialize_request(request, *args, **kwargs)
@@ -99,6 +102,7 @@ class EndPoint(APIView):
 
         try:
             self.initial(request, *args, **kwargs)
+            content_length = int(request.META.get("CONTENT_LENGTH", 0))
 
             # Get the appropriate handler method
             if request.method.lower() in self.http_method_names:
@@ -110,7 +114,7 @@ class EndPoint(APIView):
             logger.debug(f"url: {self.request.path},exc:{exc}")
             response = self.handle_exception(exc)
         except Exception as exc:
-            logger.warning(f"url: {self.request.path},exc:{exc}", exc_info=exc)
+            logger.warning(f"url: {self.request.path},exc:{exc}", exc_info=True)
             response = self.handle_exception(exc)
 
         self.response = self.finalize_response(request, response, *args, **kwargs)
@@ -119,42 +123,27 @@ class EndPoint(APIView):
                 method = self.request.method
                 if method is None:
                     raise ValueError("can not get request method")
-                operate_method = method
                 path, _path_regex, schema, filepath = VIEW_CLASS_TO_SCHEMA[self.__class__][method]
                 if "dongtai" not in filepath or "dongtai_protocol" in filepath:
                     return self.response
-                if schema is None:
-                    raise ValueError("can not get schema")
-                tags: list[str] = schema["tags"]
-                summary: str = schema["summary"]
-                module_name = tags[0]
-                operate_tag = list(filter(lambda x: x.startswith("operate-"), tags))
-                if operate_tag:
-                    operate_method = operate_tag[0].removeprefix("operate-")
 
-                if operate_method == "GET":
-                    operate_type = OperateType.GET
-                    return self.response
-                if operate_method == "POST":
-                    operate_type = OperateType.ADD
-                elif operate_method == "PUT":
-                    operate_type = OperateType.CHANGE
-                elif operate_method == "DELETE":
-                    operate_type = OperateType.DELETE
-                else:
-                    raise ValueError("unknown request method")
-
-                IastLog.objects.create(
-                    url=path,
-                    raw_url=self.request.get_full_path(),
-                    module_name=module_name,
-                    function_name=summary,
-                    operate_type=operate_type,
-                    user_id=self.request.user.id,
-                    access_ip=get_client_ip(self.request),
+                reply = json.loads(response.content)
+                if user_id is None:
+                    user_id = self.request.user.id
+                AccessLog.objects.create(
+                    start_time=start_time,
+                    exec_time=(timezone.now()-start_time).total_seconds(),
+                    user_id=user_id,
+                    client_ip=get_client_ip(self.request),
+                    method=self.request.method,
+                    url=self.request.get_full_path(),
+                    user_agent=self.request.META.get("HTTP_USER_AGENT", ""),
+                    status_code=reply.get("status", 0),
+                    req_body_length=content_length,
+                    reply_msg=reply.get("msg", "")
                 )
             except Exception as e:
-                logger.warning(f"get log info failed: {e}")
+                logger.warning(f"get log info failed: {e}", exc_info=True)
         return self.response
 
     def handle_exception(self, exc):

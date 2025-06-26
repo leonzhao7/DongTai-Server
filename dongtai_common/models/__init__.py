@@ -14,6 +14,7 @@ from .request_chains import *
 from .share_token import *
 from dongtai_common.utils.db_session_engine import Session
 from .notify_log import IastWebHookLog
+from .access_log import AccessLog
 
 
 LANGUAGE_DICT = {"JAVA": 1, "PYTHON": 2, "PHP": 3, "GO": 4}
