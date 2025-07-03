@@ -29,6 +29,11 @@ configs["task_queues"] = [
         routing_key="dongtai-api-route-handler",
     ),
     Queue(
+        "dongtai-api-route-v2-handler",
+        Exchange("dongtai-api-route-v2-handler"),
+        routing_key="dongtai-api-route-v2-handler",
+    ),
+    Queue(
         "dongtai-method-pool-scan",
         Exchange("dongtai-method-pool-scan"),
         routing_key="dongtai-method-pool-scan",
