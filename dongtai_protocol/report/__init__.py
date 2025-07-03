@@ -5,6 +5,7 @@ from dongtai_protocol.report.handler.agent_third_service_handler import (
     ThirdPartyServiceHandler,
 )
 from dongtai_protocol.report.handler.api_route_handler import ApiRouteHandler
+from dongtai_protocol.report.handler.api_route_v2_handler import ApiRouteV2Handler
 from dongtai_protocol.report.handler.error_log_handler import ErrorLogHandler
 from dongtai_protocol.report.handler.hardencode_vul_handler import HardEncodeVulHandler
 from dongtai_protocol.report.handler.heartbeat_handler import HeartBeatHandler
@@ -21,6 +22,7 @@ if __name__ == "__main__":
     NormalVulnHandler()
     SaasMethodPoolHandler()
     ApiRouteHandler()
+    ApiRouteV2Handler()
     HardEncodeVulHandler()
     ScaBulkHandler()
     ThirdPartyServiceHandler()

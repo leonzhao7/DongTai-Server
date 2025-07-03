@@ -139,6 +139,7 @@ from dongtai_web.views.vulnerability_status import VulnerabilityStatusView
 from dongtai_web.views.vuls import VulsEndPoint
 from dongtai_web.vul_log.vul_log_view import VulLogViewSet
 from dongtai_web.vul_recheck_payload.vul_recheck_payload import VulReCheckPayloadViewSet
+from dongtai_web.views.api_route_v2_search import ApiRouteV2Search
 from static.i18n.views.setlang import LanguageSetting
 
 urlpatterns: list[URLResolver | URLPattern] = [
@@ -395,6 +396,8 @@ urlpatterns.extend(
         path("api/v2/app_vul_list_content", GetAppVulsList.as_view()),
         path("api/v2/app_vul_summary", GetAppVulsSummary.as_view()),
         path("api/v2/project_version", NewProjectVersionList.as_view()),
+        # API V2 扫描
+        path('api/v2/api_route/search', ApiRouteV2Search.as_view()),
     ]
 )
 

@@ -83,6 +83,10 @@ configs["task_routes"] = {
         "queue": "dongtai-api-route-handler",
         "routing_key": "dongtai-api-route-handler",
     },
+    "dongtai_protocol.report.handler.api_route_v2_handler.api_route_v2_gather": {
+        "queue": "dongtai-api-route-v2-handler",
+        "routing_key": "dongtai-api-route-v2-handler"
+    },
     "dongtai_engine.tasks.search_vul_from_method_pool": {
         "queue": "dongtai-method-pool-scan",
         "routing_key": "dongtai-method-pool-scan",
