@@ -2228,17 +2228,6 @@ class Migration(migrations.Migration):
             unique_together={("api_method_id", "http_method_id")},
         ),
         migrations.CreateModel(
-            name="IastLicense",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("key", models.CharField(max_length=100)),
-                ("value", models.CharField(blank=True, max_length=1000, null=True)),
-            ],
-            options={
-                "db_table": "iast_license",
-            },
-        ),
-        migrations.CreateModel(
             name="IastVulInegration",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
@@ -2282,90 +2271,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "iast_vul_integration",
-                "managed": True,
-            },
-        ),
-        migrations.CreateModel(
-            name="IastShareToken",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                (
-                    "token",
-                    shortuuid.django_fields.ShortUUIDField(
-                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-                        length=22,
-                        max_length=22,
-                        prefix="",
-                    ),
-                ),
-                ("title", models.CharField(blank=True, max_length=255)),
-                (
-                    "expire_at",
-                    models.DateTimeField(
-                        blank=True, help_text="When this time is null, it means indefinitely", null=True
-                    ),
-                ),
-                ("create_at", models.DateTimeField(auto_now_add=True)),
-                ("update_at", models.DateTimeField(auto_now=True)),
-                (
-                    "token_type",
-                    models.IntegerField(choices=[(1, "Sca"), (2, "Vul")], default=2, help_text=" Sca: 1  Vul: 2 "),
-                ),
-                (
-                    "status",
-                    models.IntegerField(
-                        choices=[(1, "ENABLE"), (2, "EXPIRE"), (0, "DISABLE")],
-                        default=1,
-                        help_text=" ENABLE: 1  EXPIRE: 2  DISABLE: 0 ",
-                    ),
-                ),
-                ("target_url", models.CharField(max_length=255)),
-                (
-                    "create_user",
-                    models.ForeignKey(
-                        blank=True, default=-1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-                    ),
-                ),
-                (
-                    "project",
-                    models.ForeignKey(
-                        blank=True,
-                        default=-1,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="dongtai_common.iastproject",
-                    ),
-                ),
-                (
-                    "project_version",
-                    models.ForeignKey(
-                        blank=True,
-                        default=-1,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="dongtai_common.iastprojectversion",
-                    ),
-                ),
-                (
-                    "sca",
-                    models.ForeignKey(
-                        blank=True,
-                        default="",
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.assetv2global",
-                        to_field="aql",
-                    ),
-                ),
-                (
-                    "vul",
-                    models.ForeignKey(
-                        blank=True,
-                        default=-1,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastvulnerabilitymodel",
-                    ),
-                ),
-            ],
-            options={
-                "db_table": "iast_share_token",
                 "managed": True,
             },
         ),

@@ -25,7 +25,6 @@ from dongtai_common.common.utils import (
 from dongtai_common.models import User
 from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.asset import Asset
-from dongtai_common.models.asset_aggr import AssetAggr
 from dongtai_common.models.asset_vul import IastVulAssetRelation
 from dongtai_common.models.access_log import AccessLog
 from dongtai_common.models.project import IastProject
@@ -261,17 +260,6 @@ class EndPoint(APIView):
         qss = [user.get_projects() for user in users]
         projects = reduce(ior, qss, qs)
         return Asset.objects.filter(project__in=projects, is_del=0)
-
-    @staticmethod
-    def get_auth_asset_aggrs(auth_assets):
-        """
-        通过用户列表查询有访问权限的asset aggr列表
-        :param users:
-        :return:
-        """
-        auth_assets = auth_assets.values("signature_value").annotate(total=Count("signature_value"))
-        auth_hash = list({asset["signature_value"] for asset in auth_assets})
-        return AssetAggr.objects.filter(signature_value__in=auth_hash, is_del=0)
 
     @staticmethod
     def get_auth_asset_vuls(assets):

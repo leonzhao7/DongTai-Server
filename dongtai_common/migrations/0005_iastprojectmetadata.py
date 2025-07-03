@@ -10,36 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="IastProjectMetaData",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("api_count", models.IntegerField(default=0, help_text="API数量统计")),
-                ("vul_api_count", models.IntegerField(default=0, help_text="漏洞API数量统计")),
-                ("create_at", models.DateTimeField(auto_now_add=True, null=True)),
-                ("update_at", models.DateTimeField(auto_now=True, null=True)),
-                (
-                    "project",
-                    models.ForeignKey(
-                        db_constraint=False,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="dongtai_common.iastproject",
-                    ),
-                ),
-                (
-                    "project_version",
-                    models.ForeignKey(
-                        blank=True,
-                        db_constraint=False,
-                        default=-1,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastprojectversion",
-                    ),
-                ),
-            ],
-            options={
-                "db_table": "iast_project_meta_data",
-                "managed": True,
-            },
-        ),
     ]
