@@ -26,6 +26,7 @@ class IastAgent(models.Model):
         to=IastServer,
         on_delete=models.DO_NOTHING,
         related_name="agents",
+        null=True,
         related_query_name="agent",
         verbose_name=_("server"),
     )
