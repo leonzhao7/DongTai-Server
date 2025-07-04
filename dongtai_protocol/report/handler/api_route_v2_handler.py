@@ -62,7 +62,7 @@ def parse_paths(paths, schema, agent):
             swagger = convert_to_swagger(path_name, method_name, method_data)
             IastApiRouteV2.objects.update_or_create(
                 path=path_name,
-                method=method_name,
+                method=method_name.upper(),
                 project=agent.bind_project,
                 project_version=agent.project_version,
                 defaults={'agent': agent, 'schema':schema, 'controller':tags[0], 'info':swagger}

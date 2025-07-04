@@ -137,7 +137,7 @@ class EndPoint(APIView):
                     method=self.request.method,
                     url=self.request.get_full_path(),
                     user_agent=self.request.META.get("HTTP_USER_AGENT", ""),
-                    status_code=reply.get("status", 0),
+                    # status_code=reply.get("status", 0),
                     req_body_length=content_length,
                     reply_msg=reply.get("msg", "")
                 )

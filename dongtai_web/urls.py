@@ -74,6 +74,9 @@ from dongtai_web.views.profile import (
     ProfileBatchModifiedEndpoint,
     ProfileEndpoint,
 )
+from dongtai_web.views.api_route_search import ApiRouteSearch
+from dongtai_web.views.api_route_related_request import ApiRouteRelationRequest
+from dongtai_web.views.api_route_cover_rate import ApiRouteCoverRate
 from dongtai_web.views.program_language import ProgrammingLanguageList
 from dongtai_web.views.project_add import ProjectAdd
 from dongtai_web.views.project_delete import ProjectDel
@@ -227,6 +230,9 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("documents", DocumentsEndpoint.as_view()),
     path("version_update/K23DiutPrwpoqAddqNbHUk", MethodPoolVersionUpdate.as_view()),
     path("i18n/setlang", LanguageSetting.as_view()),
+    path('api_route/search', ApiRouteSearch.as_view()),
+    path('api_route/relationrequest', ApiRouteRelationRequest.as_view()),
+    path('api_route/cover_rate', ApiRouteCoverRate.as_view()),
     path("program_language", ProgrammingLanguageList.as_view()),
     path("filereplace/<str:filename>", FileReplace.as_view()),
     path("message/list", MessagesEndpoint.as_view()),
