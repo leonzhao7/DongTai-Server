@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from dongtai_web.utils import batch_queryset, checkcover_batch
 from dongtai_web.utils import extend_schema_with_envcheck
-from dongtai_common.models.api_route import IastApiRoute, FromWhereChoices
+from dongtai_common.models.api_route_v2 import IastApiRouteV2
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 from rest_framework import serializers
 from dongtai_common.models.project import IastProject
@@ -53,7 +53,7 @@ class ApiRouteCoverRate(UserEndPoint):
     def get(self, request):
         project_id = request.query_params.get('project_id', None)
         version_id = request.query_params.get('version_id', None)
-        auth_users = self.get_auth_users(request.user)
+        # auth_users = self.get_auth_users(request.user)
         if not version_id:
             current_project_version = get_project_version(project_id)
         else:
@@ -62,11 +62,11 @@ class ApiRouteCoverRate(UserEndPoint):
         projectexist = IastProject.objects.filter(pk=project_id).first()
         if not projectexist:
             return R.failure(_("Parameter error"))
-        total_count = IastApiRoute.objects.filter(
+        total_count = IastApiRouteV2.objects.filter(
             project_id=project_id,
             project_version_id=current_project_version.get("version_id",
                                                            0)).count()
-        covered_count = IastApiRoute.objects.filter(
+        covered_count = IastApiRouteV2.objects.filter(
             project_id=project_id,
             project_version_id=current_project_version.get("version_id", 0),
             is_cover=1).count()

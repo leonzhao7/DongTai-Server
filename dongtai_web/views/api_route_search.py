@@ -154,9 +154,9 @@ class ApiRouteSearch(UserEndPoint):
             # exclude_id = request.data.get('exclude_ids', None)
             # exclude_id = [int(i)
             #               for i in exclude_id.split(',')] if exclude_id else None
-            # is_cover = request.data.get('is_cover', None)
-            # is_cover_dict = {1: True, 0: False}
-            # is_cover = is_cover_dict[int(is_cover)] if is_cover is not None and is_cover != '' else None
+            is_cover = request.data.get('is_cover', None)
+            is_cover_dict = {1: True, 0: False}
+            is_cover = is_cover_dict[int(is_cover)] if is_cover is not None and is_cover != '' else None
         except Exception as e:
             logger.error(e)
             return R.failure(_("Parameter error"))
@@ -167,6 +167,7 @@ class ApiRouteSearch(UserEndPoint):
         q = Q(project_version_id=current_project_version.get("version_id", 0), project_id=project_id)
         q = q & Q(path__icontains=uri) if uri else q
         q = q & Q(method=method) if method else q
+        q = q & Q(is_cover=is_cover) if is_cover is not None else q
         api_routes = IastApiRouteV2.objects.filter(q).order_by('id').all()
         if page_index:
             no_used, api_routes = self.get_paginator(api_routes, page_index, page_size)
@@ -210,7 +211,7 @@ def convert_to_v1(api_route:list) -> list:
             "path": route.path,
             "code_class": route.controller,
             "description": "",
-            "method": {"apimethod": route.method.upper(), "httpmethods": [route.method.upper()]},
+            "method": {"apimethod": route.method, "httpmethods": [route.method]},
             "code_file": "",
             "controller": route.controller,
             "agent": route.agent_id,
