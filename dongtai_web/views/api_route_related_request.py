@@ -6,7 +6,7 @@
 # @description :
 ######################################################################
 
-from dongtai_common.models.api_route import IastApiRoute, IastApiMethod, IastApiRoute, HttpMethod, IastApiResponse, IastApiMethodHttpMethodRelation, IastApiParameter
+from dongtai_common.models.api_route_v2 import IastApiRouteV2
 from dongtai_common.models.agent_method_pool import MethodPool
 from dongtai_web.base.project_version import get_project_version, get_project_version_by_id
 from dongtai_common.endpoint import R, UserEndPoint
@@ -51,7 +51,7 @@ class ApiRouteRelationRequest(UserEndPoint):
             page_size = int(request.query_params.get('page_size', 1))
             page_index = int(request.query_params.get('page_index', 1))
             api_route_id = int(request.query_params.get('api_route_id', 1))
-            api_route = IastApiRoute.objects.filter(pk=api_route_id).first()
+            api_route = IastApiRouteV2.objects.filter(pk=api_route_id).first()
             if api_route is None:
                 return R.failure(msg=_("API not Fould"))
             project_id = int(request.query_params.get('project_id', None))
@@ -73,8 +73,7 @@ class ApiRouteRelationRequest(UserEndPoint):
         q = Q()
         q = q & Q(agent_id__in=[_['id'] for _ in agents]) if project_id else q
         q = q & Q(uri_sha1=sha1(api_route.path))
-        q = q & Q(
-            http_method__in=[_.method for _ in api_route.method.http_method.all()])
+        q = q & Q(http_method=api_route.method)
         method = MethodPool.objects.filter(q).order_by('-update_time')[0:1].values()
         data = list(method)[0] if method else {}
         return R.success(data=data)
