@@ -413,7 +413,7 @@ def add_new_api_route(agent: IastAgent, path, method):
     try:
         IastApiRouteV2.objects.filter(
             path=path,
-            method=method.lower(),
+            method=method,
             project_id=agent.bind_project_id,
             project_version_id=agent.project_version_id,
         ).update(is_cover=1)
@@ -462,7 +462,7 @@ def update_api_route_deatil(agent_id, path, method, params_dict):
         "jsonbody": "POST的json参数",
     }
     api_method, is_create = IastApiMethod.objects.get_or_create(method=method.upper())
-    api_route = IastApiRoute.objects.filter(agent_id=agent_id, path=path, method_id=api_method.id).first()
+    api_route = IastApiRouteV2.objects.filter(agent_id=agent_id, path=path, method_id=api_method.id).first()
     for key, value in params_dict.items():
         annotation = annotation_dict[key]
         for param_name in value:

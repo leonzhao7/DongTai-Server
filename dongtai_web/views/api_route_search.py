@@ -5,37 +5,18 @@
 #
 # @description :
 ######################################################################
-import json
+import logging
 
 from django.db.models import Q
-from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_common.models.api_route import (
-    IastApiRoute,
-    IastApiMethod,
-    IastApiRoute,
-    HttpMethod,
-    IastApiResponse,
-    IastApiMethodHttpMethodRelation,
-    IastApiParameter,
-    FromWhereChoices,
-)
-from dongtai_common.models.api_route_v2 import IastApiRouteV2
-from dongtai_common.models.agent import IastAgent
-from dongtai_web.base.project_version import get_project_version, get_project_version_by_id
-from dongtai_common.models.vulnerablity import IastVulnerabilityModel
-import hashlib
-from dongtai_common.models.agent_method_pool import MethodPool
-from django.forms.models import model_to_dict
-from dongtai_web.utils import checkcover, batch_queryset
-from django.core.cache import caches
-from functools import partial
-from dongtai_common.models.hook_type import HookType
-from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
+
+from dongtai_common.models.api_route_v2 import IastApiRouteV2, IastApiRouteV2Schema
+from dongtai_common.models.vulnerablity import IastVulnerabilityModel
+from dongtai_common.endpoint import R, UserEndPoint
+from dongtai_web.base.project_version import get_project_version, get_project_version_by_id
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
-import logging
-from dongtai_common.models.strategy import IastStrategyModel
-from dongtai_common.models.project import IastProject
+
 
 logger = logging.getLogger('dongtai-webapi')
 
@@ -163,7 +144,6 @@ class ApiRouteSearch(UserEndPoint):
             current_project_version = get_project_version(project_id)
         else:
             current_project_version = get_project_version_by_id(version_id)
-        print(f"not include {exclude_id}")
         q = Q(project_version_id=current_project_version.get("version_id", 0), project_id=project_id)
         q = q & Q(path__icontains=uri) if uri else q
         q = q & Q(method=method) if method else q
@@ -174,46 +154,98 @@ class ApiRouteSearch(UserEndPoint):
             no_used, api_routes = self.get_paginator(api_routes, page_index, page_size)
         return R.success(data=convert_to_v1(api_routes))
 
-def get_type(schema):
-    if "type" in schema:
-        return schema.get("type")
-    if "$ref" in schema:
-        ref = schema.get("$ref")
-        return ref.split("/")[-1]
-    return ""
+def _parse_schema(schema):
+    schema_type = schema.get("type", "")
+    schema_format = ""
+
+    if "format" in schema:
+        schema_format = schema.get("format", "")
+    elif "enums" in schema:
+        schema_format = "enum"
+    elif schema_type == "array":
+        items = schema.get("items")
+        if "type" in items:
+            schema_format = items.get("type", "")
+        elif "$ref" in items:
+            ref = items.get("$ref", "")
+            schema_format = f"#/{ref.split('/')[-1]}"
+    elif "additionalProperties" in schema:
+        schema_type = "map"
+        items = schema.get("additionalProperties")
+        if "type" in items:
+            schema_format = items.get("type", "")
+        elif "$ref" in items:
+            ref = items.get("$ref", "")
+            schema_format = f"#/{ref.split('/')[-1]}"
+    return (schema_type, schema_format)
+
+def _get_response(route) -> list:
+    responses = route.info.get("responses", {})
+    new_responses = list()
+    idx = 1
+    for code, res in responses.items():
+        schema = res.get("schema", {})
+        if "$ref" in schema:
+            ref = schema.get("$ref")
+            resp_type = ref.split("/")[-1]
+        else:
+            resp_type = schema.get("type", "")
+        # (resp_type, resp_format) = _parse_schema(schema)
+        new_responses.append({
+            "id": idx,
+            "return_type": resp_type,
+            "return_type_shortcut": resp_type,
+        })
+        idx += 1
+    return new_responses
+
+def _get_parameters(route) -> list:
+    parameters = route.info.get("parameters")
+    new_parameters = list()
+    for para in parameters:
+        para_schema = para.get("schema", {})
+        if "$ref" in para_schema:
+            ref = para_schema.get("$ref")
+            para_type = ref.split("/")[-1]
+            paras = route.schema.dst_info.get(para_type, [])
+            # 替换为真正的参数名称，in字段也只对第一层参数有意义
+            if paras:
+                paras[0]["name"] = para.get("name")
+                paras[0]["parameter_type"] = para_type
+                paras[0]["parameter_type_shortcut"] = para_type
+                paras[0]["in"] = para.get("in")
+            new_parameters.extend(paras)
+    idx = len(new_parameters) + 1
+    for para in parameters:
+        if "$ref" not in para_schema:
+            (para_type, para_format) = _parse_schema(para.get("schema", {}))
+            new_parameters.append({
+                "name": para.get("name"),
+                "parameter_type": para_type,
+                "parameter_type_shortcut": para_type,
+                "format": para_format,
+                "in": para.get("in"),
+                "is_leaf": True,
+                "parent": 0,
+                "id": idx,
+            })
+            if para_format[0:2] == "#/":
+                schema = route.schema.dst_info.get(para_type, [])
+                para_format = para_format[2:]
+            idx += 1
+    return new_parameters
 
 def convert_to_v1(api_route:list) -> list:
     route_list = list()
     for route in api_route:
-        info = (route.info)
-        responses = info.get("responses")
-        new_responses = list()
-        for code, res in responses.items():
-            schema = res.get("schema", {})
-            new_responses.append({
-                "id": 1,
-                "return_type": get_type(schema),
-                "route": route.id,
-                "return_type_shortcut": get_type(schema),
-            })
-        parameters = info.get("parameters")
-        new_parameters = list()
-        for para in parameters:
-            new_parameters.append({
-                "id": 1,
-                "name": para.get("name"),
-                "parameter_type": get_type(para),
-                "annotation": "请求参数",
-                "route": route.id,
-                "parameter_type_shortcut": get_type(para),
-            })
+        new_responses = _get_response(route)
+        new_parameters = _get_parameters(route)
         api = {
             "id": route.id,
             "path": route.path,
             "code_class": route.controller,
             "description": "",
             "method": {"apimethod": route.method, "httpmethods": [route.method]},
-            "code_file": "",
             "controller": route.controller,
             "agent": route.agent_id,
             "from_where": route.from_where,
@@ -239,12 +271,3 @@ def _get_hook_type(vul: dict) -> dict:
         'hook_type_name': vul['strategy__vul_name'],
         'level_id': vul['level_id']
     }
-
-    # hook_type = HookType.objects.filter(pk=vul['hook_type_id']).first()
-    # hook_type_name = hook_type.name if hook_type else None
-    # strategy = IastStrategyModel.objects.filter(pk=vul['strategy_id']).first()
-    # strategy_name = strategy.vul_name if strategy else None
-    # type_ = list(
-    #     filter(lambda x: x is not None, [strategy_name, hook_type_name]))
-    # type_name = type_[0] if type_ else ''
-    # return {'hook_type_name': type_name, 'level_id': vul['level_id']}

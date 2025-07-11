@@ -5,8 +5,8 @@
 #
 # @description :
 ######################################################################
-
 from django.db import models
+
 from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
@@ -20,12 +20,14 @@ class FromWhereChoices(models.IntegerChoices):
 class IastApiRouteV2Schema(models.Model):
     name = models.CharField(max_length=128, blank=False)
     info = models.JSONField(blank=False, default=dict)
+    dst_info = models.JSONField(blank=False, default=dict)
     project = models.ForeignKey(IastProject, on_delete=models.CASCADE, blank=False, null=False)
     project_version = models.ForeignKey(IastProjectVersion, on_delete=models.CASCADE, blank=False, null=False)
 
     class Meta:
         db_table = 'iast_api_route_v2_schema'
         unique_together = [('project', 'project_version', 'name')]
+
 
 class IastApiRouteV2(models.Model):
     path = models.CharField(max_length=128, blank=True)
