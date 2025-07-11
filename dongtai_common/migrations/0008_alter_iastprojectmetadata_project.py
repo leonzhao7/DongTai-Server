@@ -10,11 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="iastprojectmetadata",
-            name="project",
-            field=models.OneToOneField(
-                db_constraint=False, on_delete=django.db.models.deletion.CASCADE, to="dongtai_common.iastproject"
-            ),
-        ),
     ]

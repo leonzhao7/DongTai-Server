@@ -2084,35 +2084,6 @@ class Migration(migrations.Migration):
                 "managed": True,
             },
         ),
-        migrations.CreateModel(
-            name="AssetAggr",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("package_name", models.CharField(blank=True, max_length=255)),
-                ("signature_value", models.CharField(blank=True, max_length=255)),
-                ("version", models.CharField(blank=True, max_length=255)),
-                ("safe_version", models.CharField(blank=True, max_length=255)),
-                ("last_version", models.CharField(blank=True, max_length=255)),
-                ("vul_count", models.IntegerField()),
-                ("vul_critical_count", models.IntegerField(default=0)),
-                ("vul_high_count", models.IntegerField(default=0)),
-                ("vul_medium_count", models.IntegerField(default=0)),
-                ("vul_low_count", models.IntegerField(default=0)),
-                ("vul_info_count", models.IntegerField(default=0)),
-                ("project_count", models.IntegerField(blank=True)),
-                ("language", models.CharField(blank=True, max_length=32)),
-                ("license", models.CharField(blank=True, max_length=64)),
-                ("is_del", models.SmallIntegerField(default=0)),
-                (
-                    "level",
-                    models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="dongtai_common.iastvullevel"),
-                ),
-            ],
-            options={
-                "db_table": "iast_asset_aggr",
-                "managed": True,
-            },
-        ),
         migrations.AddField(
             model_name="asset",
             name="agent",
@@ -2226,53 +2197,6 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name="iastapimethodhttpmethodrelation",
             unique_together={("api_method_id", "http_method_id")},
-        ),
-        migrations.CreateModel(
-            name="IastVulInegration",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("jira_url", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("jira_id", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("jira_state", models.CharField(blank=True, default="", max_length=20, null=True)),
-                ("gitlab_url", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("gitlab_id", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("gitlab_state", models.CharField(blank=True, default="", max_length=20, null=True)),
-                ("zendao_url", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("zendao_id", models.CharField(blank=True, default="", max_length=255, null=True)),
-                ("zendao_state", models.CharField(blank=True, default="", max_length=20, null=True)),
-                (
-                    "asset_vul",
-                    models.ForeignKey(
-                        blank=True,
-                        default=-1,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastassetvul",
-                    ),
-                ),
-                (
-                    "user",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "vul",
-                    models.ForeignKey(
-                        blank=True,
-                        default=-1,
-                        null=True,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastvulnerabilitymodel",
-                    ),
-                ),
-            ],
-            options={
-                "db_table": "iast_vul_integration",
-                "managed": True,
-            },
         ),
         migrations.CreateModel(
             name="IastApiRouteV2",
