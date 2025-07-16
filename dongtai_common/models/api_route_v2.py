@@ -20,7 +20,6 @@ class FromWhereChoices(models.IntegerChoices):
 class IastApiRouteV2Schema(models.Model):
     name = models.CharField(max_length=128, blank=False)
     info = models.JSONField(blank=False, default=dict)
-    dst_info = models.JSONField(blank=False, default=dict)
     project = models.ForeignKey(IastProject, on_delete=models.CASCADE, blank=False, null=False)
     project_version = models.ForeignKey(IastProjectVersion, on_delete=models.CASCADE, blank=False, null=False)
 
@@ -41,6 +40,8 @@ class IastApiRouteV2(models.Model):
     is_cover = models.IntegerField(default=0)
     create_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     update_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+    parameters = models.JSONField(blank=False, default=list)
+    response = models.JSONField(blank=False, default=list)
     info = models.JSONField(blank=False, default=dict)
 
     class Meta:

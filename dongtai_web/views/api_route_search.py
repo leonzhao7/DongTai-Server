@@ -179,67 +179,9 @@ def _parse_schema(schema):
             schema_format = f"#/{ref.split('/')[-1]}"
     return (schema_type, schema_format)
 
-def _get_response(route) -> list:
-    responses = route.info.get("responses", {})
-    new_responses = list()
-    idx = 1
-    for code, res in responses.items():
-        schema = res.get("schema", {})
-        if "$ref" in schema:
-            ref = schema.get("$ref")
-            resp_type = ref.split("/")[-1]
-        else:
-            resp_type = schema.get("type", "")
-        # (resp_type, resp_format) = _parse_schema(schema)
-        new_responses.append({
-            "id": idx,
-            "return_type": resp_type,
-            "return_type_shortcut": resp_type,
-        })
-        idx += 1
-    return new_responses
-
-def _get_parameters(route) -> list:
-    parameters = route.info.get("parameters")
-    new_parameters = list()
-    for para in parameters:
-        para_schema = para.get("schema", {})
-        if "$ref" in para_schema:
-            ref = para_schema.get("$ref")
-            para_type = ref.split("/")[-1]
-            paras = route.schema.dst_info.get(para_type, [])
-            # 替换为真正的参数名称，in字段也只对第一层参数有意义
-            if paras:
-                paras[0]["name"] = para.get("name")
-                paras[0]["parameter_type"] = para_type
-                paras[0]["parameter_type_shortcut"] = para_type
-                paras[0]["in"] = para.get("in")
-            new_parameters.extend(paras)
-    idx = len(new_parameters) + 1
-    for para in parameters:
-        if "$ref" not in para_schema:
-            (para_type, para_format) = _parse_schema(para.get("schema", {}))
-            new_parameters.append({
-                "name": para.get("name"),
-                "parameter_type": para_type,
-                "parameter_type_shortcut": para_type,
-                "format": para_format,
-                "in": para.get("in"),
-                "is_leaf": True,
-                "parent": 0,
-                "id": idx,
-            })
-            if para_format[0:2] == "#/":
-                schema = route.schema.dst_info.get(para_type, [])
-                para_format = para_format[2:]
-            idx += 1
-    return new_parameters
-
 def convert_to_v1(api_route:list) -> list:
     route_list = list()
     for route in api_route:
-        new_responses = _get_response(route)
-        new_parameters = _get_parameters(route)
         api = {
             "id": route.id,
             "path": route.path,
@@ -252,8 +194,8 @@ def convert_to_v1(api_route:list) -> list:
             "project": route.project_id,
             "project_version": route.project_version_id,
             "is_cover": route.is_cover,
-            "parameters": new_parameters,
-            "responses": new_responses,
+            "parameters": route.parameters,
+            "responses": route.response,
             "vulnerablities": _get_vuls(route.path, route.agent_id),
         }
         route_list.append(api)
