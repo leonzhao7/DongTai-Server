@@ -262,84 +262,85 @@ def new_update_one_sca(
     package_algorithm,
     package_version="",
 ):
-    logger.info(
-        f"SCA检测开始 [{agent_id} {package_path} {package_signature} {package_name} {package_algorithm} {package_version}]"
-    )
-    from dongtai_common.models.assetv2 import (
-        AssetV2,
-        AssetV2Global,
-        IastAssetLicense,
-        IastPackageGAInfo,
-    )
+    return
+    # logger.info(
+    #     f"SCA检测开始 [{agent_id} {package_path} {package_signature} {package_name} {package_algorithm} {package_version}]"
+    # )
+    # from dongtai_common.models.assetv2 import (
+    #     AssetV2,
+    #     AssetV2Global,
+    #     IastAssetLicense,
+    #     IastPackageGAInfo,
+    # )
 
-    agent = IastAgent.objects.filter(id=agent_id).first()
-    if not agent:
-        logger.info(
-            f"SCA检测找不到对应Agent [{agent_id} {package_path} {package_signature} {package_name} {package_algorithm} {package_version}]"
-        )
-        return
-    if not package_signature:
-        package_signature = sha_1(package_signature)
-    if agent.language == "JAVA":
-        packages = get_package_v3(ecosystem="maven", package_hash=package_signature)
-    else:
-        packages = get_package_v3(aql=package_name)
-    asset_license_list = []
-    is_focus = IastPackageFocus.objects.filter(
-        Q(package_version=package_version) | Q(package_version=""),
-        language_id=LANGUAGE_DICT.get(agent.language, None),
-        package_name=package_name,
-    ).exists()
-    for package in packages:
-        aql = get_package_aql(package.name, package.ecosystem, package.version)
-        license_list = get_license_list_v2(package.license)
-        package_info, vul_asset_list = sca_scan_asset_v2(aql, package.ecosystem, package.name, package.version)
-        obj, created = IastPackageGAInfo.objects.update_or_create(
-            package_fullname=package.ecosystem + package.name,
-            defaults={
-                "affected_versions": package_info.affected_versions,
-                "unaffected_versions": package_info.unaffected_versions,
-            },
-        )
-        assetglobalobj, _ = AssetV2Global.objects.update_or_create(
-            aql=aql,
-            defaults={
-                "signature_algorithm": "SHA-1",
-                "language_id": get_language_id(agent.language if agent.language else "JAVA"),
-                "package_fullname": obj,
-                "package_name": package.name,
-                "signature_value": package.hash,
-                "version": package.version,
-                "license_list": license_list,
-                "is_focus": is_focus,
-            },
-        )
-        asset, _ = AssetV2.objects.update_or_create(
-            aql=assetglobalobj,
-            project_id=agent.bind_project_id,
-            project_version_id=agent.project_version_id,
-            defaults={
-                "signature_algorithm": "SHA-1",
-                "language_id": get_language_id(agent.language),
-                "package_name": package.name,
-                "package_path": package_path,
-                "signature_value": package_signature,
-                "version": package.version,
-                "department_id": agent.bind_project.department_id,
-            },
-        )
-        # need change package_name with ecosystem
-        datadict = asdict(package_info)
-        del datadict["affected_versions"]
-        del datadict["unaffected_versions"]
-        datadict["package_fullname"] = obj
-        AssetV2Global.objects.filter(aql=aql).update(**datadict)
-        for i in license_list:
-            license = IastAssetLicense(license_id=i["id"], asset=assetglobalobj)
-            asset_license_list.append(license)
-        for i in vul_asset_list:
-            send_notify.send_robust(sender=new_update_one_sca, asset_id=asset.id, asset_vul_id=i)
-    IastAssetLicense.objects.bulk_create(asset_license_list, ignore_conflicts=True)
+    # agent = IastAgent.objects.filter(id=agent_id).first()
+    # if not agent:
+    #     logger.info(
+    #         f"SCA检测找不到对应Agent [{agent_id} {package_path} {package_signature} {package_name} {package_algorithm} {package_version}]"
+    #     )
+    #     return
+    # if not package_signature:
+    #     package_signature = sha_1(package_signature)
+    # if agent.language == "JAVA":
+    #     packages = get_package_v3(ecosystem="maven", package_hash=package_signature)
+    # else:
+    #     packages = get_package_v3(aql=package_name)
+    # asset_license_list = []
+    # is_focus = IastPackageFocus.objects.filter(
+    #     Q(package_version=package_version) | Q(package_version=""),
+    #     language_id=LANGUAGE_DICT.get(agent.language, None),
+    #     package_name=package_name,
+    # ).exists()
+    # for package in packages:
+    #     aql = get_package_aql(package.name, package.ecosystem, package.version)
+    #     license_list = get_license_list_v2(package.license)
+    #     package_info, vul_asset_list = sca_scan_asset_v2(aql, package.ecosystem, package.name, package.version)
+    #     obj, created = IastPackageGAInfo.objects.update_or_create(
+    #         package_fullname=package.ecosystem + package.name,
+    #         defaults={
+    #             "affected_versions": package_info.affected_versions,
+    #             "unaffected_versions": package_info.unaffected_versions,
+    #         },
+    #     )
+    #     assetglobalobj, _ = AssetV2Global.objects.update_or_create(
+    #         aql=aql,
+    #         defaults={
+    #             "signature_algorithm": "SHA-1",
+    #             "language_id": get_language_id(agent.language if agent.language else "JAVA"),
+    #             "package_fullname": obj,
+    #             "package_name": package.name,
+    #             "signature_value": package.hash,
+    #             "version": package.version,
+    #             "license_list": license_list,
+    #             "is_focus": is_focus,
+    #         },
+    #     )
+    #     asset, _ = AssetV2.objects.update_or_create(
+    #         aql=assetglobalobj,
+    #         project_id=agent.bind_project_id,
+    #         project_version_id=agent.project_version_id,
+    #         defaults={
+    #             "signature_algorithm": "SHA-1",
+    #             "language_id": get_language_id(agent.language),
+    #             "package_name": package.name,
+    #             "package_path": package_path,
+    #             "signature_value": package_signature,
+    #             "version": package.version,
+    #             "department_id": agent.bind_project.department_id,
+    #         },
+    #     )
+    #     # need change package_name with ecosystem
+    #     datadict = asdict(package_info)
+    #     del datadict["affected_versions"]
+    #     del datadict["unaffected_versions"]
+    #     datadict["package_fullname"] = obj
+    #     AssetV2Global.objects.filter(aql=aql).update(**datadict)
+    #     for i in license_list:
+    #         license = IastAssetLicense(license_id=i["id"], asset=assetglobalobj)
+    #         asset_license_list.append(license)
+    #     for i in vul_asset_list:
+    #         send_notify.send_robust(sender=new_update_one_sca, asset_id=asset.id, asset_vul_id=i)
+    # IastAssetLicense.objects.bulk_create(asset_license_list, ignore_conflicts=True)
     # create license list
 
 
