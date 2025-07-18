@@ -168,8 +168,6 @@ def _para_schema_to_list(para_name:str, para_data:dict, parent_id:int, self_id:i
         collect_list = _para_schema_to_list(para_name, para_data, self_id, self_id+1, schemas)
         if collect_list and len(collect_list) == 1 and len(collect_list[0].get("format", "")) == 0:
             return para_list
-        if collect_list:
-            collect_list[0]["name"] = ""
         para_list.extend(collect_list)
         para_list[0]["is_leaf"] = False
         return para_list
