@@ -100,6 +100,9 @@ def _replace_ref_item(schema_name:str, schema_info:dict, schemas:dict, ref_set:s
 
     if schema_type == "array":
         items = schema_info.get("items", {})
+        unique = schema_info.get("uniqueItems", False)
+        if unique:
+            schema_type = "set"
         return _replace_collection_item(schema_name, schema_type, items, schema_info, schemas, ref_set)
     if "additionalProperties" in schema_info:
         schema_type = "map"
@@ -120,6 +123,11 @@ def _replace_collection_item(schema_name:str, schema_type:str, items:dict, schem
     if collect_item and len(collect_item) > 0:
         schema_format = collect_item.get("type", "")
     return {"type": schema_type, "format": schema_format, "items": collect_item}
+
+def is_collection(para_type:str) -> bool:
+    if para_type == "array" or para_type == "map" or para_type == "set":
+        return True
+    return False
 
 def _build_path_parameter(method_data:dict, schemas:dict) -> list:
     para_list = list()
@@ -144,14 +152,14 @@ def _build_path_parameter(method_data:dict, schemas:dict) -> list:
         para_list.extend(body_list)
     return para_list
 
-def _para_schema_to_list(para_name:str, para_data:dict, parent_id:int, self_id:int, schemas:dict, is_first:bool=False):
+def _para_schema_to_list(para_name:str, para_data:dict, parent_id:int, self_id:int, schemas:dict, is_child:bool=False):
     para_schema = para_data.get("schema", {})
     para_type = para_schema.get("type", "")
     para_format = para_schema.get("format", "")
     para = {
         "name": para_name,
-        "parameter_type": para_type,
-        "parameter_type_shortcut": para_type,
+        "type": para_type,
+        "type_shortcut": para_type,
         "format": para_format,
         "in": para_data.get("in", ""),
         "is_leaf": True,
@@ -159,13 +167,13 @@ def _para_schema_to_list(para_name:str, para_data:dict, parent_id:int, self_id:i
         "id": self_id,
     }
 
-    if para_type == "array" or para_type == "map":
+    if is_collection(para_type):
         para_list = [para]
         if para_format in ["boolean", "string", "integer"]:
             return para_list
         items = para_schema.get("items", {})
         para_data["schema"] = items
-        collect_list = _para_schema_to_list(para_name, para_data, self_id, self_id+1, schemas)
+        collect_list = _para_schema_to_list("", para_data, self_id, self_id+1, schemas)
         if collect_list and len(collect_list) == 1 and len(collect_list[0].get("format", "")) == 0:
             return para_list
         para_list.extend(collect_list)
@@ -173,14 +181,14 @@ def _para_schema_to_list(para_name:str, para_data:dict, parent_id:int, self_id:i
         return para_list
 
     if "properties" in para_schema:
-        if is_first:
+        if len(para_name) == 0:
+            index = 0
+            para_list = list()
+        else:
             para["is_leaf"] = False
             para_list = [para]
             index = 1
             parent_id = self_id
-        else:
-            para_list = list()
-            index = 0
         properties = para_schema.get("properties", {})
         for prop_name, prop_data in properties.items():
             prop_list = _para_schema_to_list(prop_name, {"schema": prop_data}, parent_id, self_id+index, schemas)
