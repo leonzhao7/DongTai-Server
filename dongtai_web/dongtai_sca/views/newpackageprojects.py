@@ -48,7 +48,7 @@ class NewPackageRelationProject(UserEndPoint):
     def get(self, request, language_id, package_name, package_version):
         ser = RelationProjectArgsSerializer(data=request.query_params)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

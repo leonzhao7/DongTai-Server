@@ -73,7 +73,7 @@ class DastWebhook(AnonymousAuthEndPoint):
             return R.failure(msg="Authorization check failed", status_code=401)
         ser = DastIntegrationSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             logger.debug(request.data)

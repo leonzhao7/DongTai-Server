@@ -140,7 +140,7 @@ class SensitiveInfoRuleViewSet(UserEndPoint, viewsets.ViewSet):
     def list(self, request):
         ser = _SensitiveInfoArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 name = ser.validated_data["name"]
                 page = ser.validated_data["page"]
                 page_size = ser.validated_data["page_size"]
@@ -169,7 +169,7 @@ class SensitiveInfoRuleViewSet(UserEndPoint, viewsets.ViewSet):
     def create(self, request):
         ser = SensitiveInfoRuleCreateSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 strategy_id = ser.validated_data["strategy_id"]
                 pattern_type_id = ser.validated_data["pattern_type_id"]
                 pattern = ser.validated_data["pattern"]
@@ -203,7 +203,7 @@ class SensitiveInfoRuleViewSet(UserEndPoint, viewsets.ViewSet):
     def update(self, request, pk):
         ser = SensitiveInfoRuleCreateSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 ser.validated_data["strategy_id"]
                 ser.validated_data["pattern_type_id"]
                 ser.validated_data["pattern"]
@@ -265,7 +265,7 @@ class SensitiveInfoPatternValidationView(UserEndPoint):
         pattern_test_dict = {"regex": regextest, "json": jsontest}
         ser = _RegexPatternValidationSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 test_data = ser.validated_data["test_data"]
                 pattern = ser.validated_data["pattern"]
             if pattern_type not in pattern_test_dict:

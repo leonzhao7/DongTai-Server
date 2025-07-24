@@ -42,7 +42,7 @@ class HardEncodeVulHandler(IReportHandler):
     def parse(self):
         ser = HardEncodeVulSerializer(data=self.detail)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError:
             self.validated = False

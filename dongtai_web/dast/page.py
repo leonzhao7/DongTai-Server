@@ -116,7 +116,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def summary(self, request):
         ser = VulsSummaryArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -150,7 +150,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def page(self, request):
         ser = VulsPageArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -196,7 +196,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def delete(self, request):
         ser = VulsDeleteArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -213,7 +213,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def delete_relation(self, request):
         ser = IastVulRelationDeleteArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -230,7 +230,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def create_relation(self, request):
         ser = IastVulRelationDeleteArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -251,7 +251,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
     def get_relative_with_dast_vul(self, request):
         ser = IastVulRelationArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

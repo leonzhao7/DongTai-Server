@@ -40,7 +40,7 @@ class ProjectWarningEndpoint(UserEndPoint):
     def post(self, request: Request) -> JsonResponse:
         ser = ProjectWarningSettingsSer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except serializers.ValidationError as e:
             return R.failure(data=e.detail)

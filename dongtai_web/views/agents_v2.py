@@ -58,7 +58,7 @@ class AgentListv2(UserEndPoint, ViewSet):
     def pagenation_list(self, request):
         ser = AgentListv2ArgsSerializer(data=request.GET)
         try:
-            ser.is_valid(True)
+            ser.is_valid(raise_exception=True)
         except ValidationError as e:
             return R.failure(data=e.detail)
         projects = request.user.get_projects()

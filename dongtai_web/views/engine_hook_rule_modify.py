@@ -163,7 +163,7 @@ class EngineHookRuleModifyEndPoint(UserEndPoint):
 
         ser = _EngineHookRuleModifySerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail, msg=get_validatation_detail_message(e))

@@ -60,7 +60,7 @@ class Projects(UserEndPoint):
     def get(self, request: Request):
         ser = _ProjectsArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page: int = ser.validated_data.get("page", 1)
                 page_size: int = ser.validated_data.get("pageSize", 20)
                 name: str = ser.validated_data.get("name")

@@ -55,7 +55,7 @@ class HeaderVulViewSet(UserEndPoint, viewsets.ViewSet):
     def list(self, request):
         ser = HeaderVulArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page = ser.validated_data["page"]
                 page_size = ser.validated_data["page_size"]
                 vul_id = ser.validated_data["vul_id"]

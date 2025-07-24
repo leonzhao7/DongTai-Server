@@ -49,7 +49,7 @@ class DataCleanEndpoint(UserEndPoint):
     def post(self, request):
         ser = DataCleanSettingsSer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -98,7 +98,7 @@ class DataCleanDoItNowEndpoint(UserEndPoint):
     def post(self, request):
         ser = DataCleanDoItNowArgsSer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

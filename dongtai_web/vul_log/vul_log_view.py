@@ -30,7 +30,7 @@ class VulLogViewSet(UserEndPoint, viewsets.ViewSet):
         data = []
         ser = VulLogListArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

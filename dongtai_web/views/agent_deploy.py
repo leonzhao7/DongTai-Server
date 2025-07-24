@@ -36,7 +36,7 @@ class AgentDeploy(UserEndPoint):
     def get(self, request):
         ser = AgentDeployArgsSerializer(data=request.GET)
         try:
-            ser.is_valid(True)
+            ser.is_valid(raise_exception=True)
         except ValidationError as e:
             return R.failure(data=e.detail)
         desc = IastDeployDesc.objects.filter(**ser.validated_data).first()

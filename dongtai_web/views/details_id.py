@@ -36,7 +36,7 @@ class DetailListWithid(UserEndPoint):
     def parse_ids(self, request):
         ser = IdsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 ids = ser.validated_data["ids"]
         except ValidationError as e:
             return R.failure(data=e.detail)

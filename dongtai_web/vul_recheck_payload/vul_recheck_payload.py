@@ -65,7 +65,7 @@ class VulReCheckPayloadViewSet(UserEndPoint, viewsets.ViewSet):
         """
         ser = IastVulRecheckPayloadSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -105,7 +105,7 @@ class VulReCheckPayloadViewSet(UserEndPoint, viewsets.ViewSet):
     def list(self, request):
         ser = IastVulRecheckPayloadListSerializer(data=request.query_params)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -147,7 +147,7 @@ class VulReCheckPayloadViewSet(UserEndPoint, viewsets.ViewSet):
     def update(self, request, pk):
         ser = IastVulRecheckPayloadSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

@@ -40,7 +40,7 @@ class AgentAliasModified(UserEndPoint):
     def post(self, request):
         ser = AgentAliasArgsSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 id_ = ser.validated_data["id"]
                 alias = ser.validated_data["alias"]
         except ValidationError as e:

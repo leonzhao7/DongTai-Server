@@ -42,7 +42,7 @@ class AgentConfigAllinOneView(OpenApiEndPoint):
     def get(self, request):
         ser = _AgentConfigArgsSerializer(data=request.GET)
         try:
-            ser.is_valid(True)
+            ser.is_valid(raise_exception=True)
         except ValidationError as e:
             return R.failure(data=e.detail)
         agent_id: int = ser.data["agent_id"]

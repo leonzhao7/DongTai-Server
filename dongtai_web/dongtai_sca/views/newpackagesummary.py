@@ -80,7 +80,7 @@ class NewPackageSummary(UserEndPoint):
     def get(self, request):
         ser = PackageSummaryArgsSerializer(data=request.query_params)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

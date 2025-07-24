@@ -34,7 +34,7 @@ class NewProjectVersionList(UserEndPoint):
     def get(self, request):
         ser = ProjectVersionArgSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page_size = ser.validated_data["page_size"]
                 page = ser.validated_data["page"]
                 version_name = ser.validated_data["version_name"]

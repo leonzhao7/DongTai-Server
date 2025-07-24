@@ -67,7 +67,7 @@ class SCADBMavenBulkViewSet(UserEndPoint, viewsets.ViewSet):
     def list(self, request):
         ser = ScaDBSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -95,7 +95,7 @@ class SCADBMavenBulkViewSet(UserEndPoint, viewsets.ViewSet):
         datas = [dict(row) for row in reader]
         ser = ScaMavenDbUploadSerializer(data=datas, many=True)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -157,7 +157,7 @@ class SCADBMavenViewSet(UserEndPoint, viewsets.ViewSet):
     def create(self, request):
         ser = ScaMavenDbUploadSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -182,7 +182,7 @@ class SCADBMavenViewSet(UserEndPoint, viewsets.ViewSet):
     def update(self, request, pk):
         ser = ScaMavenDbUploadSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

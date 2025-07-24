@@ -39,7 +39,7 @@ class EngineHookRuleTypesEndPoint(UserEndPoint):
         try:
             ser = _EngineHookRuleTypeArgsSerializer(data=request.GET)
             try:
-                ser.is_valid(True)
+                ser.is_valid(raise_exception=True)
             except ValidationError:
                 return None, None, None, None
             rule_type = ser.validated_data.get("type", const.RULE_PROPAGATOR)

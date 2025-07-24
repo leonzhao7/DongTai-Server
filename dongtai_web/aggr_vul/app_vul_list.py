@@ -120,7 +120,7 @@ class GetAppVulsList(UserEndPoint):
         queryset = IastVulnerabilityModel.objects.filter(is_del=0, project_id__gt=0, project__in=projects)
 
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page_size = ser.validated_data["page_size"]
                 page = ser.validated_data["page"]
                 begin_num = (page - 1) * page_size

@@ -36,7 +36,7 @@ class EngineHookRuleSummaryEndPoint(UserEndPoint):
     def get(self, request):
         ser = _EngineHookRuleSummaryQuerySerializer(data=request.GET)
         try:
-            ser.is_valid(True)
+            ser.is_valid(raise_exception=True)
         except ValidationError:
             return R.failure(msg=_("Parameter error"))
         rule_type_queryset = HookType.objects.filter(created_by__in=[request.user.id, const.SYSTEM_USER_ID])

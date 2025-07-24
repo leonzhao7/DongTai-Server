@@ -39,7 +39,7 @@ class DocumentsEndpoint(UserEndPoint):
     def get(self, request):
         ser = _DocumentArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page_size = ser.validated_data["page_size"]
                 page = ser.validated_data["page"]
                 language = ser.validated_data["language"]

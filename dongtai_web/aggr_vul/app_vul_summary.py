@@ -100,7 +100,7 @@ class GetAppVulsSummary(UserEndPoint):
         bind_project_id = 0
         project_version_id = 0
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 if ser.validated_data.get("bind_project_id", 0):
                     bind_project_id = ser.validated_data.get("bind_project_id", 0)
                 if ser.validated_data.get("project_version_id", 0):

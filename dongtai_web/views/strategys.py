@@ -94,7 +94,7 @@ class StrategysEndpoint(UserEndPoint):
     def get(self, request):
         ser = _StrategyArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page_size = ser.validated_data["page_size"]
                 page = ser.validated_data["page"]
                 name = ser.validated_data["name"]
@@ -121,7 +121,7 @@ class StrategysEndpoint(UserEndPoint):
     def post(self, request):
         ser = StrategyCreateSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

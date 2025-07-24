@@ -86,7 +86,7 @@ class ScanStrategyRelationProject(UserEndPoint):
     def get(self, request, pk):
         ser = _ScanStrategyRelationProjectArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 size = ser.validated_data['size']
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -119,7 +119,7 @@ class ScanStrategyViewSet(UserEndPoint, viewsets.ViewSet):
     def list(self, request):
         ser = _ScanStrategyArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 name = ser.validated_data.get('name', None)
                 page = ser.validated_data['page']
                 page_size = ser.validated_data['page_size']
@@ -146,7 +146,7 @@ class ScanStrategyViewSet(UserEndPoint, viewsets.ViewSet):
     def create(self, request):
         ser = ScanCreateSerializer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 name = ser.validated_data['name']
                 content = ser.validated_data['content']
                 status = ser.validated_data['status']
@@ -172,7 +172,7 @@ class ScanStrategyViewSet(UserEndPoint, viewsets.ViewSet):
     def update(self, request, pk):
         ser = ScanCreateSerializer(data=request.data, partial=True)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)

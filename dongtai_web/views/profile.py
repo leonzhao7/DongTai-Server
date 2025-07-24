@@ -38,7 +38,7 @@ class ProfileEndpoint(UserEndPoint):
     def post(self, request, key):
         ser = ProfilepostArgsSer(data=request.data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 value = ser.validated_data["value"]
         except ValidationError as e:
             return R.failure(data=e.detail)
@@ -92,7 +92,7 @@ class ProfileBatchModifiedEndpoint(UserEndPoint):
     def post(self, request):
         ser = ProfileBatchPostArgsSer(data=request.data, many=True)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 data = ser.validated_data
         except ValidationError as e:
             return R.failure(data=e.detail)

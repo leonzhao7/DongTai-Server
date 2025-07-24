@@ -58,7 +58,7 @@ class MessagesEndpoint(UserEndPoint):
     def get(self, request):
         ser = _MessagesArgsSerializer(data=request.GET)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 page_size = ser.validated_data["page_size"]
                 page = ser.validated_data["page"]
         except ValidationError as e:

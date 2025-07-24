@@ -29,7 +29,7 @@ class BatchStatusUpdateSerializerView(UserEndPoint):
     def get_params(self, data):
         ser = self.serializer(data=data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError:
             return {"ids": [], "status": 0}
@@ -57,7 +57,7 @@ class AllStatusUpdateSerializerView(UserEndPoint):
     def get_params(self, data):
         ser = self.serializer(data=data)
         try:
-            if ser.is_valid(True):
+            if ser.is_valid(raise_exception=True):
                 pass
         except ValidationError:
             return {"status": 0}
