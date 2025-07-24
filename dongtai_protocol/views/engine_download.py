@@ -12,7 +12,6 @@ from dongtai_common.endpoint import OpenApiEndPoint, R
 from dongtai_common.utils.request_type import Request
 from dongtai_conf.settings import BUCKET_NAME_BASE_URL, VERSION
 from dongtai_protocol.api_schema import DongTaiParameter
-from dongtai_protocol.utils import OssDownloader
 
 logger = logging.getLogger("dongtai.openapi")
 
@@ -74,4 +73,4 @@ class EngineDownloadEndPoint(OpenApiEndPoint):
             os.makedirs(EngineDownloadEndPoint.LOCAL_AGENT_PATH)
         if os.path.exists(local_agent_file):
             return True
-        return OssDownloader.download_file(object_name=remote_agent_file, local_file=local_agent_file)
+        return False

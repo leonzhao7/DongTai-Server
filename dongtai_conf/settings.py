@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+import tempfile
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import random
 import sys
@@ -42,9 +42,9 @@ DEBUG = os.environ.get("debug", "false") == "true"
 
 # READ CONFIG FILE
 config = ConfigParser()
-status = config.read(os.path.join(BASE_DIR, "dongtai_conf/conf/config.ini"))
+status = config.read(os.path.join(BASE_DIR, "dongtai_conf", "conf", "config.ini"))
 if len(status) == 0:
-    print("config file not exist. stop running")
+    print(f"config file not exist. stop running")
     sys.exit(0)
 
 
@@ -138,7 +138,7 @@ LANGUAGES = (
     ("zh", "简体中文"),
 )
 USE_I18N = True
-LOCALE_PATHS = (os.path.join(BASE_DIR, "static/i18n"),)
+LOCALE_PATHS = (os.path.join(BASE_DIR, "static", "i18n"),)
 USE_L10N = True
 MODELTRANSLATION_FALLBACK_LANGUAGES = ("zh", "en")
 MIDDLEWARE = [
@@ -245,7 +245,7 @@ ROOT_URLCONF = "dongtai_conf.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "static/templates")],
+        "DIRS": [os.path.join(BASE_DIR, "static", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -328,8 +328,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTH_USER_MODEL = "dongtai_common.User"
 TIME_ZONE = "Asia/Shanghai"
-STATIC_URL = "/static/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static/static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static", "static")
 MEDIA_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/static/media/"
 CAPTCHA_IMAGE_SIZE = (80, 45)
@@ -343,38 +342,7 @@ LOGGING_LEVEL = safe_execute(LOGGING_LEVEL, BaseException, config.get, "other", 
 try:
     TMP_COMMON_PATH = config.get("common_file_path", "tmp_path")
 except Exception:
-    TMP_COMMON_PATH = "/tmp/logstash"
-
-# 图片二级存储路径
-try:
-    REPORT_IMG_FILES_PATH = config.get("common_file_path", "report_img")
-except Exception:
-    REPORT_IMG_FILES_PATH = "report/img"
-
-# report html二级存储路径
-try:
-    REPORT_HTML_FILES_PATH = config.get("common_file_path", "report_html")
-except Exception:
-    REPORT_HTML_FILES_PATH = "report/html"
-
-# report pdf二级存储路径
-try:
-    REPORT_PDF_FILES_PATH = config.get("common_file_path", "report_pdf")
-except Exception:
-    REPORT_PDF_FILES_PATH = "report/pdf"
-# report word 二级存储路径
-try:
-    REPORT_WORD_FILES_PATH = config.get("common_file_path", "report_word")
-except Exception:
-    REPORT_WORD_FILES_PATH = "report/word"
-# report excel 二级存储路径
-try:
-    REPORT_EXCEL_FILES_PATH = config.get("common_file_path", "report_excel")
-except Exception:
-    REPORT_EXCEL_FILES_PATH = "report/excel"
-FILES_SIZE_LIMIT = 1024 * 1024 * 50
-# # 报告二级存储路径
-
+    TMP_COMMON_PATH = os.path.join(tempfile.gettempdir(), "iast")
 
 LOGGING = {
     "version": 1,
@@ -393,25 +361,25 @@ LOGGING = {
         },
         "dongtai-webapi": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "/tmp/webapi.log",
+            "filename": os.path.join(TMP_COMMON_PATH, "webapi.log"),
             "formatter": "verbose",
             "encoding": "utf-8",
         },
         "dongtai.openapi": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "/tmp/openapi.log",
+            "filename": os.path.join(TMP_COMMON_PATH, "openapi.log"),
             "formatter": "verbose",
             "encoding": "utf-8",
         },
         "dongtai-core": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "/tmp/core.log",
+            "filename": os.path.join(TMP_COMMON_PATH, "core.log"),
             "formatter": "verbose",
             "encoding": "utf-8",
         },
         "celery.apps.worker": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "/tmp/worker.log",
+            "filename": os.path.join(TMP_COMMON_PATH, "worker.log"),
             "formatter": "verbose",
         },
     },
@@ -1068,7 +1036,8 @@ AGENT_LOG_DIR = os.path.join(TMP_COMMON_PATH, "batchagent")
 for _dir in (TMP_COMMON_PATH, AGENT_LOG_DIR):
     if not os.path.exists(_dir):
         print(f"{_dir} is not exists, check the init.")
-        sys.exit(0)
+        os.mkdir(_dir)
+        # sys.exit(0)
 
 DAST_TOKEN = config.get("other", "dast_token", fallback="")
 

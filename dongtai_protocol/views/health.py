@@ -13,7 +13,6 @@ from drf_spectacular.utils import extend_schema
 from requests.exceptions import ConnectionError, ConnectTimeout
 
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_protocol.utils import checkossstatus
 
 logger = logging.getLogger("dongtai.openapi")
 
@@ -92,12 +91,10 @@ class HealthView(UserEndPoint):
         tags=["OpenAPI"],
     )
     def get(self, request):
-        oss_status, _ = checkossstatus()
-        statusmap = {True: 1, False: 0}
         engine_status, engine_resp = _checkenginestatus()
         data = {
             "dongtai_openapi": {"status": 1},
-            "oss": {"status": statusmap[oss_status]},
+            "oss": {"status": 1},
         }
         if engine_status and engine_resp is not None:
             data.update(engine_resp)

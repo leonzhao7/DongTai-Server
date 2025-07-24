@@ -23,7 +23,6 @@ from dongtai_common.common.utils import (
 from dongtai_common.endpoint import OpenApiEndPoint, R
 from dongtai_conf.settings import BUCKET_NAME_BASE_URL, VERSION
 from dongtai_protocol.api_schema import DongTaiParameter
-from dongtai_protocol.utils import OssDownloader
 
 logger = logging.getLogger("dongtai.openapi")
 
@@ -46,10 +45,7 @@ class JavaAgentDownload:
     def download_agent(self):
         if os.path.exists(self.original_agent_file):
             return True
-        return OssDownloader.download_file(
-            object_name=self.remote_agent_file,
-            local_file=f"{self.original_agent_file}",
-        )
+        return False
 
     def create_config(
         self,
@@ -110,10 +106,7 @@ class PythonAgentDownload:
     def download_agent(self):
         if os.path.exists(self.original_agent_file):
             return True
-        return OssDownloader.download_file(
-            object_name=self.remote_agent_file,
-            local_file=f"{self.original_agent_file}",
-        )
+        return False
 
     def create_config(self, base_url, agent_token, auth_token, project_name, **kwargs):
         try:
@@ -183,10 +176,7 @@ class PhpAgentDownload:
     def download_agent(self):
         if os.path.exists(self.original_agent_file):
             return True
-        return OssDownloader.download_file(
-            object_name=self.remote_agent_file,
-            local_file=f"{self.original_agent_file}",
-        )
+        return False
 
     def create_config(self, base_url, agent_token, auth_token, project_name, **kwargs):
         try:
