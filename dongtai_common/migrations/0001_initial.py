@@ -759,21 +759,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="VersionControl",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("version", models.CharField(blank=True, max_length=255, null=True)),
-                ("component_name", models.CharField(blank=True, max_length=255, null=True)),
-                ("component_version_hash", models.CharField(blank=True, max_length=255, null=True)),
-                ("additional", models.CharField(blank=True, max_length=255, null=True)),
-                ("update_time", models.IntegerField(blank=True, default=dongtai_common.utils.db.get_timestamp)),
-            ],
-            options={
-                "db_table": "project_version_control",
-                "managed": True,
-            },
-        ),
-        migrations.CreateModel(
             name="ProjectSaasMethodPoolHeader",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
