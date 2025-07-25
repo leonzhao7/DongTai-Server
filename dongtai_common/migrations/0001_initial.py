@@ -524,6 +524,26 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name="IastOverpowerUserAuth",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("server_name", models.CharField(blank=True, max_length=255, null=True)),
+                ("server_port", models.CharField(blank=True, max_length=5, null=True)),
+                ("app_name", models.CharField(blank=True, max_length=50, null=True)),
+                ("http_url", models.CharField(blank=True, max_length=255, null=True)),
+                ("http_query_string", models.CharField(blank=True, max_length=2000, null=True)),
+                ("auth_sql", models.CharField(blank=True, max_length=255, null=True)),
+                ("auth_value", models.CharField(blank=True, max_length=1000, null=True)),
+                ("jdbc_class", models.CharField(blank=True, max_length=255, null=True)),
+                ("created_time", models.DateTimeField(blank=True, null=True)),
+                ("updated_time", models.DateTimeField(blank=True, null=True)),
+            ],
+            options={
+                "db_table": "iast_user_auth",
+                "managed": True,
+            },
+        ),
+        migrations.CreateModel(
             name="IastPackageGAInfo",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
@@ -755,6 +775,21 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "talent",
                 "db_table": "auth_talent",
+                "managed": True,
+            },
+        ),
+        migrations.CreateModel(
+            name="VersionControl",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("version", models.CharField(blank=True, max_length=255, null=True)),
+                ("component_name", models.CharField(blank=True, max_length=255, null=True)),
+                ("component_version_hash", models.CharField(blank=True, max_length=255, null=True)),
+                ("additional", models.CharField(blank=True, max_length=255, null=True)),
+                ("update_time", models.IntegerField(blank=True, default=dongtai_common.utils.db.get_timestamp)),
+            ],
+            options={
+                "db_table": "project_version_control",
                 "managed": True,
             },
         ),
@@ -1462,6 +1497,28 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.DO_NOTHING,
                 to="dongtai_common.iastvulnerabilitymodel",
             ),
+        ),
+        migrations.CreateModel(
+            name="IastErrorlog",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("errorlog", models.TextField(blank=True, null=True)),
+                ("state", models.CharField(blank=True, max_length=50, null=True)),
+                ("dt", models.IntegerField(blank=True, null=True)),
+                (
+                    "agent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="dongtai_common.iastagent",
+                    ),
+                ),
+            ],
+            options={
+                "db_table": "iast_errorlog",
+                "managed": True,
+            },
         ),
         migrations.CreateModel(
             name="IastDastIntegrationRelation",
