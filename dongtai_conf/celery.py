@@ -145,10 +145,6 @@ configs["task_routes"] = {
         "exchange": "dongtai-periodic-task",
         "routing_key": "dongtai-periodic-task",
     },
-    "dongtai_engine.tasks.clear_error_log": {
-        "exchange": "dongtai-periodic-task",
-        "routing_key": "dongtai-periodic-task",
-    },
     "dongtai_engine.tasks.vul_recheck": {
         "exchange": "dongtai-periodic-task",
         "routing_key": "dongtai-periodic-task",

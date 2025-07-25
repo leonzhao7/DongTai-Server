@@ -9,7 +9,6 @@ from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.agent_method_pool import MethodPool
 from dongtai_common.models.asset import Asset
-from dongtai_common.models.errorlog import IastErrorlog
 from dongtai_common.models.heartbeat import IastHeartbeat
 from dongtai_common.models.iast_overpower_user import IastOverpowerUserAuth
 from dongtai_common.models.replay_method_pool import IastAgentMethodPoolReplay
@@ -57,7 +56,6 @@ class AgentsDeleteEndPoint(UserEndPoint):
                 queryset = IastAgent.objects.filter(user=user, pk=pk).first()
                 if queryset:
                     self.agent = queryset
-                    self.delete_error_log()
                     self.delete_heart_beat()
                     self.delete_sca()
                     self.delete_vul()
@@ -80,13 +78,6 @@ class AgentsDeleteEndPoint(UserEndPoint):
         return R.success(
             msg=_("Successfully deleted {} strips, failed to deleted {} strips").format(len(success), len(failure))
         )
-
-    def delete_error_log(self):
-        try:
-            deleted, _rows_count = IastErrorlog.objects.filter(agent=self.agent).delete()
-            logger.warning(_("Error logs deleted successfully, Deletion Amount: {}").format(deleted))
-        except Exception as e:
-            logger.warning(_("Failed to delete error logs, probe ID: {}, error message: {}").format(self.agent.id, e))
 
     def delete_heart_beat(self):
         try:
@@ -164,7 +155,6 @@ class AgentsDeleteEndPoint(UserEndPoint):
 
 if __name__ == "__main__":
     MethodPool.objects.count()
-    IastErrorlog.objects.count()
     IastHeartbeat.objects.count()
     IastOverpowerUserAuth.objects.count()
     Asset.objects.count()

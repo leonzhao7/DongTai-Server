@@ -16,7 +16,6 @@ from dongtai_common.engine.vul_engine import VulEngine
 from dongtai_common.models import User
 from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.agent_method_pool import MethodPool
-from dongtai_common.models.errorlog import IastErrorlog
 from dongtai_common.models.heartbeat import IastHeartbeat
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.replay_method_pool import IastAgentMethodPoolReplay
@@ -363,22 +362,6 @@ def heartbeat():
         logger.info("[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service Failure.")
     except Exception as e:
         logger.info(f"[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service Error. reason is {e}")
-
-
-@shared_task(queue="dongtai-periodic-task")
-def clear_error_log():
-    """
-    清理错误日志
-    :return:
-    """
-    logger.info("日志清理开始")
-    try:
-        timestamp = int(time.time())
-        out_date_timestamp = 60 * 60 * 24 * 30
-        count = IastErrorlog.objects.filter(dt__lt=(timestamp - out_date_timestamp)).delete()
-        logger.info(f"日志清理成功,共{count}条")
-    except Exception as e:
-        logger.warning(f"日志清理失败,错误详情:{e}")
 
 
 @shared_task(queue="dongtai-periodic-task")
