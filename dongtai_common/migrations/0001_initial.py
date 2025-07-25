@@ -524,26 +524,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="IastOverpowerUserAuth",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("server_name", models.CharField(blank=True, max_length=255, null=True)),
-                ("server_port", models.CharField(blank=True, max_length=5, null=True)),
-                ("app_name", models.CharField(blank=True, max_length=50, null=True)),
-                ("http_url", models.CharField(blank=True, max_length=255, null=True)),
-                ("http_query_string", models.CharField(blank=True, max_length=2000, null=True)),
-                ("auth_sql", models.CharField(blank=True, max_length=255, null=True)),
-                ("auth_value", models.CharField(blank=True, max_length=1000, null=True)),
-                ("jdbc_class", models.CharField(blank=True, max_length=255, null=True)),
-                ("created_time", models.DateTimeField(blank=True, null=True)),
-                ("updated_time", models.DateTimeField(blank=True, null=True)),
-            ],
-            options={
-                "db_table": "iast_user_auth",
-                "managed": True,
-            },
-        ),
-        migrations.CreateModel(
             name="IastPackageGAInfo",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),

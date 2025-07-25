@@ -10,7 +10,6 @@ from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.agent_method_pool import MethodPool
 from dongtai_common.models.asset import Asset
 from dongtai_common.models.heartbeat import IastHeartbeat
-from dongtai_common.models.iast_overpower_user import IastOverpowerUserAuth
 from dongtai_common.models.replay_method_pool import IastAgentMethodPoolReplay
 from dongtai_common.models.replay_queue import IastReplayQueue
 from dongtai_common.models.vulnerablity import IastVulnerabilityModel
@@ -67,17 +66,6 @@ class AgentDeleteEndPoint(UserEndPoint):
             )
         except Exception as e:
             logger.exception(_("Failed to delete heartbeat data, error message: "), exc_info=e)
-
-    def delete_vul_overpower(self):
-        try:
-            deleted, _rows_count = IastOverpowerUserAuth.objects.filter(agent=self.agent).delete()
-            logger.error(
-                _(
-                    "The replay request method pool data was successfully deleted, A total of {} replay requests are deleted"
-                ).format(deleted)
-            )
-        except Exception as e:
-            logger.exception(_("Failed to delete unauthorized data, error message: "), exc_info=e)
 
     def delete_vul(self):
         try:
@@ -140,7 +128,5 @@ class AgentDeleteEndPoint(UserEndPoint):
 if __name__ == "__main__":
     MethodPool.objects.count()
     IastHeartbeat.objects.count()
-    IastOverpowerUserAuth.objects.count()
     Asset.objects.count()
     IastVulnerabilityModel.objects.count()
-    MethodPool.objects.count()
