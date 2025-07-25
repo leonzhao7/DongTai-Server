@@ -12,17 +12,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="IastWebHookLog",
-            fields=[
-                ("id", models.BigAutoField(primary_key=True, serialize=False)),
-                ("event_type", models.CharField(max_length=255)),
-                ("body", models.JSONField()),
-                ("create_time", models.IntegerField()),
-            ],
-            options={
-                "db_table": "iast_webhook_log",
-                "managed": True,
-            },
-        ),
     ]
