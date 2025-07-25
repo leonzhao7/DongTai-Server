@@ -22,15 +22,10 @@ from urllib.parse import urljoin
 import pymysql
 from django.utils.translation import gettext_lazy as _
 
-from dongtai_conf.utils import get_config
-
 pymysql.install_as_MySQLdb()
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-get_config(BASE_DIR, os.getenv("TARGET_SECRETSMANAGER", ""))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -1060,19 +1055,6 @@ if os.getenv("DJANGOSILK", None) == "TRUE":
     }
     SILKY_PYTHON_PROFILER_BINARY = True
 
-
-# Baseline configuration.
-AUTH_LDAP_SERVER_URI = config.get("ldap", "server_uri", fallback="")
-
-AUTH_LDAP_BIND_DN = config.get("ldap", "ldap_bind_dn", fallback="")
-AUTH_LDAP_BIND_PASSWORD = config.get("ldap", "ldap_bind_password", fallback="")
-
-AUTH_LDAP_ALWAYS_UPDATE_USER = False
-AUTH_LDAP_READY = AUTH_LDAP_SERVER_URI != ""
-# useless
-AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=users,dc=example,dc=com"
-
-
 # report upload throttle
 REPORT_UPLOAD_THROTTLE = config.get("throttle", "report_upload", fallback="")
 
@@ -1081,3 +1063,5 @@ LOG_SERVICE_TIMEOUT = config.getint("log_service", "port", fallback=10)
 
 # enable token login
 TOKEN_LOGIN = config.getboolean("other", "token_login", fallback=False)
+
+XFF_TRUSTED_PROXY_DEPTH = 2

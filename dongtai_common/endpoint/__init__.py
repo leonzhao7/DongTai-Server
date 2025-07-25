@@ -101,7 +101,8 @@ class EndPoint(APIView):
 
         try:
             self.initial(request, *args, **kwargs)
-            content_length = int(request.META.get("CONTENT_LENGTH", 0))
+            content_length_str = request.META.get("CONTENT_LENGTH", "")
+            content_length = int(content_length_str) if content_length_str.strip().isdigit() else 0
 
             # Get the appropriate handler method
             if request.method.lower() in self.http_method_names:
@@ -122,7 +123,7 @@ class EndPoint(APIView):
                 method = self.request.method
                 if method is None:
                     raise ValueError("can not get request method")
-                path, _path_regex, schema, filepath = VIEW_CLASS_TO_SCHEMA[self.__class__][method]
+                _, _, _, filepath = VIEW_CLASS_TO_SCHEMA.get(self.__class__, {}).get(method, (None, None, None, ""))
                 if "dongtai" not in filepath or "dongtai_protocol" in filepath:
                     return self.response
 
