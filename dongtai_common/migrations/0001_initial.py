@@ -1499,28 +1499,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.CreateModel(
-            name="IastErrorlog",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("errorlog", models.TextField(blank=True, null=True)),
-                ("state", models.CharField(blank=True, max_length=50, null=True)),
-                ("dt", models.IntegerField(blank=True, null=True)),
-                (
-                    "agent",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastagent",
-                    ),
-                ),
-            ],
-            options={
-                "db_table": "iast_errorlog",
-                "managed": True,
-            },
-        ),
-        migrations.CreateModel(
             name="IastDastIntegrationRelation",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
