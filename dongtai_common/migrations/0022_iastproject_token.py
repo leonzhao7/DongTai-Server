@@ -18,7 +18,7 @@ def update_exist_project_token(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dongtai_common"),
+        ("dongtai_common", "0021_iastwebhooklog"),
     ]
 
     operations = [

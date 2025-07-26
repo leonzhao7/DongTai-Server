@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # datetime:2020/10/23 11:54
 from dongtai_protocol.report.handler.agent_filepath_handler import FilePathHandler
-from dongtai_protocol.report.handler.agent_third_service_handler import (
-    ThirdPartyServiceHandler,
-)
 from dongtai_protocol.report.handler.api_route_handler import ApiRouteHandler
 from dongtai_protocol.report.handler.api_route_v2_handler import ApiRouteV2Handler
 from dongtai_protocol.report.handler.hardencode_vul_handler import HardEncodeVulHandler
@@ -23,5 +20,4 @@ if __name__ == "__main__":
     ApiRouteV2Handler()
     HardEncodeVulHandler()
     ScaBulkHandler()
-    ThirdPartyServiceHandler()
     FilePathHandler()

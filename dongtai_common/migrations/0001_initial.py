@@ -1135,38 +1135,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="IastThirdPartyService",
-            fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("address", models.CharField(blank=True, max_length=255, null=True)),
-                ("service_type", models.CharField(blank=True, max_length=255, null=True)),
-                ("port", models.CharField(blank=True, max_length=255, null=True)),
-                (
-                    "agent",
-                    models.ForeignKey(
-                        db_column="agent_id",
-                        db_constraint=False,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="dongtai_common.iastagent",
-                    ),
-                ),
-                (
-                    "project",
-                    models.ForeignKey(
-                        blank=True,
-                        db_constraint=False,
-                        default=-1,
-                        on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="dongtai_common.iastproject",
-                    ),
-                ),
-            ],
-            options={
-                "db_table": "iast_third_party_service",
-                "managed": True,
-            },
-        ),
-        migrations.CreateModel(
             name="IastStrategyUser",
             fields=[
                 ("id", models.BigAutoField(primary_key=True, serialize=False)),
