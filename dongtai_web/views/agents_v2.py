@@ -69,7 +69,7 @@ class AgentListv2(UserEndPoint, ViewSet):
             filter_condiction = filter_condiction & Q(bind_project_id=ser.validated_data["project_id"])
         if ser.validated_data["allow_report"] is not None:
             filter_condiction = filter_condiction & Q(allow_report=ser.validated_data["allow_report"])
-        if ser.validated_data["last_days"] is not None:
+        if ser.validated_data["last_days"] is not None and ser.validated_data["last_days"] > 0:
             filter_condiction = filter_condiction & Q(
                 heartbeat__dt__gte=int(time()) - 60 * 60 * 24 * ser.validated_data["last_days"]
             )
