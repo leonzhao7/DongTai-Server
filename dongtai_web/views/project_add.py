@@ -148,7 +148,7 @@ class ProjectAdd(UserEndPoint):
                 if vul_validation is not None:
                     project.vul_validation = vul_validation
                 if base_url:
-                    project.base_url = replace_ending(base_url, "/", "")
+                    project.base_url = remove_ending_slash(base_url)
                 if test_req_header_key:
                     project.test_req_header_key = test_req_header_key
                 if test_req_header_value:
@@ -209,7 +209,7 @@ def is_ip(address):
     return not address.split(".")[-1].isalpha()
 
 
-def replace_ending(sentence, old, new):
-    if sentence.endswith(old):
-        return sentence[: -len(old)] + new
+def remove_ending_slash(sentence):
+    while sentence.endswith("/"):
+        sentence = sentence[: -1]
     return sentence
