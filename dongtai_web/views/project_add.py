@@ -89,17 +89,6 @@ class ProjectAdd(UserEndPoint):
                 log_level = request.data.get("log_level", None)
                 if len(name) > 30:
                     return R.failure(msg="项目名长度需在30个字符以内")
-                accessable_ips = []
-                if pid and base_url:
-                    ips = filter(
-                        lambda x: ip_validate(x),
-                        [i[0] for i in IastServer.objects.filter(pid=pid).values_list("ip").distinct().all()],
-                    )
-                    accessable_ips = _accessable_ips(base_url, ips)
-                if accessable_ips:
-                    parsed_url = urlparse(base_url)
-                    if parsed_url.netloc not in parsed_url:
-                        return R.failure(status=202, msg=_("base_url validate failed"))
                 if base_url and not url_validate(base_url):
                     return R.failure(status=202, msg=_("base_url validate failed"))
                 if not scan_id or not name or not mode:
@@ -190,19 +179,6 @@ class ProjectAdd(UserEndPoint):
         except Exception as e:
             logger.exception("uncatched exception: ", exc_info=e)
             return R.failure(status=202, msg=_("Parameter error"))
-
-
-def _accessable_ips(url, ips):
-    parse_re = urlparse(url)
-    return list(filter(lambda x: url_accessable(urlunparse(parse_re._replace(netloc=x))), ips))
-
-
-def url_accessable(url):
-    try:
-        requests.get(url, timeout=2)
-    except Exception:
-        return False
-    return True
 
 
 def url_validate(url):
