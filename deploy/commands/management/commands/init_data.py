@@ -1,16 +1,10 @@
-import json
-import os
-from collections import OrderedDict
-
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
-from django.db.models import Q
-from tqdm import tqdm
 
+from dongtai_common.models.iast_role import IastRoleV2, RoleLevel
 from dongtai_common.models.user import User
 from dongtai_common.models.department import Department
-from dongtai_common.models.talent import Talent
-
+from dongtai_common.models.tenant import Tenant
 from dongtai_common.models.program_language import IastProgramLanguage
 from dongtai_common.models.deploy import IastDeployDesc
 from dongtai_common.models.vul_level import IastVulLevel
@@ -18,6 +12,7 @@ from dongtai_common.models.message import IastMessageType
 from dongtai_common.models.project import IastProjectTemplate
 from dongtai_common.models.strategy_user import IastStrategyUser
 from dongtai_common.models.profile import IastProfile
+from dongtai_common.models.vulnerablity import IastVulnerabilityStatus
 
 
 class Command(BaseCommand):
@@ -29,25 +24,36 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # 必须要在数据库中创建很多内容才能运行系统，这里只考虑在一个空白数据库的环境运行，如果数据库中已经有数据，要先清空
+        IastRoleV2.objects.get_or_create(level=RoleLevel.NORMAL,
+                                         defaults={"name": "项目用户", "status": 1, "permission": {}})
+        IastRoleV2.objects.get_or_create(level=RoleLevel.TENANT_ADMIN,
+                                         defaults={"name": "租户管理员", "status": 1, "permission": {}})
+        role, created = IastRoleV2.objects.get_or_create(level=RoleLevel.SUPER_ADMIN,
+                                                         defaults={"name": "超级管理员", "status": 1, "permission": {}})
+        kwargs = {'name': '默认公司'}
+        tenant, created = Tenant.objects.get_or_create(name='默认公司', defaults=kwargs)
         # 1. 创建admin用户
         Group.objects.get_or_create(name='system_admin')
         group, created = Group.objects.get_or_create(name='talent_admin')
         Group.objects.get_or_create(name='user')
+        IastProjectTemplate.objects.all().delete()
+        IastStrategyUser.objects.all().delete()
+        User.objects.all().delete()
         admin = User.objects.create_system_user(
             username='admin',
             password='admin',
             email='admin@e-sscard.com',
             is_global_permission = True,
             phone='13912345678',
-            default_language='zh'
+            default_language='zh',
+            role=role,
+            tenant=tenant,
         )
         admin.groups.add(group)
         # principal_id, department_path, token 不知道啥意思，先不管
         kwargs = {'name': '默认部门', 'created_by': admin.id, 'parent_id': -1, 'principal_id': admin.id}
         depart,created = Department.objects.get_or_create(name='默认部门', defaults=kwargs)
-        kwargs = {'talent_name': '默认部门', 'created_by': admin.id}
-        talent,created = Talent.objects.get_or_create(talent_name='默认部门', defaults=kwargs)
-        depart.talent.add(talent)
+        depart.talent.add(tenant)
         admin.department.add(depart)
         
         vul_level_list = [
@@ -58,11 +64,11 @@ class Command(BaseCommand):
             {'name': 'note', 'name_value': '提示', 'name_type': '提示信息', 'name_type_en': 'NOTE', 'name_value_en': 'NOTE'}
         ]
         for level in vul_level_list:
-            IastVulLevel.objects.get_or_create(defaults={}, **level)
+            IastVulLevel.objects.get_or_create(name=level["name"], defaults=level)
 
         program_language_list = [{'name': 'Java'}, {'name': 'Python'}, {'name': 'PHP'}, {'name': 'Go'}]
         for language in program_language_list:
-            IastProgramLanguage.objects.get_or_create(defaults={}, **language)
+            IastProgramLanguage.objects.get_or_create(name=language["name"])
 
         deploy_list = [
             {'middleware': 'Spring-boot/Netty/Jetty/Sofa', 'language': 'java', 'desc': '乱写的'},
@@ -76,20 +82,19 @@ class Command(BaseCommand):
             {'middleware': 'websphere', 'language': 'java', 'desc': '乱写的'},
         ]
         for deploy in deploy_list:
-            IastDeployDesc.objects.get_or_create(defaults={}, **deploy)
+            IastDeployDesc.objects.get_or_create(middleware=deploy["middleware"], defaults=deploy)
 
-        kwargs = {'name': 'report'}
-        IastMessageType.objects.get_or_create(defaults={}, **kwargs)
+        IastMessageType.objects.get_or_create(name="report")
 
-        strategy = IastStrategyUser.objects.create(
-            name='全部漏洞策略', 
-            user=admin, 
-            status=True, 
-            content='2,8,9,14,15,17,18,19,20,23,24,25,26,28,30,33,37,22,34,1,10,11,12,13,16,21,27,29,31,32,3,4,5,6,7,35,36,38,41,45,44,43,40,39,42')
-        IastProjectTemplate.objects.create(
-            template_name='全面扫描模板',
-            user=admin,
-            scan=strategy)
+        strategy, created = IastStrategyUser.objects.get_or_create(name="全部漏洞策略", defaults={
+            'name': '全部漏洞策略',
+            'user': admin,
+            'status': True,
+            'content': '2,8,9,14,15,17,18,19,20,23,24,25,26,28,30,33,37,22,34,1,10,11,12,13,16,21,27,29,31,32,3,4,5,6,7,35,36,38,41,45,44,43,40,39,42'})
+        IastProjectTemplate.objects.get_or_create(template_name="全面扫描模板", defaults={
+            'template_name': '全面扫描模板',
+            'user': admin,
+            'scan': strategy})
 
         profile_list = [
             {'key': 'enable_update', 'value': 'FALSE'},
@@ -101,4 +106,16 @@ class Command(BaseCommand):
             {'key': 'dast_validation_settings', 'value': '{"strategy_id": [2, 8, 9, 14, 15, 17, 18, 19, 20, 23, 24, 25, 26, 28, 30, 33, 37, 22, 34, 1, 10, 11, 12, 13, 16, 21, 27, 29, 31, 32, 4, 5, 6, 7, 36, 38, 41, 45, 42, 3, 35, 39, 40, 43, 44], "validation_status": true}'}
         ]
         for profile in profile_list:
-            IastProfile.objects.get_or_create(**profile)
+            IastProfile.objects.get_or_create(key=profile['key'], defaults=profile)
+
+        vul_status_list = [
+            {"name": "待验证", "name_zh": "待验证", "name_en": "Pending"},
+            {"name": "验证中", "name_zh": "验证中", "name_en": "Verifying"},
+            {"name": "已确认", "name_zh": "已确认", "name_en": "Confirmed"},
+            {"name": "已忽略", "name_zh": "已忽略", "name_en": "Ignore"},
+            {"name": "已处理", "name_zh": "已处理", "name_en": "Solved"},
+            {"name": "已修复", "name_zh": "已修复", "name_en": "Fixed"},
+            {"name": "验证失败", "name_zh": "验证失败", "name_en": "Verify failed"},
+        ]
+        for vul_status in vul_status_list:
+            IastVulnerabilityStatus.objects.get_or_create(name=vul_status["name"], defaults=vul_status)

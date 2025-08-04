@@ -25,7 +25,6 @@ class Command(BaseCommand):
                 name=user.username,
                 create_time=timestamp,
                 update_time=timestamp,
-                created_by=user.id,
                 parent_id=parent.id if parent else -1,
                 principal_id=user.id,
             )

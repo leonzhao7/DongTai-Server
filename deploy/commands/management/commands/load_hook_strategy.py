@@ -78,7 +78,7 @@ class Command(BaseCommand):
             ):
                 # 存在用户定义的冲突策略,不会修改
                 continue
-            strategy["user_id"] = strategy["user"]
+            strategy["user_id"] = user.id
             del strategy["user"]
             strategy["level_id"] = strategy["level"]
             del strategy["level"]

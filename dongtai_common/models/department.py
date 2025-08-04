@@ -5,7 +5,7 @@ from typing import Any
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from dongtai_common.models.talent import Talent
+from dongtai_common.models.tenant import Tenant
 from dongtai_common.utils.customfields import trans_char_field
 from dongtai_common.utils.db import get_timestamp
 from dongtai_common.utils.settings import get_managed
@@ -21,7 +21,7 @@ class IastDepartment(models.Model):
 
 class PermissionsMixin(models.Model):
     talent = models.ManyToManyField(
-        Talent,
+        Tenant,
         verbose_name=_("talent"),
         blank=True,
         help_text=_(

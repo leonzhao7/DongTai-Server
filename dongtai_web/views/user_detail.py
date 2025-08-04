@@ -26,7 +26,7 @@ class UserDetailEndPoint(TalentAdminEndPoint):
                         data={
                             "username": user.get_username(),
                             "department": department.get_department_name(),
-                            "talent": talent.get_talent_name(),
+                            "talent": talent.get_name(),
                         }
                     )
         except BaseException:

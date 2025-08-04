@@ -10,19 +10,18 @@ from dongtai_common.utils.settings import get_managed
 from dongtai_common.utils.db import get_timestamp
 
 
-class Talent(models.Model):
-    talent_name = models.CharField(
+class Tenant(models.Model):
+    name = models.CharField(
         unique=True,
-        verbose_name=_("talent"),
+        verbose_name=_("tenant"),
         max_length=255,
         blank=True,
         error_messages={
-            "unique": _("A talent with that talent name already exists."),
+            "unique": _("A tenant with that tenant name already exists."),
         },
     )
     create_time = models.IntegerField(default=get_timestamp)
     update_time = models.IntegerField(default=get_timestamp)
-    created_by = models.IntegerField()
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -32,12 +31,12 @@ class Talent(models.Model):
     )
 
     class Meta:
-        verbose_name = _("talent")
+        verbose_name = _("tenant")
         managed = get_managed()
         db_table = "auth_talent"
 
-    def get_talent_name(self):
-        return self.talent_name
+    def get_name(self):
+        return self.name
 
     @trans_char_field("talent_name", {"zh": {"默认租户": "默认租户"}, "en": {"默认租户": "Default Tenant"}})
     def __getattribute__(self, name) -> Any:

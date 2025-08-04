@@ -15,7 +15,7 @@ from dongtai_common.models.agent import IastAgent
 from dongtai_common.models.department import Department
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
-from dongtai_common.models.talent import Talent
+from dongtai_common.models.tenant import Tenant
 from dongtai_common.models.vul_level import IastVulLevel
 from dongtai_common.utils.settings import get_managed
 from dongtai_conf.settings import ASSET_INDEX
@@ -59,7 +59,7 @@ class Asset(models.Model):
     # 部门id
     department = models.ForeignKey(Department, models.DO_NOTHING, default=-1)
     # 租户id
-    talent = models.ForeignKey(Talent, models.DO_NOTHING, default=-1)
+    talent = models.ForeignKey(Tenant, models.DO_NOTHING, default=-1)
     safe_version_list = models.JSONField(default=list)
     nearest_safe_version = models.JSONField(default=str)
     latest_safe_version = models.JSONField(default=str)

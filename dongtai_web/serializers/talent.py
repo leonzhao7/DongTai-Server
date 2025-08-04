@@ -2,14 +2,14 @@
 from rest_framework import serializers
 
 from dongtai_common.models import User
-from dongtai_common.models.talent import Talent
+from dongtai_common.models.tenant import Tenant
 
 
 class TalentSerializer(serializers.ModelSerializer):
     created = serializers.SerializerMethodField()
 
     class Meta:
-        model = Talent
+        model = Tenant
         fields = [
             "id",
             "talent_name",
