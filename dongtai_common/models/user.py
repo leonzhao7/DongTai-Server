@@ -8,7 +8,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dongtai_common.models.department import Department
-from dongtai_common.models.iast_role import IastRoleV2
+from dongtai_common.models.iast_role import IastRoleV2, RoleLevel
+from dongtai_common.models.tenant import Tenant
 from dongtai_conf.patch import patch_point, to_patch
 
 
@@ -68,8 +69,7 @@ class User(AbstractUser, PermissionsMixin):
     deleted = models.BooleanField(default=False)
     failed_login_count = models.IntegerField(default=0)
     failed_login_time = models.DateTimeField(default=timezone.now)
-    totp_secret = models.CharField(max_length=255, blank=True)
-    ldap_dn = models.CharField(max_length=1024, blank=True)
+    tenant = models.ForeignKey(Tenant, models.DO_NOTHING, blank=True)
 
     objects = SaaSUserManager()
     using_department = None
@@ -78,6 +78,10 @@ class User(AbstractUser, PermissionsMixin):
     class Meta(AbstractUser.Meta):
         db_table = "auth_user"
         indexes = [models.Index(fields=["deleted"])]
+
+    @property
+    def role_level(self):
+        return self.role.level
 
     def is_system_admin(self):
         return self.is_superuser == 1
@@ -118,10 +122,6 @@ class User(AbstractUser, PermissionsMixin):
         total_dep = Department.objects.none() if not totals else Department.objects.filter(totals)
         return Department.objects.filter(pk__in=[i.id for i in total_dep])
 
-    def get_using_department(self):
-        if self.using_department:
-            return self.using_department
-        return self.get_department()
 
     @to_patch
     def get_projects(self) -> QuerySet:
@@ -132,3 +132,10 @@ class User(AbstractUser, PermissionsMixin):
             return IastProject.objects.all()
         _, queryset = patch_point(self, queryset)
         return queryset
+
+    def has_privilege(self, role_level, tenant_id) -> bool:
+        if self.role_level <= role_level:
+            return False
+        if self.role_level == RoleLevel.TENANT_ADMIN and self.tenant != tenant_id:
+            return False
+        return True
