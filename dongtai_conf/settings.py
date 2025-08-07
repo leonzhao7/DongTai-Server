@@ -115,8 +115,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": ["django.core.paginator"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
-        "dongtai_common.common.utils.ProjectTokenAuthentication",
-        "dongtai_common.common.utils.DepartmentTokenAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_RENDERER_CLASSES": [

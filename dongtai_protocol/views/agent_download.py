@@ -13,13 +13,8 @@ import uuid
 from django.http import FileResponse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
 
-from dongtai_common.common.utils import (
-    DepartmentTokenAuthentication,
-    ProjectTokenAuthentication,
-)
 from dongtai_common.endpoint import OpenApiEndPoint, R
 from dongtai_conf.settings import BUCKET_NAME_BASE_URL, VERSION
 from dongtai_protocol.api_schema import DongTaiParameter
@@ -275,12 +270,6 @@ class AgentDownload(OpenApiEndPoint):
 
     name = "download_iast_agent"
     description = "下载洞态Agent"
-    authentication_classes = (
-        ProjectTokenAuthentication,
-        DepartmentTokenAuthentication,
-        TokenAuthentication,
-        SessionAuthentication,
-    )
 
     @staticmethod
     def is_tar_file(file):
@@ -332,8 +321,6 @@ class AgentDownload(OpenApiEndPoint):
             user_token = request.query_params.get("token", None)
             if department_token:
                 final_token = department_token
-            elif request.user.using_project is not None:
-                final_token = f"PROJECT{request.user.using_project.token}"
             elif not user_token:
                 token, success = Token.objects.get_or_create(user=request.user)
                 final_token = token.key
