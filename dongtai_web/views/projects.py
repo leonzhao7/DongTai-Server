@@ -40,7 +40,6 @@ class _ProjectsArgsSerializer(serializers.Serializer):
         max_value=10,
         help_text=_("The exclude vulnerability status."),
     )
-    project_group_name = serializers.CharField(default=None, help_text="项目组名称")
 
 
 _SuccessSerializer = get_response_serializer(ProjectSerializer(many=True))
@@ -66,7 +65,6 @@ class Projects(UserEndPoint):
                 name: str = ser.validated_data.get("name")
                 status: int | None = ser.validated_data.get("status")
                 exclude_vul_status: int | None = ser.validated_data.get("exclude_vul_status")
-                project_group_name: str | None = ser.validated_data.get("project_group_name")
             else:
                 return R.failure(data="Can not validation data.")
         except ValidationError as e:
@@ -77,9 +75,6 @@ class Projects(UserEndPoint):
             queryset = queryset.filter(name__icontains=name)
         if status is not None:
             queryset = queryset.filter(status=status)
-        if project_group_name is not None:
-            queryset = queryset.filter(iastprojectgroup__name__icontains=project_group_name)
-        queryset = queryset.select_related("user").prefetch_related("iastprojectgroup_set")
         page_summary, page_data = self.get_paginator(queryset, page, page_size)
         vul_levels_dict = get_vul_levels_dict(page_data, exclude_vul_status=exclude_vul_status)
         project_language_dict = get_project_language(page_data)
