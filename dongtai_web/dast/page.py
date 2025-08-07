@@ -120,7 +120,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
-        department = request.user.get_relative_department()
+        department = request.user.get_departments()
         q = Q(project__department__in=department)
         if 'bind_project_id' in ser.validated_data:
             q = q & Q(project_id=ser.validated_data['bind_project_id'])
@@ -154,7 +154,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
-        department = request.user.get_relative_department()
+        department = request.user.get_departments()
         q = Q(project__department__in=department)
         if 'vul_level_id' in ser.validated_data:
             q = q & Q(vul_level_id__in=ser.validated_data['vul_level_id'])
@@ -184,7 +184,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
                                  description=_("Dast Vul detail"),
                                  tags=[_('Dast Vul')])
     def single(self, request, pk):
-        department = request.user.get_relative_department()
+        department = request.user.get_departments()
         q = Q(project__department__in=department) & Q(pk=pk)
         dastvul = IastDastIntegration.objects.filter(q).first()
         return R.success(data=VulsResArgsSerializer(dastvul).data)
@@ -200,7 +200,7 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
                 pass
         except ValidationError as e:
             return R.failure(data=e.detail)
-        department = request.user.get_relative_department()
+        department = request.user.get_departments()
         q = Q(project__department__in=department) & Q(
             pk__in=ser.validated_data['vul_id'])
         dastvul = IastDastIntegration.objects.filter(q).values().first()

@@ -273,12 +273,12 @@ class RequestReplayEndPoint(UserEndPoint):
             )
         if request.user.is_superuser == 1 or replay_data.agent.user_id == request.user.id:
             pass
-        elif request.user.is_superuser == 2 and replay_data.agent.user_id != request.user.id:
+        # elif request.user.is_superuser == 2 and replay_data.agent.user_id != request.user.id:
             # 部门鉴权
-            talent = request.user.get_talent()
-            departments = talent.departments.all()
-            if replay_data.agent.user.get_department() not in departments:
-                replay_data = {}
+            # talent = request.user.get_talent()
+            # departments = talent.departments.all()
+            # if replay_data.agent.user.get_department() not in departments:
+            #     replay_data = {}
         elif replay_data.agent.user_id != request.user.id:
             replay_data = {}
 

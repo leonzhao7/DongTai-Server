@@ -1,10 +1,10 @@
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from dongtai_common.models.iast_role import IastRoleV2, RoleLevel
+from dongtai_common.models.user_role import UserRole, RoleLevel
 from dongtai_common.models.user import User
-from dongtai_common.models.department import Department
-from dongtai_common.models.tenant import Tenant
+from dongtai_common.models.user_department import UserDepartment
+from dongtai_common.models.user_tenant import UserTenant
 from dongtai_common.models.program_language import IastProgramLanguage
 from dongtai_common.models.deploy import IastDeployDesc
 from dongtai_common.models.vul_level import IastVulLevel
@@ -24,38 +24,26 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # 必须要在数据库中创建很多内容才能运行系统，这里只考虑在一个空白数据库的环境运行，如果数据库中已经有数据，要先清空
-        IastRoleV2.objects.get_or_create(level=RoleLevel.NORMAL,
-                                         defaults={"name": "项目用户", "status": 1, "permission": {}})
-        IastRoleV2.objects.get_or_create(level=RoleLevel.TENANT_ADMIN,
-                                         defaults={"name": "租户管理员", "status": 1, "permission": {}})
-        role, created = IastRoleV2.objects.get_or_create(level=RoleLevel.SUPER_ADMIN,
-                                                         defaults={"name": "超级管理员", "status": 1, "permission": {}})
-        kwargs = {'name': '默认公司'}
-        tenant, created = Tenant.objects.get_or_create(name='默认公司', defaults=kwargs)
-        # 1. 创建admin用户
-        Group.objects.get_or_create(name='system_admin')
-        group, created = Group.objects.get_or_create(name='talent_admin')
-        Group.objects.get_or_create(name='user')
         IastProjectTemplate.objects.all().delete()
         IastStrategyUser.objects.all().delete()
         User.objects.all().delete()
-        admin = User.objects.create_system_user(
-            username='admin',
-            password='admin',
-            email='admin@e-sscard.com',
-            is_global_permission = True,
-            phone='13912345678',
-            default_language='zh',
-            role=role,
-            tenant=tenant,
-        )
-        admin.groups.add(group)
-        # principal_id, department_path, token 不知道啥意思，先不管
-        kwargs = {'name': '默认部门', 'created_by': admin.id, 'parent_id': -1, 'principal_id': admin.id}
-        depart,created = Department.objects.get_or_create(name='默认部门', defaults=kwargs)
-        depart.talent.add(tenant)
-        admin.department.add(depart)
-        
+        UserDepartment.objects.all().delete()
+
+        # 创建用户
+        UserRole.objects.get_or_create(level=UserRole.LEVEL_NORMAL,
+                                       defaults={"name": "项目用户", "status": 1, "permission": {}})
+        UserRole.objects.get_or_create(level=UserRole.LEVEL_TENANT,
+                                       defaults={"name": "租户管理员", "status": 1, "permission": {}})
+        role, _ = UserRole.objects.get_or_create(level=UserRole.LEVEL_SUPER,
+                                                       defaults={"name": "超级管理员", "status": 1, "permission": {}})
+        # tenant, _ = UserTenant.objects.get_or_create(name='公司')
+        # kwargs = {'name': '全部门', 'parent': None, 'tenant': tenant}
+        # depart, created = UserDepartment.objects.get_or_create(name='默认部门', tenant=tenant, defaults=kwargs)
+        kwargs = {'role': role,
+                  'phone': '13912345678',
+                  'default_language': 'zh',}
+        admin = User.objects.create_superuser(username='admin', password='admin', email='admin@e-sscard.com', **kwargs)
+
         vul_level_list = [
             {'name': 'high', 'name_value': '高危', 'name_type': '高危漏洞', 'name_type_en': 'HIGH', 'name_value_en': 'HIGH'},
             {'name': 'medium', 'name_value': '中危', 'name_type': '中危漏洞', 'name_type_en': 'MEDIUM', 'name_value_en': 'MEDIUM'},

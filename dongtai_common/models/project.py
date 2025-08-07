@@ -8,7 +8,7 @@ from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 
 from dongtai_common.models import User
-from dongtai_common.models.department import Department
+from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.strategy_user import IastStrategyUser
 from dongtai_common.utils.db import get_timestamp
 from dongtai_common.utils.settings import get_managed
@@ -75,13 +75,12 @@ class IastProject(models.Model):
     data_gather = models.JSONField(null=True)
     data_gather_is_followglobal = models.IntegerField(default=1)
     blacklist_is_followglobal = models.IntegerField(default=1)
-    # department = models.ForeignKey(Department, models.DO_NOTHING)
+    department = models.ForeignKey(UserDepartment, models.DO_NOTHING, null=True, blank=True, related_name="projects")
     template = models.ForeignKey(IastProjectTemplate, models.DO_NOTHING)
     enable_log = models.BooleanField(null=True)
     log_level = models.CharField(max_length=511, null=True, blank=True)
     last_has_online_agent_time = models.IntegerField(default=get_timestamp)
     status = models.IntegerField(default=0, choices=ProjectStatus.choices)
-    projectgroups = models.ManyToManyField("IastProjectGroup", through="IastProjectGroupProject")
     users = models.ManyToManyField("User", through="IastProjectUser", related_name="auth_projects")
     token = ShortUUIDField(max_length=22, alphabet=string.ascii_letters + string.digits)
 

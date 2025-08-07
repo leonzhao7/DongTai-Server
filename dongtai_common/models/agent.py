@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from dongtai_common.models import User
-from dongtai_common.models.department import Department
+from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
 from dongtai_common.models.server import IastServer
@@ -49,7 +49,7 @@ class IastAgent(models.Model):
     except_running_status = models.IntegerField(default=1)
     state_status = models.IntegerField(default=1)
     events = models.JSONField(default=get_events)
-    department = models.ForeignKey(Department, models.DO_NOTHING)
+    department = models.ForeignKey(UserDepartment, models.DO_NOTHING)
     allow_report = models.IntegerField(default=1)
 
     class Meta:

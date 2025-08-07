@@ -7,11 +7,11 @@ from dongtai_common.utils.settings import get_managed
 
 
 class UserTenant(models.Model):
-    STATUS_OK = 0
-    STATUS_TRIAL = 1
-    STATUS_SUSPEND = 2
-    STATUS_LOCK = 3
-    STATUS_DELETE = 4
+    STATUS_OK = 1
+    STATUS_TRIAL = 2
+    STATUS_SUSPEND = 3
+    STATUS_LOCK = 4
+    STATUS_DELETE = 5
 
     name = models.CharField(unique=True,max_length=255,blank=False)
     create_at = models.DateTimeField(default=timezone.now)
@@ -27,3 +27,11 @@ class UserTenant(models.Model):
 
     def is_active(self):
         return self.status == self.STATUS_OK
+
+    @staticmethod
+    def get_status_list():
+        return [{"code": UserTenant.STATUS_OK, "name": "正常"},
+                {"code": UserTenant.STATUS_TRIAL, "name": "试用"},
+                {"code": UserTenant.STATUS_SUSPEND, "name": "暂停"},
+                {"code": UserTenant.STATUS_LOCK, "name": "锁定"},
+                {"code": UserTenant.STATUS_DELETE, "name": "删除"}]

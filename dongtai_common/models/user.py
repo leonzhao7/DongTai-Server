@@ -35,6 +35,15 @@ class User(AbstractUser):
     def role_level(self):
         return self.role.level
 
+    def is_super_admin(self):
+        return self.role.level == UserRole.LEVEL_SUPER
+
+    def is_normal(self):
+        return self.role.level == UserRole.LEVEL_NORMAL
+
+    def is_tenant_admin(self):
+        return self.role.level == UserRole.LEVEL_TENANT
+
     def is_system_admin(self):
         return self.role.level == UserRole.LEVEL_SUPER
 
@@ -52,7 +61,7 @@ class User(AbstractUser):
     def get_departments(self) -> QuerySet:
         if self.role.level == UserRole.LEVEL_SUPER:
             return UserDepartment.objects.all()
-        return UserDepartment.objects.filter(id__in=self.departments.all()).all()
+        return self.departments.all()
 
     @to_patch
     def get_projects(self) -> QuerySet:

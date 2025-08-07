@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import IntegerChoices
 from django.utils.translation import gettext_lazy as _
 
-from dongtai_common.models.department import Department
+from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
 from dongtai_common.utils.db import get_timestamp
@@ -32,7 +32,7 @@ class AssetV2(models.Model):
     project = models.ForeignKey(IastProject, on_delete=models.CASCADE, blank=True, default=-1)
     project_version = models.ForeignKey(IastProjectVersion, on_delete=models.CASCADE, blank=True, default=-1)
     # 部门id
-    department = models.ForeignKey(Department, models.DO_NOTHING, blank=True, default=-1)
+    department = models.ForeignKey(UserDepartment, models.DO_NOTHING, blank=True, default=-1)
     language_id = models.IntegerField(default=1, blank=True)
     aql = models.ForeignKey(
         "AssetV2Global",

@@ -21,7 +21,7 @@ class UserDepartment(models.Model):
         default=None,
     )
     token = models.CharField(max_length=1024, blank=True)
-    tenant = models.ForeignKey(UserTenant, on_delete=models.DO_NOTHING)
+    tenant = models.ForeignKey(UserTenant, on_delete=models.DO_NOTHING, related_name='departments',)
 
     class Meta:
         managed = get_managed()

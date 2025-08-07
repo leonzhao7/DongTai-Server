@@ -21,11 +21,11 @@ class UserDetailEndPoint(TalentAdminEndPoint):
             if talent:
                 current_talent = request.user.get_talent()
                 if current_talent == talent:
-                    department = user.get_department()
+                    # department = user.get_department()
                     return R.success(
                         data={
                             "username": user.get_username(),
-                            "department": department.get_department_name(),
+                            # "department": department.get_department_name(),
                             "talent": talent.get_name(),
                         }
                     )
