@@ -35,7 +35,6 @@ from dongtai_web.views.agents_delete import AgentsDeleteEndPoint
 from dongtai_web.views.agents_user import UserAgentList
 from dongtai_web.views.agents_v2 import AgentListv2
 from dongtai_web.views.captcha_create import CaptchaCreate
-from dongtai_web.views.demo import Demo
 from dongtai_web.views.details_id import (
     AgentListWithid,
     ProjectListWithid,
@@ -120,9 +119,11 @@ from dongtai_web.views.user_login import UserLogin
 from dongtai_web.views.user_logout import UserLogout
 from dongtai_web.views.user_passwrd import UserPassword
 from dongtai_web.views.user_passwrd_reset import UserPasswordReset
-from dongtai_web.views.user_register_batch import UserRegisterEndPoint
 from dongtai_web.views.user_token import UserDepartmentToken, UserToken
 from dongtai_web.views.user_manage import UserManage
+from dongtai_web.views.user_department_manage import DepartmentManage
+from dongtai_web.views.user_tenant_manage import TenantManage
+from dongtai_web.views.user_role import RoleManage
 from dongtai_web.views.version_update import MethodPoolVersionUpdate
 from dongtai_web.views.vul_count_for_plugin import VulCountForPluginEndPoint
 from dongtai_web.views.vul_delete import VulDelete
@@ -158,9 +159,20 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("user/add", UserManage.as_view({'post': 'create'})),
     path("user/stop", UserManage.as_view({"post": "stop"})),
     path("user/update", UserManage.as_view({"post": "update"})),
+    path("user/reset", UserManage.as_view({"post": "reset"})),
     path("user/list", UserManage.as_view({"get": "list"})),
     path("captcha/", include("captcha.urls")),
     path(r"captcha/refresh", CaptchaCreate.as_view()),
+    path("department/list", DepartmentManage.as_view({"get": "list"})),
+    path("department/add", DepartmentManage.as_view({"post": "add"})),
+    path("department/update", DepartmentManage.as_view({"post": "update"})),
+    path("department/delete", DepartmentManage.as_view({"post": "delete"})),
+    path("tenant/list", TenantManage.as_view({"get": "list"})),
+    path("tenant/add", TenantManage.as_view({"post": "add"})),
+    path("tenant/update", TenantManage.as_view({"post": "update"})),
+    path("tenant/delete", TenantManage.as_view({"post": "delete"})),
+    path("tenant/status/list", TenantManage.as_view({"get": "status_list"})),
+    path("role/list", RoleManage.as_view({"get": "list"})),
     path("project/<int:pk>/token", ProjectToken.as_view()),
     path("project/<int:id>", ProjectDetail.as_view()),
     path("project/add", ProjectAdd.as_view()),
@@ -377,15 +389,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
         ),
     ),
 ]
-if os.getenv("environment", None) in ("TEST", "PROD"):
-    # demo接口
-    urlpatterns.extend(
-        [
-            path("demo", Demo.as_view()),
-            path("user/register", UserRegisterEndPoint.as_view()),
-            path("user/register/<str:token>", UserRegisterEndPoint.as_view()),
-        ]
-    )
 if os.getenv("githubcount", None) in ("true",) or os.getenv("environment", None) in ("PROD",):
     from dongtai_web.views.github_contributors import GithubContributorsView
 

@@ -8,8 +8,8 @@ from rest_framework import viewsets
 
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models import User
-from dongtai_common.models.iast_role import RoleLevel, IastRoleV2
-from dongtai_common.models.tenant import Tenant
+from dongtai_common.models.user_role import RoleLevel, UserRole
+from dongtai_common.models.user_tenant import UserTenant
 from dongtai_common.utils.request_type import Request
 
 logger = logging.getLogger("django")
@@ -23,33 +23,38 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
         summary=_("User Manage"),
         tags=[_("UserManage")],
     )
+    
     def list(self, request:Request):
-        role = request.user.role_level
-        if role == RoleLevel.NORMAL:
+        if request.user.is_normal():
             return R.failure(msg="没有权限")
         data = list()
-        if role == RoleLevel.SUPER_ADMIN:
+        if request.user.is_super_admin():
             users = User.objects.all()
         else:
             users = User.objects.filter(tenant=request.user.tenant).all()
+        summary = None
+        if "page" in request.query_params and "page_size" in request.query_params:
+            page: int = request.query_params.get("page")
+            page_size: int = request.query_params.get("pageSize")
+            summary, users = self.get_paginator(users, page, page_size)
         for user in users:
             data.append({
-                "userid": user.id,
-                "username": user.username,
+                "id": user.id,
+                "name": user.username,
                 "email": user.email,
                 "phone": user.phone,
-                "role": user.role.id,
-                "role_level": user.role.name,
-                "tenant": user.tenant.id,
-                "tenant_name": user.tenant.name,
+                "role_id": user.role.id,
+                "role": user.role.name,
+                "tenant_id": user.tenant.id if user.tenant else "",
+                "tenant": user.tenant.name if user.tenant else 0,
                 # "lastlogin": user.last_login,
-                "department": str(user.department),
+                # "department": str(user.department),
                 "deleted": user.deleted,
             })
-        return R.success(data=data)
+        return R.success(data=data, page=summary)
 
     def stop(self, request:Request):
-        user_id = request.data.get("userid", -1)
+        user_id = request.data.get("id", -1)
         user = User.objects.filter(id=user_id).first()
         if user is None:
             return R.failure(msg="用户不存在")
@@ -61,14 +66,27 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
         user.save()
         return R.success()
 
+    def reset(self, request:Request):
+        user_id = request.data.get("id", -1)
+        user = User.objects.filter(id=user_id).first()
+        if user is None:
+            return R.failure(msg="用户不存在")
+
+        if not request.user.has_privilege(user.role_level, user.tenant.id):
+            return R.failure(msg="没有权限")
+
+        user.password = user.username + "@123"
+        user.save()
+        return R.success()
+
     def update(self, request:Request):
-        user_id = request.data.get("userid", -1)
+        user_id = request.data.get("id", -1)
         user = User.objects.filter(id=user_id).first()
         if user is None:
             return R.failure(msg="用户不存在")
 
         role_id = request.data.get("role", -1)
-        role = IastRoleV2.objects.filter(id=role_id).first()
+        role = UserRole.objects.filter(id=role_id).first()
         if role is None:
             return R.failure(msg="参数错误")
         user.role = role
@@ -84,16 +102,16 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
 
     def create(self, request:Request):
         role_id = request.data.get("role", 0)
-        role = IastRoleV2.objects.filter(id=role_id).first()
+        role = UserRole.objects.filter(id=role_id).first()
         if role is None:
             return R.failure(msg="参数错误")
 
         tenant_id = request.data.get("tenant", 0)
-        tenant = Tenant.objects.filter(id=tenant_id).first()
+        tenant = UserTenant.objects.filter(id=tenant_id).first()
         if tenant is None:
             return R.failure(msg="参数错误")
 
-        username = request.data.get("username", "")
+        username = request.data.get("name", "")
         if username == "":
             return R.failure(msg="请输入用户名")
 
