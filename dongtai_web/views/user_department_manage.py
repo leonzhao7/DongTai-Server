@@ -31,12 +31,12 @@ class DepartmentManage(UserEndPoint, viewsets.ViewSet):
         else:
             q = Q()
         if request.user.is_super_admin():
-            departs = UserDepartment.objects.filter(q).all()
+            departs = UserDepartment.objects.filter(q).order_by("id").all()
         else:
-            departs = UserDepartment.objects.filter(q & Q(tenant=request.user.tenant)).all()
+            departs = UserDepartment.objects.filter(q & Q(tenant=request.user.tenant)).order_by("id").all()
 
         summary = None
-        if "page" in request.query_params and "page_size" in request.query_params:
+        if "page" in request.query_params and "pageSize" in request.query_params:
             page: int = request.query_params.get("page")
             page_size: int = request.query_params.get("pageSize")
             summary, departs = self.get_paginator(departs, page, page_size)

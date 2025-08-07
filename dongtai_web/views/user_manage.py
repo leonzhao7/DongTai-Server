@@ -29,11 +29,11 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
             return R.failure(msg="没有权限")
         data = list()
         if request.user.is_super_admin():
-            users = User.objects.all()
+            users = User.objects.order_by("id").all()
         else:
-            users = User.objects.filter(tenant=request.user.tenant).all()
+            users = User.objects.filter(tenant=request.user.tenant).order_by("id").all()
         summary = None
-        if "page" in request.query_params and "page_size" in request.query_params:
+        if "page" in request.query_params and "pageSize" in request.query_params:
             page: int = request.query_params.get("page")
             page_size: int = request.query_params.get("pageSize")
             summary, users = self.get_paginator(users, page, page_size)
@@ -45,8 +45,8 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
                 "phone": user.phone,
                 "role_id": user.role.id,
                 "role": user.role.name,
-                "tenant_id": user.tenant.id if user.tenant else "",
-                "tenant": user.tenant.name if user.tenant else 0,
+                "tenant_id": user.tenant.id if user.tenant else 0,
+                "tenant": user.tenant.name if user.tenant else "",
                 # "lastlogin": user.last_login,
                 # "department": str(user.department),
                 "deleted": user.deleted,

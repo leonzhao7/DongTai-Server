@@ -27,12 +27,12 @@ class TenantManage(UserEndPoint, viewsets.ViewSet):
             return R.failure(msg="没有权限")
         key = request.query_params.get("keyword", "")
         if key and len(key) > 0:
-            tenants = UserTenant.objects.filter(name__icontains=key).all()
+            tenants = UserTenant.objects.filter(name__icontains=key).order_by("id").all()
         else:
-            tenants = UserTenant.objects.all()
+            tenants = UserTenant.objects.order_by("id").all()
 
         summary = None
-        if "page" in request.query_params and "page_size" in request.query_params:
+        if "page" in request.query_params and "pageSize" in request.query_params:
             page: int = request.query_params.get("page")
             page_size: int = request.query_params.get("pageSize")
             summary, tenants = self.get_paginator(tenants, page, page_size)
