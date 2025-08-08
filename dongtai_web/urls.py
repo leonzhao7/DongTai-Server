@@ -21,7 +21,6 @@ from dongtai_web.dast.manage import DastManageEndPoint
 from dongtai_web.systemmonitor.urls import urlpatterns as systemmonitor_urls
 from dongtai_web.versioncontrol.urls import urlpatterns as versioncontrol_urls
 from dongtai_web.views.agent import Agent
-from dongtai_web.views.agent_alias_modified import AgentAliasModified
 from dongtai_web.views.agent_delete import AgentDeleteEndPoint
 from dongtai_web.views.agent_deploy import AgentDeploy
 from dongtai_web.views.agent_install import AgentInstall
@@ -221,7 +220,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("agent/start", AgentStart.as_view()),
     path("agent/stop", AgentStop.as_view()),
     path("agents/delete", AgentsDeleteEndPoint.as_view()),
-    path("agent/alias/modified", AgentAliasModified.as_view()),
     path("openapi", OpenApiEndpoint.as_view()),
     path("profile/<str:key>", ProfileEndpoint.as_view()),
     path("profile/batch/get", ProfileBatchGetEndpoint.as_view()),
@@ -389,14 +387,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
         ),
     ),
 ]
-if os.getenv("githubcount", None) in ("true",) or os.getenv("environment", None) in ("PROD",):
-    from dongtai_web.views.github_contributors import GithubContributorsView
-
-    urlpatterns.extend(
-        [
-            path("github_contributors", GithubContributorsView.as_view()),
-        ]
-    )
 
 urlpatterns = [path("api/v1/", include(urlpatterns))]
 urlpatterns.extend(

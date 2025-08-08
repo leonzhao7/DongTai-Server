@@ -19,7 +19,7 @@ from dongtai_common.models.asset_vul import (
     IastVulAssetRelation,
     IastVulLevel,
 )
-from dongtai_common.models.package_focus import IastPackageFocus
+
 from dongtai_conf.settings import SCA_SETUP
 from dongtai_engine.signals import send_notify
 from dongtai_protocol.views.hook_profiles import LANGUAGE_DICT

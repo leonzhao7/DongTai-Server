@@ -6,7 +6,6 @@
 from .user import User
 from . import api_route
 from .api_route_v2 import *
-from .request_chains import *
 from dongtai_common.utils.db_session_engine import Session
 from .access_log import AccessLog
 
