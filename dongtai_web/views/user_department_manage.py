@@ -49,6 +49,8 @@ class DepartmentManage(UserEndPoint, viewsets.ViewSet):
                 "parent_id": depart.parent.id if depart.parent else 0,
                 "tenant": depart.tenant.name,
                 "tenant_id": depart.tenant.id,
+                "user_count": depart.users.count(),
+                "users": list(depart.users.values_list("username", flat=True)),
             })
         return R.success(data=data, page=summary)
 
@@ -74,6 +76,7 @@ class DepartmentManage(UserEndPoint, viewsets.ViewSet):
             except Exception as e:
                 logger.exception("exception: ", exc_info=e)
                 return R.failure()
+
         if request.user.is_tenant_admin():
             if parent and parent.tenant != request.user.tenant:
                 return R.failure(msg="没有权限")
@@ -87,15 +90,19 @@ class DepartmentManage(UserEndPoint, viewsets.ViewSet):
         return R.failure(msg="没有权限")
 
     def delete(self, request: Request):
+        if request.user.is_normal():
+            return R.failure(msg="没有权限")
+
         did = request.data.get("id", -1)
         depart = UserDepartment.objects.filter(id=did).first()
         if not depart:
             return R.failure(msg="部门不存在")
 
-        if request.user.is_normal():
-            return R.failure(msg="没有权限")
         if request.user.is_tenant_admin() and request.user.tenant != depart.tenant:
             return R.failure(msg="没有权限")
+
+        if depart.users.count() > 0:
+            return R.failure(msg="部门不为空，请删除所有用户")
 
         try:
             depart.delete()
@@ -127,7 +134,7 @@ class DepartmentManage(UserEndPoint, viewsets.ViewSet):
             if request.user.is_tenant_admin() and request.user.tenant != parent.tenant:
                 return R.failure(msg="没有权限")
             if depart.tenant != parent.tenant:
-                return R.failure(msg="参数错误")
+                return R.failure(msg="没有权限")
             depart.parent = parent
 
         try:

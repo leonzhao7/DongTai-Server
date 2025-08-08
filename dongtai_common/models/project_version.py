@@ -18,7 +18,7 @@ class IastProjectVersion(models.Model):
     create_time = models.IntegerField(_("create time"), default=get_timestamp)
     update_time = models.IntegerField(_("update time"), default=get_timestamp)
     user = models.ForeignKey(User, models.DO_NOTHING)
-    project = models.ForeignKey(IastProject, models.DO_NOTHING)
+    project = models.ForeignKey(IastProject, models.DO_NOTHING, related_name="versions")
 
     class Meta:
         managed = get_managed()

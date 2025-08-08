@@ -23,13 +23,14 @@ class TenantManage(UserEndPoint, viewsets.ViewSet):
     )
 
     def list(self, request: Request):
-        if not request.user.is_super_admin():
-            return R.failure(msg="没有权限")
-        key = request.query_params.get("keyword", "")
-        if key and len(key) > 0:
-            tenants = UserTenant.objects.filter(name__icontains=key).order_by("id").all()
+        if request.user.is_super_admin():
+            key = request.query_params.get("keyword", "")
+            if key and len(key) > 0:
+                tenants = UserTenant.objects.filter(name__icontains=key).order_by("id").all()
+            else:
+                tenants = UserTenant.objects.order_by("id").all()
         else:
-            tenants = UserTenant.objects.order_by("id").all()
+            tenants = [request.user.tenant]
 
         summary = None
         if "page" in request.query_params and "pageSize" in request.query_params:
@@ -42,6 +43,10 @@ class TenantManage(UserEndPoint, viewsets.ViewSet):
                 "id": tenant.id,
                 "name": tenant.name,
                 "status": tenant.status,
+                "user_count": tenant.users.count(),
+                "users": list(tenant.users.values_list("username", flat=True)),
+                "department_count": tenant.departments.count(),
+                "departments": list(tenant.departments.values_list("name", flat=True)),
             })
         return R.success(data=data, page=summary)
 
@@ -59,13 +64,16 @@ class TenantManage(UserEndPoint, viewsets.ViewSet):
         return R.success()
 
     def delete(self, request: Request):
+        if not request.user.is_super_admin():
+            return R.failure(msg="没有权限")
+
         tid = request.data.get("id", -1)
         tenant = UserTenant.objects.filter(id=tid).first()
         if not tenant:
             return R.failure(msg="公司不存在")
 
-        if not request.user.is_super_admin():
-            return R.failure(msg="没有权限")
+        if tenant.departments.count() > 0:
+            return R.failure(msg="公司不为空，请先删除所有部门")
 
         try:
             tenant.delete()

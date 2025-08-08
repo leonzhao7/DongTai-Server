@@ -17,15 +17,11 @@ class User(AbstractUser):
     phone = models.CharField(blank=True, max_length=32)
     role = models.ForeignKey(UserRole, models.DO_NOTHING, blank=False)
     tenant = models.ForeignKey(UserTenant, models.CASCADE, related_name="users", blank=True, null=True)
+    department = models.ForeignKey(UserDepartment, models.SET_NULL, related_name="users", blank=True, null=True)
     default_language = models.CharField(max_length=15, blank=True)
     deleted = models.BooleanField(default=False)
     failed_login_count = models.IntegerField(default=0)
     failed_login_time = models.DateTimeField(default=timezone.now)
-    departments = models.ManyToManyField(
-        UserDepartment,
-        related_name="users",
-        verbose_name="所属部门"
-    )
 
     class Meta:
         db_table = "user"
@@ -51,30 +47,36 @@ class User(AbstractUser):
         return self.role.level == UserRole.LEVEL_TENANT
 
     def get_talent(self):
-        try:
-            department = self.department.get() if self.department else None
-            talent = department.talent.get() if department else None
-        except Exception:
-            talent = None
-        return talent
+        return self.tenant
 
-    def get_departments(self) -> QuerySet:
-        if self.role.level == UserRole.LEVEL_SUPER:
-            return UserDepartment.objects.all()
-        return self.departments.all()
+    def get_my_departments(self) -> QuerySet:
+        if self.is_super_admin():
+            return UserDepartment.objects.filter(id=-1).all()
+        else:
+            return UserDepartment.objects.filter(id=self.department.id).all()
 
     @to_patch
     def get_projects(self) -> QuerySet:
         from dongtai_common.models.project import IastProject
 
-        if self.role.level == UserRole.LEVEL_SUPER:
+        if self.is_super_admin():
             return IastProject.objects.all()
-        departs = self.get_departments()
-        return IastProject.objects.filter(department__in=departs)
+        if self.is_tenant_admin():
+            return IastProject.objects.filter(department__in=UserDepartment.objects.filter(tenant=self.tenant)).all()
+        return IastProject.objects.filter(department__in=UserDepartment.objects.filter(id=self.department.id).all())
 
     def has_privilege(self, role_level, tenant_id) -> bool:
-        if self.role_level <= role_level:
-            return False
-        if self.role_level == UserRole.LEVEL_TENANT and self.tenant != tenant_id:
-            return False
-        return True
+        if self.role_level == UserRole.LEVEL_SUPER:
+            return True
+
+        if self.role_level == UserRole.LEVEL_TENANT and self.tenant.id == tenant_id and role_level <= self.role_level:
+            return True
+
+        return False
+
+    def has_project_perm(self, project) -> bool:
+        if self.is_tenant_admin():
+            return self.tenant == project.department.tenant
+        if self.is_normal():
+            return self.department == project.department
+        return False

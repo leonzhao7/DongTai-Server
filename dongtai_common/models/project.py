@@ -10,6 +10,7 @@ from shortuuid.django_fields import ShortUUIDField
 from dongtai_common.models import User
 from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.strategy_user import IastStrategyUser
+from dongtai_common.models.user_tenant import UserTenant
 from dongtai_common.utils.db import get_timestamp
 from dongtai_common.utils.settings import get_managed
 from dongtai_conf.settings import DOMAIN_VUL
@@ -39,10 +40,12 @@ class IastProjectTemplate(models.Model):
     data_gather = models.JSONField(default=dict)
     data_gather_is_followglobal = models.IntegerField(default=1)
     blacklist_is_followglobal = models.IntegerField(default=1)
+    tenant = models.ForeignKey(UserTenant, models.SET_NULL, null=True, blank=True)
 
     class Meta:
         managed = get_managed()
         db_table = "iast_project_template"
+        unique_together = ['template_name', 'tenant_id']
 
     def to_full_template(self):
         pass

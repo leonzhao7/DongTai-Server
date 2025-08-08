@@ -2,11 +2,11 @@
 
 import logging
 
-from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 
 from dongtai_common.endpoint import R, UserEndPoint
+from dongtai_common.models.user_role import UserRole
 from dongtai_common.utils.request_type import Request
 from dongtai_conf.settings import SCA_SETUP
 
@@ -23,22 +23,20 @@ class UserInfoEndpoint(UserEndPoint):
     )
     def get(self, request: Request):
         user = request.user
-        group = Group.objects.filter(user=user).order_by("-id").first()
-
         return R.success(
             data={
                 "userid": user.id if not user.is_anonymous else -1,
                 "username": user.get_username(),
                 "role": 3
-                if group is None
+                if user.role.level == UserRole.LEVEL_NORMAL
                 else 2
-                if group.name == "talent_admin"
+                if user.role.level == UserRole.LEVEL_TENANT
                 else 1
-                if group.name == "system_admin"
+                if user.role.level == UserRole.LEVEL_SUPER
                 else 0,
-                "role_name": "" if group is None else group.name,
-                "role_id": user.role_id,
+                "role_name": user.role.name,
+                "role_id": user.role.id,
                 "sca_setup": not SCA_SETUP,
-                "is_wait_binding": user.role_id == 11,
+                "is_wait_binding": user.role.id == 11,
             }
         )

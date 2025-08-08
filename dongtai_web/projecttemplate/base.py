@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from dongtai_common.models.project import (
     IastProject,
     IastProjectTemplate,
@@ -62,6 +64,8 @@ class ProjectTemplateCreateArgsSerializer(serializers.Serializer):
 
 
 def template_create(data, user):
+    if not user.is_super_admin():
+        data['tenant_id'] = user.tenant.id
     data['user_id'] = user.id
     for field in ["blacklist"]:
         if field in data:
@@ -72,11 +76,13 @@ def template_create(data, user):
 
 
 def template_update(pk, data, user):
+    if not user.is_super_admin():
+        data['tenant_id'] = user.tenant.id
     data['user_id'] = user.id
     for field in ["blacklist"]:
         if field in data:
             del data[field]
-    IastProjectTemplate.objects.filter(pk=pk).update(**data)
+    IastProjectTemplate.objects.filter(Q(pk=pk) & Q(tenant=user.tenant)).update(**data)
 
 
 class IastProjectTemplateView(TalentAdminEndPoint, viewsets.ViewSet):
@@ -138,7 +144,7 @@ class IastProjectTemplateView(TalentAdminEndPoint, viewsets.ViewSet):
         page_size = ser.validated_data['page_size']
         page = ser.validated_data['page']
         summary, templates = self.get_paginator(
-            IastProjectTemplate.objects.values().order_by(
+            IastProjectTemplate.objects.filter(tenant=request.user.tenant).values().order_by(
                 '-latest_time').all(), page, page_size)
         return R.success(
             data=ProjectTemplateCreateArgsSerializer(templates,
@@ -150,14 +156,14 @@ class IastProjectTemplateView(TalentAdminEndPoint, viewsets.ViewSet):
                                  description=_("delete project template"),
                                  tags=[_('projectemplate')])
     def delete(self, request, pk):
-        IastProjectTemplate.objects.filter(pk=pk).delete()
+        IastProjectTemplate.objects.filter(Q(pk=pk) & Q(tenant=request.user.tenant)).delete()
         return R.success()
 
     @extend_schema_with_envcheck(summary=_('get project template'),
                                  description=_("get project template"),
-                                 tags=[_('projectemplate')])
+                                 tags = [_('projectemplate')])
     def retrieve(self, request, pk):
-        obj = IastProjectTemplate.objects.filter(pk=pk).values().first()
+        obj = IastProjectTemplate.objects.filter(Q(pk=pk) & Q(tenant=request.user.tenant)).values().first()
         if not obj:
             return R.failure()
         return R.success(data=ProjectTemplateCreateArgsSerializer(obj).data)

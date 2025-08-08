@@ -2,12 +2,14 @@
 
 import logging
 
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models import User
+from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.user_role import RoleLevel, UserRole
 from dongtai_common.models.user_tenant import UserTenant
 from dongtai_common.utils.request_type import Request
@@ -27,16 +29,23 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
     def list(self, request:Request):
         if request.user.is_normal():
             return R.failure(msg="没有权限")
-        data = list()
-        if request.user.is_super_admin():
-            users = User.objects.order_by("id").all()
+
+        key = request.query_params.get("keyword", "")
+        if key and len(key) > 0:
+            q = Q(username__icontains=key)
         else:
-            users = User.objects.filter(tenant=request.user.tenant).order_by("id").all()
+            q = Q()
+        if request.user.is_super_admin():
+            users = User.objects.filter(q).order_by("id").all()
+        else:
+            users = User.objects.filter(q & Q(tenant=request.user.tenant)).order_by("id").all()
+
         summary = None
         if "page" in request.query_params and "pageSize" in request.query_params:
             page: int = request.query_params.get("page")
             page_size: int = request.query_params.get("pageSize")
             summary, users = self.get_paginator(users, page, page_size)
+        data = list()
         for user in users:
             data.append({
                 "id": user.id,
@@ -50,6 +59,8 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
                 # "lastlogin": user.last_login,
                 # "department": str(user.department),
                 "deleted": user.deleted,
+                "department_id": user.department.id if user.department else 0,
+                "department": user.department.name if user.department else "",
             })
         return R.success(data=data, page=summary)
 
@@ -75,7 +86,7 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
         if not request.user.has_privilege(user.role_level, user.tenant.id):
             return R.failure(msg="没有权限")
 
-        user.password = user.username + "@123"
+        user.set_password(user.username + "@123")
         user.save()
         return R.success()
 
@@ -94,9 +105,21 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
         if not request.user.has_privilege(role.level, user.tenant.id):
             return R.failure(msg="没有权限")
 
-        user.email = request.data.get("email", "")
-        user.phone = request.data.get("phone", "")
-        user.default_language = request.data.get("default_language", "zh")
+        depart_id = request.data.get("department")
+        if depart_id:
+            depart = UserDepartment.objects.filter(id=depart_id).first()
+            if depart is None:
+                return R.failure(msg="参数错误")
+            if request.user.is_tenant_admin() and depart.tenant.id != request.user.tenant.id:
+                return R.failure(msg="没有权限")
+            user.department = depart
+
+        if "email" in request.data:
+            user.email = request.data.get("email", "")
+        if "phone" in request.data:
+            user.phone = request.data.get("phone", "")
+        if "default_language" in request.data:
+            user.default_language = request.data.get("default_language", "zh")
         user.save()
         return R.success()
 
@@ -118,11 +141,21 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
         if not request.user.has_privilege(role.level, tenant_id):
             return R.failure(msg="没有权限")
 
+        depart = None
+        depart_id = request.data.get("department")
+        if depart_id:
+            depart = UserDepartment.objects.filter(id=depart_id).first()
+            if depart is None:
+                return R.failure(msg="参数错误")
+            if request.user.is_tenant_admin() and depart.tenant.id != request.user.tenant.id:
+                return R.failure(msg="没有权限")
+
         User.objects.create_user(username=username,
                                  password=username+"@123",
                                  email=request.data.get("email", ""),
                                  phone=request.data.get("phone", ""),
                                  default_language=request.data.get("default_language", "zh"),
                                  role=role,
-                                 tenant=tenant)
+                                 tenant=tenant,
+                                 department=depart)
         return R.success()

@@ -26,7 +26,7 @@ class UserTenant(models.Model):
         return self.name
 
     def is_active(self):
-        return self.status == self.STATUS_OK
+        return self.status == self.STATUS_OK or self.status == self.STATUS_TRIAL
 
     @staticmethod
     def get_status_list():
