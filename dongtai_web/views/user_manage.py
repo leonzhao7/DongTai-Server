@@ -10,7 +10,7 @@ from rest_framework import viewsets
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models import User
 from dongtai_common.models.user_department import UserDepartment
-from dongtai_common.models.user_role import RoleLevel, UserRole
+from dongtai_common.models.user_role import UserRole
 from dongtai_common.models.user_tenant import UserTenant
 from dongtai_common.utils.request_type import Request
 

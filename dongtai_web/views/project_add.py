@@ -109,7 +109,8 @@ class ProjectAdd(UserEndPoint):
                         project = IastProject.objects.create(
                             name=name,
                             template_id=template_id,
-                            user_id=1,
+                            user_id=request.user.id,
+                            department=request.user.department,
                         )
                         IastProjectUser.objects.create(user=request.user, project=project)
                     else:
