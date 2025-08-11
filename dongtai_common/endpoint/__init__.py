@@ -219,8 +219,7 @@ class EndPoint(APIView):
             users = User.objects.all()
         elif user.is_talent_admin():
             talent = user.get_talent()
-            departments = talent.departments.all()
-            users = User.objects.filter(department__in=departments)
+            users = talent.users
         else:
             users = User.objects.filter(id=user.id).all()
         return users

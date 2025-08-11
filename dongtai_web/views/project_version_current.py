@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 import logging
-import time
 
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_common.models.project_version import IastProjectVersion
+from dongtai_common.models import IastProjectVersion
+from dongtai_common.models.project import IastProject
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 
 logger = logging.getLogger("django")
@@ -44,27 +43,19 @@ class ProjectVersionCurrent(UserEndPoint):
     def post(self, request):
         try:
             project_id = request.data.get("project_id", 0)
-            version_id = request.data.get("version_id", 0)
-            if not version_id or not project_id:
+            project = request.user.get_projects().filter(id=project_id).first()
+            if not project:
                 return R.failure(status=202, msg=_("Parameter error"))
 
-            projects = request.user.get_projects()
-            version = IastProjectVersion.objects.filter(
-                project_id=project_id, id=version_id, project__in=projects
-            ).first()
-            if version:
-                version.current_version = 1
-                version.update_time = int(time.time())
-                version.save(update_fields=["current_version", "update_time"])
-                IastProjectVersion.objects.filter(
-                    ~Q(id=version_id),
-                    project_id=project_id,
-                    current_version=1,
-                    status=1,
-                ).update(current_version=0, update_time=int(time.time()))
+            version_id = request.data.get("version_id", 0)
+            version = project.versions.filter(id=version_id).first()
+            if not version:
+                return R.failure(status=202, msg=_("Parameter error"))
 
-                return R.success(msg=_("Version setting success"))
-            return R.failure(status=202, msg=_("Version does not exist"))
+            project.current_version = version
+            project.save()
+
+            return R.success(msg=_("Version setting success"))
 
         except Exception as e:
             logger.exception("uncatched exception: ", exc_info=e)

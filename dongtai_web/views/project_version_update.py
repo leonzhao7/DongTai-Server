@@ -30,11 +30,20 @@ class ProjectVersionUpdate(UserEndPoint):
     )
     def post(self, request):
         try:
-            version_id = request.data.get("version_id", 0)
-            projects = request.user.get_projects()
-            result = version_modify(projects, request.data)
-            if not version_id or result.get("status", "202") == "202":
+            project_id = request.data.get("project_id", 0)
+            project = request.user.get_projects().filter(id=project_id).first()
+            if not project:
                 return R.failure(status=202, msg=_("Parameter error"))
+
+            version_id = request.data.get("version_id", 0)
+            version = project.versions.filter(id=version_id).first()
+            if not version:
+                return R.failure(status=202, msg=_("Parameter error"))
+
+            version.version_name = request.data.get("version_name", "")
+            version.description = request.data.get("description", "")
+            version.save()
+
             return R.success(msg=_("Update completed"))
 
         except Exception as e:

@@ -52,9 +52,7 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
             if project_version:
                 project_current_version = project_version
             else:
-                project_current_version = IastProjectVersion.objects.filter(
-                    project_id=project["id"], current_version=1, status=1
-                ).first()
+                project_current_version = project.current_version
             project_id = project["id"]
             project_version_id = project_current_version.id
         agent_id = AgentRegisterEndPoint.get_agent_id(

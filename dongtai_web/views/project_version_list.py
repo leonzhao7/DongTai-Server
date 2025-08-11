@@ -43,17 +43,15 @@ class ProjectVersionList(UserEndPoint):
             if not project:
                 return R.failure(status=203, msg=_("no permission"))
 
-            versionInfo = IastProjectVersion.objects.filter(project_id=project_id, status=1).order_by("-id")
             data = []
-            if versionInfo:
+            if project.versions:
                 data = [
                     {
-                        "version_id": item.id,
-                        "version_name": item.version_name,
-                        "current_version": item.current_version,
-                        "description": item.description,
-                    }
-                    for item in versionInfo
+                        "version_id": version.id,
+                        "version_name": version.version_name,
+                        "current_version": 1 if project.current_version and version.id == project.current_version.id else 0,
+                        "description": version.description,
+                    } for version in project.versions.all()
                 ]
 
             return R.success(msg=_("Search successful"), data=data)

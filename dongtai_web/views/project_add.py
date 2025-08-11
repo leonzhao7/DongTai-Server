@@ -11,10 +11,11 @@ from rest_framework import serializers
 
 from dongtai_common.common.utils import disable_cache
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_common.models.project import IastProject, IastProjectUser
+from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
 from dongtai_common.models.server import IastServer
 from dongtai_common.models.strategy_user import IastStrategyUser
+from dongtai_common.utils.request_type import Request
 from dongtai_engine.common.queryset import get_scan_id
 from dongtai_web.base.project_version import version_modify
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
@@ -71,7 +72,7 @@ class ProjectAdd(UserEndPoint):
         ),
         response_schema=_ResponseSerializer,
     )
-    def post(self, request):
+    def post(self, request:Request):
         try:
             with transaction.atomic():
                 name = str(request.data.get("name"))
@@ -83,7 +84,7 @@ class ProjectAdd(UserEndPoint):
                 base_url = request.data.get("base_url", None)
                 test_req_header_key = request.data.get("test_req_header_key", None)
                 test_req_header_value = request.data.get("test_req_header_value", None)
-                description = request.data.get("description", None)
+                vul_validation = request.data.get("vul_validation", None)
                 pid = request.data.get("pid", 0)
                 enable_log = request.data.get("enable_log", None)
                 log_level = request.data.get("log_level", None)
@@ -95,51 +96,29 @@ class ProjectAdd(UserEndPoint):
                     logger.error("require base scan_id and name")
                     return R.failure(status=202, msg=_("Required scan strategy and name"))
 
-                version_name = request.data.get("version_name", "")
-                if not version_name:
-                    version_name = "V1.0"
-                vul_validation = request.data.get("vul_validation", None)
-
                 if pid:
                     project = projects.filter(id=pid).first()
-                    project.name = name
                 else:
-                    project = IastProject.objects.filter(name=name).first()
+                    project = projects.filter(name=name).first()
                     if not project:
                         project = IastProject.objects.create(
                             name=name,
-                            template_id=template_id,
-                            user_id=request.user.id,
                             department=request.user.department,
                         )
-                        IastProjectUser.objects.create(user=request.user, project=project)
                     else:
                         return R.failure(
                             status=203,
                             msg=_("Failed to create, the application name already exists"),
                         )
 
-                versionInfo = IastProjectVersion.objects.filter(
-                    project_id=project.id, current_version=1, status=1
-                ).first()
-                project_version_id = versionInfo.id if versionInfo else 0
-                current_project_version = {
-                    "project_id": project.id,
-                    "version_id": project_version_id,
-                    "version_name": version_name,
-                    "description": request.data.get("description", ""),
-                    "current_version": 1,
-                }
-                if not versionInfo or not (
-                    versionInfo.version_name == version_name
-                    and (versionInfo.description == description or not description)
-                ):
-                    result = version_modify(projects, current_project_version)
-                    if result.get("status", "202") == "202":
-                        logger.error("version update failure")
-                        return R.failure(status=202, msg=result.get("msg", _("Version Update Error")))
-                    project_version_id = result.get("data", {}).get("version_id", 0)
+                version_name = request.data.get("version_name", "V1.0")
+                description = request.data.get("description", "")
+                version = IastProjectVersion.objects.create(version_name=version_name, description=description, project=project)
+                if not version:
+                    return R.failure(status=203, msg="操作失败",)
 
+                project.current_version = version
+                project.name = name
                 project.scan = scan
                 project.mode = mode
                 project.template_id = template_id
@@ -167,13 +146,14 @@ class ProjectAdd(UserEndPoint):
                         "template_id",
                         "enable_log",
                         "log_level",
+                        "current_version_id",
                     ]
                 )
                 disable_cache(get_scan_id, (project.id))
                 return R.success(
                     data={
                         "project_id": project.id,
-                        "project_version_id": project_version_id,
+                        "project_version_id": 1,
                     },
                     msg="操作成功",
                 )

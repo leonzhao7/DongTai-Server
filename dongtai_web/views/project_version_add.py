@@ -4,6 +4,7 @@ import logging
 from django.utils.translation import gettext_lazy as _
 
 from dongtai_common.endpoint import R, UserEndPoint
+from dongtai_common.models import IastProjectVersion
 from dongtai_web.base.project_version import VersionModifySerializer, version_modify
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 
@@ -32,12 +33,25 @@ class ProjectVersionAdd(UserEndPoint):
         response_schema=_ResponseSerializer,
     )
     def post(self, request):
+        version_id = request.data.get("version_id", 0)
+        project_id = request.data.get("project_id", 0)
+        version_name = request.data.get("version_name", "")
+        description = request.data.get("description", "")
+        projects = request.user.get_projects()
+        project = projects.filter(id=project_id).first()
+        if project is None:
+            return R.failure(msg="参数错误")
+
         try:
-            projects = request.user.get_projects()
-            result = version_modify(projects, request.data)
-            if result.get("status", "202") == "202":
-                return R.failure(status=202, msg=result.get("msg", _("Parameter error")))
-            return R.success(msg=_("Created success"), data=result.get("data", {}))
+            version = project.versions.filter(id=version_id).first()
+            if version is None:
+                version = IastProjectVersion.objects.create(version_name=version_name, description=description, project=project)
+
+            return R.success(msg=_("Created success"), data={
+                "version_id": version.id,
+                "version_name": version.version_name,
+                "description": version.description,
+            })
 
         except Exception as e:
             logger.error(e, exc_info=True)

@@ -78,7 +78,6 @@ class JavaAgentDownload:
     def replace_config(self):
         user_file = f"{self.target_path}/{self.agent_file}"
         # 执行jar -uvf {JavaAgentDownload.LOCAL_AGENT_FILE} iast.properties更新jar包的文件
-        import os
 
         os.system(f"cd {self.user_target_path};zip -u {user_file} iast.properties")  # nosec
         # ignore because no userinput invoked here.
@@ -326,7 +325,7 @@ class AgentDownload(OpenApiEndPoint):
                 final_token = token.key
             else:
                 final_token = user_token
-            agent_token = "".join(str(uuid.uuid4()).split("-"))
+            agent_token = uuid.uuid4().hex
 
             handler = self.make_download_handler(language, request.user.id)
 

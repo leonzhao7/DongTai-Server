@@ -242,7 +242,7 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
             "alias",
             "token",
             "bind_project__name",
-            "bind_project__user__username",
+            "user",
             "language",
             "server__ip",
             "server__port",

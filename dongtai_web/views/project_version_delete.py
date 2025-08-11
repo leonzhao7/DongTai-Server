@@ -39,17 +39,19 @@ class ProjectVersionDelete(UserEndPoint):
     )
     def post(self, request):
         try:
-            version_id = request.data.get("version_id", 0)
             project_id = request.data.get("project_id", 0)
-            if not version_id or not project_id:
+            project = request.user.get_projects().filter(id=project_id).first()
+            if not project:
                 return R.failure(status=202, msg=_("Parameter error"))
-            version = IastProjectVersion.objects.filter(id=version_id, project_id=project_id, status=1).first()
-            if version:
-                version.status = 0
-                version.update_time = int(time.time())
-                version.save(update_fields=["status"])
-                return R.success(msg=_("Deleted Successfully"))
-            return R.failure(status=202, msg=_("Version does not exist"))
+
+            version_id = request.data.get("version_id", 0)
+            version = project.versions.filter(id=version_id).first()
+            if not version:
+                return R.failure(status=202, msg=_("Parameter error"))
+
+            version.delete()
+
+            return R.success(msg=_("Deleted Successfully"))
 
         except Exception as e:
             logger.exception("uncatched exception: ", exc_info=e)

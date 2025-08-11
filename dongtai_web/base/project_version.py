@@ -15,16 +15,12 @@ class VersionModifySerializer(serializers.Serializer):
     version_name = serializers.CharField(help_text=_("The version name of the project"))
     description = serializers.CharField(help_text=_("Description of the project versoin"))
     project_id = serializers.IntegerField(help_text=_("The id of the project"))
-    current_version = serializers.IntegerField(
-        help_text=_("Whether it is the current version, 1 means yes, 0 means no.")
-    )
 
 
 @transaction.atomic
 def version_modify(projects: QuerySet[IastProject], versionData):
     version_id = versionData.get("version_id", 0)
     project_id = versionData.get("project_id", 0)
-    current_version = versionData.get("current_version", 0)
     version_name = versionData.get("version_name", "")
     description = versionData.get("description", "")
     project = projects.filter(id=project_id).only("id", "user").first()
@@ -53,7 +49,6 @@ def version_modify(projects: QuerySet[IastProject], versionData):
     else:
         version, created = IastProjectVersion.objects.get_or_create(
             project_id=project.id,
-            current_version=current_version,
             version_name=version_name,
             description=description,
             status=1,
@@ -71,16 +66,15 @@ def version_modify(projects: QuerySet[IastProject], versionData):
 
 
 def get_project_version(project_id, auth_users=None):
-    versionInfo = IastProjectVersion.objects.filter(
-        project_id=project_id,
-        current_version=1,
-    ).first()
-    if versionInfo:
+    project = IastProject.objects.filter(id=project_id).first()
+    if project and project.current_version:
+        version = project.current_version
         current_project_version = {
-            "version_id": versionInfo.id,
-            "version_name": versionInfo.version_name,
-            "description": versionInfo.description,
+            "version_id": version.id,
+            "version_name": version.version_name,
+            "description": version.description,
         }
+
     else:
         current_project_version = {
             "version_id": 0,

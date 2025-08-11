@@ -100,7 +100,7 @@ class ProjectSummary(UserEndPoint):
             return R.failure(status=203, msg=_("no permission"))
         version_id = request.GET.get("version_id", None)
         data = {}
-        data["owner"] = project.user.get_username()
+        data["owner"] = project.department.name if project.department else ""
         data["name"] = project.name
         data["id"] = project.id
         data["mode"] = project.mode
@@ -122,5 +122,5 @@ class ProjectSummary(UserEndPoint):
         data["agent_language"] = ProjectSerializer(project).data["agent_language"]
         data["agent_alive"] = IastAgent.objects.filter(bind_project_id=project.id, online=const.RUNNING).count()
         project_version = IastProjectVersion.objects.filter(pk=current_project_version.get("version_id", 0)).first()
-        data["project_version_latest_time"] = project_version.update_time if project_version else project.latest_time
+        data["project_version_latest_time"] = project_version.update_at if project_version else project.latest_time
         return R.success(data=data)

@@ -36,14 +36,13 @@ class ProjectDel(UserEndPoint):
     )
     def post(self, request):
         try:
-            project_id = request.data.get("id", None)
-            if project_id:
-                project = IastProject.objects.filter(id=project_id).first()
-                if request.user.has_project_perm(project):
-                    project.versions.all().delete()
-                    project.delete()
-                else:
-                    return R.failure(msg="没有权限")
+            project_id = request.data.get("id", 0)
+            project = request.user.get_projects().filter(id=project_id).first()
+            if project:
+                project.versions.delete()
+                project.delete()
+            else:
+                return R.failure(msg="参数错误")
 
             return R.success(msg=_("Application has been deleted successfully"))
         except Exception as e:

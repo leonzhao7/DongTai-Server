@@ -4,7 +4,8 @@ import os.path
 import string
 import time
 
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
 from shortuuid.django_fields import ShortUUIDField
 
 from dongtai_common.models import User
@@ -41,7 +42,7 @@ class IastProjectTemplate(models.Model):
 
     class Meta:
         managed = get_managed()
-        db_table = "iast_project_template"
+        db_table = "project_template"
         unique_together = ['template_name', 'tenant_id']
 
     def to_full_template(self):
@@ -61,7 +62,6 @@ class IastProject(models.Model):
     vul_count = models.PositiveIntegerField(blank=True, null=True)
     agent_count = models.IntegerField(blank=True, null=True)
     latest_time = models.IntegerField(default=get_timestamp)
-    # user = models.ForeignKey(User, models.DO_NOTHING)
     # openapi服务不必使用该字段
     scan = models.ForeignKey(IastStrategyUser, models.DO_NOTHING, blank=True, null=True)
 
@@ -69,18 +69,18 @@ class IastProject(models.Model):
     base_url = models.CharField(max_length=255, blank=True)
     test_req_header_key = models.CharField(max_length=511, blank=True)
     test_req_header_value = models.CharField(max_length=511, blank=True)
-    department = models.ForeignKey(UserDepartment, models.DO_NOTHING, null=True, blank=True, related_name="projects")
-    template = models.ForeignKey(IastProjectTemplate, models.DO_NOTHING)
+    department = models.ForeignKey(UserDepartment, on_delete=models.SET_NULL, null=True, blank=True, related_name="projects")
+    template = models.ForeignKey(IastProjectTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+    current_version = models.ForeignKey("IastProjectVersion", on_delete=models.SET_NULL, null=True, blank=True)
     enable_log = models.BooleanField(null=True)
     log_level = models.CharField(max_length=511, null=True, blank=True)
     last_has_online_agent_time = models.IntegerField(default=get_timestamp)
     status = models.IntegerField(default=0, choices=ProjectStatus.choices)
-    users = models.ManyToManyField("User", through="IastProjectUser", related_name="auth_projects")
-    token = ShortUUIDField(max_length=22, alphabet=string.ascii_letters + string.digits)
 
     class Meta:
         managed = get_managed()
-        db_table = "iast_project"
+        db_table = "project"
+        unique_together = ["name", "department_id"]
 
     def update_latest(self):
         self.latest_time = int(time.time())
@@ -89,16 +89,22 @@ class IastProject(models.Model):
     def get_url(self):
         return os.path.join(DOMAIN_VUL, "project/projectDetail", str(self.id))
 
+    @staticmethod
+    def get_or_create(project_name, project_department, version_name, version_description, project_params:dict):
+        from dongtai_common.models.project_version import IastProjectVersion
 
-class IastProjectUser(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, models.DO_NOTHING, db_constraint=False)
-    project = models.ForeignKey(IastProject, models.DO_NOTHING, db_constraint=False)
+        with transaction.atomic():
+            project, project_created = IastProject.objects.get_or_create(
+                name=project_name,
+                department=project_department,
+                defaults=project_params)
+            if project:
+                version, ver_created = IastProjectVersion.objects.get_or_create(
+                    version_name=version_name,
+                    project=project,
+                    defaults={"description": version_description})
+                if not project.versions.count() == 1:
+                    project.current_version = version
+                    project.save()
 
-    class Meta:
-        managed = get_managed()
-        db_table = "iast_project_user"
-        constraints = [
-            models.UniqueConstraint(fields=["project_id", "user_id"], name="iast_project_user_unique_constraint")
-        ]
-        indexes = [models.Index(fields=["user_id", "project_id"])]
+        return project, project_created, ver_created

@@ -10,7 +10,6 @@ from dongtai_web.aggr_vul.app_vul_summary import GetAppVulsSummary
 from dongtai_web.aggregation.aggregation_del import DelVulMany
 from dongtai_web.aggregation.aggregation_project_del import DelVulProjectLevel
 from dongtai_web.apitimelog.urls import urlpatterns as apitimelog_urls
-from dongtai_web.base.update_project_version import UpdateProjectVersion
 from dongtai_web.dongtai_sca.urls import urlpatterns as sca_urls
 from dongtai_web.enum.hook_rules import HookRuleEnumEndPoint
 from dongtai_web.header_vul.base import HeaderVulViewSet
@@ -186,7 +185,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("project/version/delete", ProjectVersionDelete.as_view()),
     path("project/version/current", ProjectVersionCurrent.as_view()),
     path("project/version/list/<int:project_id>", ProjectVersionList.as_view()),
-    path("project/version/check", UpdateProjectVersion.as_view()),
     path("vulns", VulsEndPoint.as_view()),
     path("vuln/summary", VulSummary.as_view()),
     path("vuln/summary_type", VulSummaryType.as_view()),
