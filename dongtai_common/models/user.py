@@ -55,7 +55,7 @@ class User(AbstractUser):
         else:
             return UserDepartment.objects.filter(id=self.department.id).all()
 
-    @to_patch
+    # 过滤当前用户可见的project
     def get_projects(self) -> QuerySet:
         from dongtai_common.models.project import IastProject
 

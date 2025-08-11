@@ -37,9 +37,6 @@ class IastProjectTemplate(models.Model):
     scan = models.ForeignKey(IastStrategyUser, models.DO_NOTHING)
     vul_validation = models.IntegerField(default=0, choices=VulValidation.choices)
     is_system = models.IntegerField(default=0)
-    data_gather = models.JSONField(default=dict)
-    data_gather_is_followglobal = models.IntegerField(default=1)
-    blacklist_is_followglobal = models.IntegerField(default=1)
     tenant = models.ForeignKey(UserTenant, models.SET_NULL, null=True, blank=True)
 
     class Meta:
@@ -54,9 +51,6 @@ class IastProjectTemplate(models.Model):
         return {
             "scan_id": self.scan_id,  # type: ignore
             "vul_validation": self.vul_validation,
-            "data_gather": self.data_gather,
-            "data_gather_is_followglobal": self.data_gather_is_followglobal,
-            "blacklist_is_followglobal": self.blacklist_is_followglobal,
         }
 
 
@@ -67,7 +61,7 @@ class IastProject(models.Model):
     vul_count = models.PositiveIntegerField(blank=True, null=True)
     agent_count = models.IntegerField(blank=True, null=True)
     latest_time = models.IntegerField(default=get_timestamp)
-    user = models.ForeignKey(User, models.DO_NOTHING)
+    # user = models.ForeignKey(User, models.DO_NOTHING)
     # openapi服务不必使用该字段
     scan = models.ForeignKey(IastStrategyUser, models.DO_NOTHING, blank=True, null=True)
 
@@ -75,9 +69,6 @@ class IastProject(models.Model):
     base_url = models.CharField(max_length=255, blank=True)
     test_req_header_key = models.CharField(max_length=511, blank=True)
     test_req_header_value = models.CharField(max_length=511, blank=True)
-    data_gather = models.JSONField(null=True)
-    data_gather_is_followglobal = models.IntegerField(default=1)
-    blacklist_is_followglobal = models.IntegerField(default=1)
     department = models.ForeignKey(UserDepartment, models.DO_NOTHING, null=True, blank=True, related_name="projects")
     template = models.ForeignKey(IastProjectTemplate, models.DO_NOTHING)
     enable_log = models.BooleanField(null=True)

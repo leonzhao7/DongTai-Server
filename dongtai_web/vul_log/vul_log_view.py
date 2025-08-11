@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.utils.translation import gettext_lazy as _
@@ -7,7 +9,10 @@ from rest_framework.serializers import ValidationError
 
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models.iast_vul_log import IastVulLog
-from dongtai_web.common import VulType
+
+class VulType(IntEnum):
+    APPLICATION = 1
+    ASSET = 2
 
 
 class VulLogListArgsSerializer(serializers.Serializer):
