@@ -10,7 +10,6 @@ from dongtai_web.aggr_vul.app_vul_summary import GetAppVulsSummary
 from dongtai_web.aggregation.aggregation_del import DelVulMany
 from dongtai_web.aggregation.aggregation_project_del import DelVulProjectLevel
 from dongtai_web.apitimelog.urls import urlpatterns as apitimelog_urls
-from dongtai_web.dongtai_sca.urls import urlpatterns as sca_urls
 from dongtai_web.enum.hook_rules import HookRuleEnumEndPoint
 from dongtai_web.header_vul.base import HeaderVulViewSet
 from dongtai_web.projecttemplate.base import IastProjectTemplateView
@@ -20,23 +19,16 @@ from dongtai_web.dast.manage import DastManageEndPoint
 from dongtai_web.systemmonitor.urls import urlpatterns as systemmonitor_urls
 from dongtai_web.versioncontrol.urls import urlpatterns as versioncontrol_urls
 from dongtai_web.views.agent import Agent
-from dongtai_web.views.agent_delete import AgentDeleteEndPoint
 from dongtai_web.views.agent_deploy import AgentDeploy
-from dongtai_web.views.agent_install import AgentInstall
 from dongtai_web.views.agent_start import AgentStart
 from dongtai_web.views.agent_status_update import AgentStatusUpdate
 from dongtai_web.views.agent_stop import AgentStop
 from dongtai_web.views.agent_summary import AgentSummary
-from dongtai_web.views.agent_uninstall import AgentUninstall
-from dongtai_web.views.agents import AgentList
-from dongtai_web.views.agents_delete import AgentsDeleteEndPoint
-from dongtai_web.views.agents_user import UserAgentList
 from dongtai_web.views.agents_v2 import AgentListv2
 from dongtai_web.views.captcha_create import CaptchaCreate
 from dongtai_web.views.details_id import (
     AgentListWithid,
     ProjectListWithid,
-    ScaListWithid,
     VulsListWithid,
 )
 from dongtai_web.views.documents import DocumentsEndpoint
@@ -89,7 +81,6 @@ from dongtai_web.views.project_version_delete import ProjectVersionDelete
 from dongtai_web.views.project_version_list import ProjectVersionList
 from dongtai_web.views.project_version_update import ProjectVersionUpdate
 from dongtai_web.views.projects import Projects
-from dongtai_web.views.sca_details import ScaDetailView
 from dongtai_web.views.sensitive_info_rule import (
     SensitiveInfoPatternTypeView,
     SensitiveInfoPatternValidationView,
@@ -197,7 +188,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("vul/status_list", VulnerabilityStatusView.as_view()),
     path("plugin/vuln/list", VulListEndPoint.as_view()),
     path("plugin/vuln/count", VulCountForPluginEndPoint.as_view()),
-    path("sca/<int:id>", ScaDetailView.as_view()),
     path("strategys", StrategysEndpoint.as_view()),
     path("strategy/<int:pk>", StrategyEndpoint.as_view()),
     path("strategy/<int:id>/enable", StrategyEnableEndpoint.as_view()),
@@ -209,15 +199,9 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("strategy/user/list", StrategyList.as_view()),
     path("agent/<int:id_>", Agent.as_view()),
     path("agent/deploy", AgentDeploy.as_view()),
-    path("agents", AgentList.as_view()),
-    path("agent/<int:pk>/delete", AgentDeleteEndPoint.as_view()),
-    path("agents/user", UserAgentList.as_view()),
-    path("agent/install", AgentInstall.as_view()),
-    path("agent/uninstall", AgentUninstall.as_view()),
     path("agent/status/update", AgentStatusUpdate.as_view()),
     path("agent/start", AgentStart.as_view()),
     path("agent/stop", AgentStop.as_view()),
-    path("agents/delete", AgentsDeleteEndPoint.as_view()),
     path("openapi", OpenApiEndpoint.as_view()),
     path("profile/<str:key>", ProfileEndpoint.as_view()),
     path("profile/batch/get", ProfileBatchGetEndpoint.as_view()),
@@ -284,7 +268,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path('scan_strategy/all', ScanStrategyAllView.as_view()),
     path("agent/list/ids", AgentListWithid.as_view()),
     path("vul/list/ids", VulsListWithid.as_view()),
-    path("sca/list/ids", ScaListWithid.as_view()),
     path("project/list/ids", ProjectListWithid.as_view()),
     # get webHook setting
     path("agent/summary/<int:pk>", AgentSummary.as_view()),
@@ -405,7 +388,6 @@ urlpatterns.extend(
 
 # urlpatterns.extend(scaupload_urls) departured
 urlpatterns.extend(apitimelog_urls)
-urlpatterns.extend(sca_urls)
 urlpatterns.extend(versioncontrol_urls)
 urlpatterns.extend(systemmonitor_urls)
 

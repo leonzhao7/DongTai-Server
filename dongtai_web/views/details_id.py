@@ -14,12 +14,10 @@ from rest_framework.serializers import ValidationError
 
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models.agent import IastAgent
-from dongtai_common.models.asset import Asset
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.vulnerablity import IastVulnerabilityModel
 from dongtai_web.serializers.agent import AgentSerializer
 from dongtai_web.serializers.project import ProjectSerializer
-from dongtai_web.serializers.sca import ScaSerializer
 from dongtai_web.serializers.vul import VulSerializer
 from dongtai_web.utils import (
     extend_schema_with_envcheck,
@@ -95,31 +93,6 @@ class ProjectListWithid(DetailListWithid):
         request=IdsSerializer,
         tags=[_("Project")],
         summary=_("通过ID获取项目列表"),
-        description=_("Get the item corresponding to the user, support fuzzy search based on name."),
-    )
-    def post(self, request):
-        return super().get(request)
-
-
-class ScaListWithid(DetailListWithid):
-    serializer = ScaSerializer
-
-    @extend_schema(
-        tags=[_("Component")],
-        summary=_("Component List with id"),
-    )
-    def get(self, request):
-        return super().get(request)
-
-    def query(self, ids, request):
-        auth_users = self.get_auth_users(request.user)
-        auth_agents = self.get_auth_agents(auth_users)
-        return Asset.objects.filter(pk__in=ids, agent__in=auth_agents).all()
-
-    @extend_schema_with_envcheck(
-        request=IdsSerializer,
-        tags=[_("Component")],
-        summary=_("Component List with id"),
         description=_("Get the item corresponding to the user, support fuzzy search based on name."),
     )
     def post(self, request):
