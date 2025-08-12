@@ -5,7 +5,7 @@
 #
 # @description :
 ######################################################################
-
+from dongtai_common.models import IastProjectVersion
 from dongtai_web.base.project_version import get_project_version, get_project_version_by_id
 from dongtai_common.models.agent import IastAgent
 from dongtai_common.endpoint import R, UserEndPoint
@@ -51,24 +51,19 @@ class ApiRouteCoverRate(UserEndPoint):
         response_schema=_GetResponseSerializer,
     )
     def get(self, request):
-        project_id = request.query_params.get('project_id', None)
-        version_id = request.query_params.get('version_id', None)
-        # auth_users = self.get_auth_users(request.user)
-        if not version_id:
-            current_project_version = get_project_version(project_id)
-        else:
-            current_project_version = get_project_version_by_id(version_id)
-        # departments = request.user.get_relative_department()
-        projectexist = IastProject.objects.filter(pk=project_id).first()
-        if not projectexist:
+        project_id = request.query_params.get('project_id', 0)
+        version_id = request.query_params.get('version_id', 0)
+        project = request.user.get_projects().filter(id=project_id).first()
+        version = IastProjectVersion.objects.filter(id=version_id, project_id=project_id).first()
+        if not project or not version:
             return R.failure(_("Parameter error"))
+
         total_count = IastApiRouteV2.objects.filter(
             project_id=project_id,
-            project_version_id=current_project_version.get("version_id",
-                                                           0)).count()
+            project_version_id=version.id).count()
         covered_count = IastApiRouteV2.objects.filter(
             project_id=project_id,
-            project_version_id=current_project_version.get("version_id", 0),
+            project_version_id=version.id,
             is_cover=1).count()
         try:
             cover_rate = "{:.2%}".format(covered_count / total_count)

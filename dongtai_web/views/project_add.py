@@ -13,11 +13,9 @@ from dongtai_common.common.utils import disable_cache
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.project_version import IastProjectVersion
-from dongtai_common.models.server import IastServer
 from dongtai_common.models.strategy_user import IastStrategyUser
 from dongtai_common.utils.request_type import Request
 from dongtai_engine.common.queryset import get_scan_id
-from dongtai_web.base.project_version import version_modify
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 
 logger = logging.getLogger("django")

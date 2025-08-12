@@ -4,7 +4,7 @@ import logging
 from django.utils.translation import gettext_lazy as _
 
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_web.base.project_version import VersionModifySerializer, version_modify
+from dongtai_web.base.project_version import VersionModifySerializer
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 
 logger = logging.getLogger("django")

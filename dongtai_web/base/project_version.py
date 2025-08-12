@@ -17,54 +17,6 @@ class VersionModifySerializer(serializers.Serializer):
     project_id = serializers.IntegerField(help_text=_("The id of the project"))
 
 
-@transaction.atomic
-def version_modify(projects: QuerySet[IastProject], versionData):
-    version_id = versionData.get("version_id", 0)
-    project_id = versionData.get("project_id", 0)
-    version_name = versionData.get("version_name", "")
-    description = versionData.get("description", "")
-    project = projects.filter(id=project_id).only("id", "user").first()
-    if not version_name or not project:
-        return {"status": "202", "msg": _("Parameter error")}
-    baseVersion = IastProjectVersion.objects.filter(
-        project_id=project.id,
-        version_name=version_name,
-        status=1,
-    )
-    if version_id:
-        baseVersion = baseVersion.filter(~Q(id=version_id))
-    existVersion = baseVersion.exists()
-    if existVersion:
-        return {"status": "202", "msg": _("Repeated version name")}
-    if version_id:
-        version = IastProjectVersion.objects.filter(id=version_id, project_id=project.id, status=1).first()
-        if not version:
-            return {"status": "202", "msg": _("Version does not exist")}
-        version.update_time = int(time.time())
-        version.version_name = version_name
-        version.description = description
-        version.status = 1
-        version.user = project.user
-        version.save()
-    else:
-        version, created = IastProjectVersion.objects.get_or_create(
-            project_id=project.id,
-            version_name=version_name,
-            description=description,
-            status=1,
-            user=project.user,
-        )
-    return {
-        "status": "201",
-        "msg": "success",
-        "data": {
-            "version_id": version.id,
-            "version_name": version_name,
-            "description": description,
-        },
-    }
-
-
 def get_project_version(project_id, auth_users=None):
     project = IastProject.objects.filter(id=project_id).first()
     if project and project.current_version:
