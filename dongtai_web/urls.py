@@ -102,12 +102,10 @@ from dongtai_web.views.strategys_add import StrategyAdd
 from dongtai_web.views.strategys_list import StrategyList
 from dongtai_web.views.strategys_type import StrategyType
 from dongtai_web.views.system_info import SystemInfo
-from dongtai_web.views.user_detail import UserDetailEndPoint
 from dongtai_web.views.user_info import UserInfoEndpoint
 from dongtai_web.views.user_login import UserLogin
 from dongtai_web.views.user_logout import UserLogout
 from dongtai_web.views.user_passwrd import UserPassword
-from dongtai_web.views.user_passwrd_reset import UserPasswordReset
 from dongtai_web.views.user_token import UserDepartmentToken, UserToken
 from dongtai_web.views.user_manage import UserManage
 from dongtai_web.views.user_department_manage import DepartmentManage
@@ -137,14 +135,12 @@ from dongtai_web.views.api_route_v2_search import ApiRouteV2Search
 from static.i18n.views.setlang import LanguageSetting
 
 urlpatterns: list[URLResolver | URLPattern] = [
-    path("user/<int:user_id>", UserDetailEndPoint.as_view()),
     path("user/changePassword", UserPassword.as_view()),
     path("user/login", UserLogin.as_view()),
     path("user/logout", UserLogout.as_view()),
     path("user/info", UserInfoEndpoint.as_view()),
     path("user/token", UserToken.as_view()),
     path("user/department/token", UserDepartmentToken.as_view()),
-    path("user/password/reset", UserPasswordReset.as_view()),
     path("user/add", UserManage.as_view({'post': 'create'})),
     path("user/stop", UserManage.as_view({"post": "stop"})),
     path("user/update", UserManage.as_view({"post": "update"})),

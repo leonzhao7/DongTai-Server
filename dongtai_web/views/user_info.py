@@ -25,18 +25,13 @@ class UserInfoEndpoint(UserEndPoint):
         user = request.user
         return R.success(
             data={
-                "userid": user.id if not user.is_anonymous else -1,
+                "userid": user.id,
                 "username": user.get_username(),
-                "role": 3
-                if user.role.level == UserRole.LEVEL_NORMAL
-                else 2
-                if user.role.level == UserRole.LEVEL_TENANT
-                else 1
-                if user.role.level == UserRole.LEVEL_SUPER
-                else 0,
+                "role": 3 if user.is_normal() else
+                        2 if user.is_tenant_admin() else
+                        1 if user.is_super_admin() else
+                        0,
                 "role_name": user.role.name,
                 "role_id": user.role.id,
-                "sca_setup": not SCA_SETUP,
-                "is_wait_binding": user.role.id == 11,
             }
         )

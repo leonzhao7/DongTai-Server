@@ -39,51 +39,44 @@ class UserLogin(UserEndPoint):
         }
         """
         try:
-            captcha_hash_key = request.data["captcha_hash_key"]
-            captcha = request.data["captcha"]
-            if captcha_hash_key and captcha:
-                captcha_obj = CaptchaStore.objects.get(hashkey=captcha_hash_key)
-                if int(captcha_obj.expiration.timestamp()) < int(time.time()):
-                    return R.failure(status=203, msg=_("Captcha timed out"))
-                if captcha_obj.response == captcha.lower():
-                    username = request.data["username"]
-                    password = request.data["password"]
-                    user: User | None = authenticate(username=username, password=password)  # type: ignore
-                    if user is not None:
-                        user, login_result = patch_point(user, None)
-                        if login_result is not None:
-                            return login_result
-                        user.failed_login_count = 0
-                        user.save()
-                        login(request, user)
-                        return R.success(
-                            msg=_("Login successful"),
-                            data={
-                                "default_language": user.default_language,
-                                "is_active": user.is_active,
-                            },
-                        )
-                    user_login: User | None = User.objects.filter(username=username).first()
-                    if user_login and not user_login.is_active:
-                        return R.failure(
-                            status=205,
-                            msg="用户已被禁用",
-                            data={
-                                "default_language": user_login.default_language,
-                                "is_active": user_login.is_active,
-                            },
-                        )
-                    if user_login is not None:
+            captcha_hash_key = request.data.get("captcha_hash_key")
+            captcha = request.data.get("captcha")
+            if not captcha or not captcha_hash_key:
+                return R.failure(status=204, msg=_("verification code should not be empty"))
+
+            captcha_obj = CaptchaStore.objects.get(hashkey=captcha_hash_key)
+            if int(captcha_obj.expiration.timestamp()) < int(time.time()):
+                return R.failure(status=203, msg=_("Captcha timed out"))
+
+            if captcha_obj.response != captcha.lower():
+                return R.failure(status=203, msg=_("Verification code error"))
+
+            username = request.data.get("username")
+            password = request.data.get("password")
+            user: User | None = authenticate(username=username, password=password)  # type: ignore
+            if user is None:
+                user_login: User | None = User.objects.filter(username=username).first()
+                if user_login:
+                    if user_login.is_active:
                         user_login.failed_login_count += 1
                         user_login.failed_login_time = timezone.now()
                         user_login.save()
-                        return R.failure(msg="密码错误")
-                    logger.warning(
-                        f"user [{username}] login failure, rease: {'user not exist' if user is None else 'user is disable'}"
-                    )
+                        return R.failure(status=202, msg=_("Login failed"))
+                    else:
+                        return R.failure(status=205, msg="用户已被禁用")
+                else:
                     return R.failure(status=202, msg=_("Login failed"))
-                return R.failure(status=203, msg=_("Verification code error"))
-            return R.failure(status=204, msg=_("verification code should not be empty"))
+
+            user.failed_login_count = 0
+            user.save()
+            login(request, user)
+            return R.success(
+                msg=_("Login successful"),
+                data={
+                    "default_language": user.default_language,
+                    "is_active": user.is_active,
+                },
+            )
         except Exception as e:
             logger.exception("uncatched exception: ", exc_info=e)
             return R.failure(status=202, msg=_("Login failed"))
