@@ -99,10 +99,7 @@ class ProjectAdd(UserEndPoint):
                 else:
                     project = projects.filter(name=name).first()
                     if not project:
-                        project = IastProject.objects.create(
-                            name=name,
-                            department=request.user.department,
-                        )
+                        project = IastProject.objects.create(name=name, tenant=request.user.tenant)
                     else:
                         return R.failure(
                             status=203,
@@ -147,6 +144,7 @@ class ProjectAdd(UserEndPoint):
                         "current_version_id",
                     ]
                 )
+                project.departments.set(request.user.departments.all())
                 disable_cache(get_scan_id, (project.id))
                 return R.success(
                     data={

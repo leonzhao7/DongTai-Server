@@ -31,9 +31,8 @@ class UserDepartmentToken(UserEndPoint):
 
     @extend_schema(summary=_("获取部门部署 token"), tags=[_("User")], deprecated=True)
     def get(self, request):
-        departments = request.user.get_my_departments()
-        tokens = departments.values("id", "token", "name").all()
-        for token in tokens:
-            if token["token"] is not None:
-                token["token"] = "GROUP" + token["token"]
-        return R.success(data=list(tokens))
+        departs = request.user.get_departments()
+        data = list()
+        for depart in departs:
+            data.append({"id": depart.id, "name": depart.name, "token": "DEPART" + depart.token})
+        return R.success(data=data)

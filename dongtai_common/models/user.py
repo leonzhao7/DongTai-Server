@@ -1,27 +1,27 @@
 #!/usr/bin/env python
 # datetime:2021/1/25 下午6:43
 
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
+from dongtai_common import generate_token
 from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.user_role import UserRole
 from dongtai_common.models.user_tenant import UserTenant
-from dongtai_conf.patch import patch_point, to_patch
 
 
 class User(AbstractUser):
     phone = models.CharField(blank=True, max_length=32)
     role = models.ForeignKey(UserRole, models.DO_NOTHING, blank=False)
     tenant = models.ForeignKey(UserTenant, models.CASCADE, related_name="users", blank=True, null=True)
-    department = models.ForeignKey(UserDepartment, models.SET_NULL, related_name="users", blank=True, null=True)
+    departments = models.ManyToManyField(UserDepartment, related_name='users')
     default_language = models.CharField(max_length=15, blank=True)
     deleted = models.BooleanField(default=False)
     failed_login_count = models.IntegerField(default=0)
     failed_login_time = models.DateTimeField(default=timezone.now)
+    token = models.CharField(max_length=32, blank=True, default=generate_token)
 
     class Meta:
         db_table = "user"
@@ -49,21 +49,34 @@ class User(AbstractUser):
     def get_talent(self):
         return self.tenant
 
-    def get_my_departments(self) -> QuerySet:
+    # 过滤当前用户可见的department
+    def get_departments(self) -> QuerySet:
         if self.is_super_admin():
             return UserDepartment.objects.filter(id=-1).all()
+        elif self.is_tenant_admin():
+            return self.tenant.departments.all()
         else:
-            return UserDepartment.objects.filter(id=self.department.id).all()
+            return self.departments.all()
 
     # 过滤当前用户可见的project
     def get_projects(self) -> QuerySet:
         from dongtai_common.models.project import IastProject
 
-        if self.is_super_admin():
-            return IastProject.objects.all()
         if self.is_tenant_admin():
-            return IastProject.objects.filter(department__in=UserDepartment.objects.filter(tenant=self.tenant)).all()
-        return IastProject.objects.filter(department__in=UserDepartment.objects.filter(id=self.department.id).all())
+            return self.tenant.projects.all()
+        else:
+            departs = self.get_departments()
+            return IastProject.objects.filter(departments__in=departs.values_list("id")).all()
+
+    # 过滤当前用户可见的user
+    def get_users(self) -> QuerySet:
+        if self.is_super_admin():
+            return User.objects.all()
+
+        if self.is_tenant_admin():
+            return self.tenant.users.all()
+
+        return User.objects.filter(id=self.id).all()
 
     def has_privilege(self, role_level, tenant_id) -> bool:
         if self.role_level == UserRole.LEVEL_SUPER:

@@ -123,7 +123,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_owner(self, obj) -> str:
         if obj not in self.USER_MAP:
-            self.USER_MAP[obj] = obj.department.name if obj.department else ""
+            self.USER_MAP[obj] = obj.tenant.name if obj.tenant else ""
         return self.USER_MAP[obj]
 
     def get_agent_language(self, obj) -> list:

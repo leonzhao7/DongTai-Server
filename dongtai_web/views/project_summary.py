@@ -100,7 +100,7 @@ class ProjectSummary(UserEndPoint):
             return R.failure(status=203, msg=_("no permission"))
         version_id = request.GET.get("version_id", None)
         data = {}
-        data["owner"] = project.department.name if project.department else ""
+        data["owner"] = project.tenant.name if project.tenant else ""
         data["name"] = project.name
         data["id"] = project.id
         data["mode"] = project.mode

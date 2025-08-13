@@ -143,6 +143,7 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("user/department/token", UserDepartmentToken.as_view()),
     path("user/add", UserManage.as_view({'post': 'create'})),
     path("user/stop", UserManage.as_view({"post": "stop"})),
+    path("user/delete", UserManage.as_view({"post": "delete"})),
     path("user/update", UserManage.as_view({"post": "update"})),
     path("user/reset", UserManage.as_view({"post": "reset"})),
     path("user/list", UserManage.as_view({"get": "list"})),

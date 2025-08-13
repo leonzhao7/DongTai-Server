@@ -6,7 +6,6 @@ import time
 
 from django.db import models, transaction
 from django.utils import timezone
-from shortuuid.django_fields import ShortUUIDField
 
 from dongtai_common.models import User
 from dongtai_common.models.user_department import UserDepartment
@@ -69,18 +68,19 @@ class IastProject(models.Model):
     base_url = models.CharField(max_length=255, blank=True)
     test_req_header_key = models.CharField(max_length=511, blank=True)
     test_req_header_value = models.CharField(max_length=511, blank=True)
-    department = models.ForeignKey(UserDepartment, on_delete=models.SET_NULL, null=True, blank=True, related_name="projects")
+    departments = models.ManyToManyField(UserDepartment, related_name='projects')
+    tenant = models.ForeignKey(UserTenant, on_delete=models.CASCADE, related_name="projects")
     template = models.ForeignKey(IastProjectTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     current_version = models.ForeignKey("IastProjectVersion", on_delete=models.SET_NULL, null=True, blank=True)
     enable_log = models.BooleanField(null=True)
-    log_level = models.CharField(max_length=511, null=True, blank=True)
+    log_level = models.CharField(max_length=16, null=True, blank=True)
     last_has_online_agent_time = models.IntegerField(default=get_timestamp)
     status = models.IntegerField(default=0, choices=ProjectStatus.choices)
 
     class Meta:
         managed = get_managed()
         db_table = "project"
-        unique_together = ["name", "department_id"]
+        unique_together = ["name", "tenant_id"]
 
     def update_latest(self):
         self.latest_time = int(time.time())
@@ -88,23 +88,3 @@ class IastProject(models.Model):
 
     def get_url(self):
         return os.path.join(DOMAIN_VUL, "project/projectDetail", str(self.id))
-
-    @staticmethod
-    def get_or_create(project_name, project_department, version_name, version_description, project_params:dict):
-        from dongtai_common.models.project_version import IastProjectVersion
-
-        with transaction.atomic():
-            project, project_created = IastProject.objects.get_or_create(
-                name=project_name,
-                department=project_department,
-                defaults=project_params)
-            if project:
-                version, ver_created = IastProjectVersion.objects.get_or_create(
-                    version_name=version_name,
-                    project=project,
-                    defaults={"description": version_description})
-                if not project.versions.count() == 1:
-                    project.current_version = version
-                    project.save()
-
-        return project, project_created, ver_created

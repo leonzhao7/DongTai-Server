@@ -3,6 +3,7 @@
 from django.db import models
 from django.utils import timezone
 
+from dongtai_common import generate_token
 from dongtai_common.utils.settings import get_managed
 
 
@@ -17,6 +18,7 @@ class UserTenant(models.Model):
     create_at = models.DateTimeField(default=timezone.now)
     update_at = models.DateTimeField(auto_now=True)
     status = models.IntegerField(blank=False, default=STATUS_OK)
+    token = models.CharField(max_length=32, blank=True, default=generate_token)
 
     class Meta:
         managed = get_managed()
