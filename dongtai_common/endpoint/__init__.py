@@ -243,7 +243,7 @@ class EndPoint(APIView):
         qs = IastProject.objects.none()
         qss = [user.get_projects() for user in users]
         projects = reduce(ior, qss, qs)
-        return IastAgent.objects.filter(bind_project__in=projects)
+        return IastAgent.objects.filter(project__in=projects)
 
     @staticmethod
     def get_auth_assets(users):

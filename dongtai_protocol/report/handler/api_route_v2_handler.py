@@ -43,7 +43,7 @@ def api_route_v2_gather(agent_id, api_data):
         if len(components) > 0 and len(components.get('schemas', {})) > 0:
             schema, created = IastApiRouteV2Schema.objects.update_or_create(
                 name="api_data", 
-                project=agent.bind_project, 
+                project=agent.project,
                 project_version=agent.project_version,
                 defaults={'info':api_data}
             )
@@ -64,7 +64,7 @@ def parse_paths(paths, schemas_obj, schema, agent):
             IastApiRouteV2.objects.update_or_create(
                 path=path_name,
                 method=method_name.upper(),
-                project=agent.bind_project,
+                project=agent.project,
                 project_version=agent.project_version,
                 defaults={'agent': agent, 'schema':schema, 'controller':tags[0], 'parameters':para_list, 'response':resp_list, 'info':method_data}
             )

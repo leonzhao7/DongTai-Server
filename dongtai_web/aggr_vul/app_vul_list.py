@@ -49,7 +49,7 @@ class AppVulSerializer(serializers.ModelSerializer):
     agent__project_name = serializers.CharField()
     agent__server__container = serializers.CharField()
     agent__language = serializers.CharField()
-    agent__bind_project_id = serializers.CharField()
+    agent__project_id = serializers.CharField()
     header_vul_urls = serializers.ListField()
     dastvul__vul_type = serializers.CharField()
     dastvul_count = serializers.CharField()
@@ -86,7 +86,7 @@ class AppVulSerializer(serializers.ModelSerializer):
             "agent__project_name",
             "agent__server__container",
             "agent__language",
-            "agent__bind_project_id",
+            "agent__project_id",
             "header_vul_urls",
             "dastvul__vul_type",
             "dastvul_count",
@@ -132,10 +132,10 @@ class GetAppVulsList(UserEndPoint):
                 es_query = {}
                 tantivy_query = {}
                 # 从项目列表进入 绑定项目id
-                if ser.validated_data.get("bind_project_id", 0):
-                    queryset = queryset.filter(project_id=ser.validated_data.get("bind_project_id"))
-                    es_query["bind_project_id"] = ser.validated_data.get("bind_project_id")
-                    tantivy_query["project_id"] = ser.validated_data.get("bind_project_id")
+                if ser.validated_data.get("project_id", 0):
+                    queryset = queryset.filter(project_id=ser.validated_data.get("project_id"))
+                    es_query["project_id"] = ser.validated_data.get("project_id")
+                    tantivy_query["project_id"] = ser.validated_data.get("project_id")
                 # 项目版本号
                 if ser.validated_data.get("project_version_id", 0):
                     queryset = queryset.filter(project_version_id=ser.validated_data.get("project_version_id"))
@@ -309,7 +309,7 @@ class GetAppVulsList(UserEndPoint):
                 item["agent__project_name"] = item["project__name"]
                 item["agent__server__container"] = item["server__container"]
                 item["agent__language"] = item["language"]
-                item["agent__bind_project_id"] = item["project_id"]
+                item["agent__project_id"] = item["project_id"]
                 item["header_vul_urls"] = VulSerializer.find_all_urls(item["id"]) if item["is_header_vul"] else []
                 item["dastvul__vul_type"] = dast_vul_types_dict[item["id"]]
                 item["dastvul_count"] = dastvul_rel_count_res_dict[item["id"]]
@@ -349,7 +349,7 @@ def get_vul_list_from_elastic_search(
     search_keyword="",
     page=1,
     page_size=10,
-    bind_project_id=0,
+    project_id=0,
     project_version_id=0,
     order="",
 ):
@@ -372,16 +372,16 @@ def get_vul_list_from_elastic_search(
 
     auth_project_ids = list(project_ids.values_list("id", flat=True))
     must_query = [
-        Q("terms", bind_project_id=auth_project_ids),
+        Q("terms", project_id=auth_project_ids),
         Q("terms", is_del=[0]),
-        Q("range", bind_project_id={"gt": 0}),
+        Q("range", project_id={"gt": 0}),
         Q("range", strategy_id={"gt": 0}),
     ]
     order_list = ["_score", "level_id", "-latest_time", "-id"]
     if order:
         order_list.insert(0, order)
-    if bind_project_id:
-        must_query.append(Q("terms", bind_project_id=[bind_project_id]))
+    if project_id:
+        must_query.append(Q("terms", project_id=[project_id]))
     if project_version_id:
         must_query.append(Q("terms", project_version_id=[project_version_id]))
     if project_ids:
@@ -423,7 +423,7 @@ def get_vul_list_from_elastic_search(
             language_ids,
             search_keyword,
             page_size,
-            bind_project_id,
+            project_id,
             project_version_id,
         ]
     )
@@ -477,7 +477,7 @@ def get_vul_list_from_elastic_search(
             vul["agent__project_name"] = vul["project__name"]
             vul["agent__server__container"] = vul["server__container"]
             vul["agent__language"] = vul["language"]
-            vul["agent__bind_project_id"] = vul["project_id"]
+            vul["agent__project_id"] = vul["project_id"]
             for k, v in strategy_dic.items():
                 vul["strategy__" + k] = v
             for k, v in iast_vulnerability_dic.items():

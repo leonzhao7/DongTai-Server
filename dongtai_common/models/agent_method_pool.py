@@ -86,7 +86,7 @@ class VulMethodPool(models.Model):
 @registry.register_document
 class MethodPoolDocument(Document):
     user_id = fields.IntegerField(attr="agent.user_id")
-    bind_project_id = fields.IntegerField(attr="agent.bind_project_id")
+    project_id = fields.IntegerField(attr="agent.project_id")
     project_version_id = fields.IntegerField(attr="agent.project_version_id")
     req_header_for_search = fields.TextField(attr="req_header_fs")
     language = fields.TextField(attr="agent.language")

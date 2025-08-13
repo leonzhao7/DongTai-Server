@@ -118,8 +118,7 @@ class ProjectAdd(UserEndPoint):
                 project.mode = mode
                 project.template_id = template_id
                 project.latest_time = int(time.time())
-                project.enable_log = enable_log
-                project.log_level = log_level
+                project.log_level = project.generate_log_level(enable_log, log_level)
                 if vul_validation is not None:
                     project.vul_validation = vul_validation
                 if base_url:

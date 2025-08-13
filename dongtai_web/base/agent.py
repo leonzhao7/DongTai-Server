@@ -32,7 +32,7 @@ def get_agents_with_project(project_name, users):
         )
 
         if project_ids:
-            agent_ids = IastAgent.objects.filter(bind_project_id__in=project_ids).values_list("id", flat=True).all()
+            agent_ids = IastAgent.objects.filter(project_id__in=project_ids).values_list("id", flat=True).all()
 
     return agent_ids
 
@@ -47,14 +47,14 @@ def get_user_project_name(auth_users):
 
 
 def get_user_agent_pro(auth_users, bindId):
-    agentInfo = IastAgent.objects.filter(user__in=auth_users, bind_project_id__in=bindId).values(
-        "id", "bind_project_id", "server_id"
+    agentInfo = IastAgent.objects.filter(user__in=auth_users, project_id__in=bindId).values(
+        "id", "project_id", "server_id"
     )
     result = {"pidArr": {}, "serverArr": {}, "server_ids": []}
 
     if agentInfo:
         for item in agentInfo:
-            result["pidArr"][item["id"]] = item["bind_project_id"]
+            result["pidArr"][item["id"]] = item["project_id"]
             result["serverArr"][item["id"]] = item["server_id"]
             result["server_ids"].append(item["server_id"])
     return result
@@ -85,14 +85,14 @@ def get_project_vul_count(users, queryset, auth_agents, project_id=None):
     agentIdArr = {}
     for item in queryset:
         agentIdArr[item["agent_id"]] = item["count"]
-    auth_agent_arr = auth_agents.values("project_version_id", "bind_project_id", "id")
+    auth_agent_arr = auth_agents.values("project_version_id", "project_id", "id")
     agent_list = {}
     for auth in auth_agent_arr:
-        version_id = versions_map.get(auth["bind_project_id"], 0)
+        version_id = versions_map.get(auth["project_id"], 0)
         if version_id == auth["project_version_id"]:
-            if agent_list.get(auth["bind_project_id"], None) is None:
-                agent_list[auth["bind_project_id"]] = []
-            agent_list[auth["bind_project_id"]].append(auth["id"])
+            if agent_list.get(auth["project_id"], None) is None:
+                agent_list[auth["project_id"]] = []
+            agent_list[auth["project_id"]].append(auth["id"])
 
     # 需要 查询 指定项目 当前版本 绑定的agent 所对应的漏洞数量
     for project in project_queryset:

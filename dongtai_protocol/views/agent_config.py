@@ -97,7 +97,7 @@ def get_agent_filter_details(agent_id):
     return (
         IastAgent.objects.filter(pk=agent_id)
         .values(
-            "bind_project__name",
+            "project__name",
             "user__username",
             "server__protocol",
             "token",
@@ -107,7 +107,7 @@ def get_agent_filter_details(agent_id):
             "language",
         )
         .annotate(
-            PROJECT_NAME=F("bind_project__name"),
+            PROJECT_NAME=F("project__name"),
             ACCOUNT_NAME=F("user__username"),
             PROTOCOL=F("server__protocol"),
             AGENT_IP=F("server__ip"),

@@ -32,7 +32,7 @@ class VulsPageArgsSerializer(serializers.Serializer):
     project_id = serializers.ListField(child=serializers.IntegerField(),
                                        required=False)
     project_version_id = serializers.IntegerField(required=False)
-    bind_project_id = serializers.IntegerField(required=False)
+    project_id = serializers.IntegerField(required=False)
     vul_level_id = serializers.ListField(child=serializers.IntegerField(),
                                          required=False)
     vul_type = serializers.ListField(child=serializers.CharField(),
@@ -45,7 +45,7 @@ class VulsPageArgsSerializer(serializers.Serializer):
 class VulsSummaryArgsSerializer(VulsPageArgsSerializer):
 
     class Meta:
-        fields = ['bind_project_id', 'project_id', 'project_version_id']
+        fields = ['project_id', 'project_id', 'project_version_id']
 
 
 class VulsDeleteArgsSerializer(serializers.Serializer):
@@ -122,8 +122,8 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
             return R.failure(data=e.detail)
         department = request.user.get_departments()
         q = Q(project__department__in=department)
-        if 'bind_project_id' in ser.validated_data:
-            q = q & Q(project_id=ser.validated_data['bind_project_id'])
+        if 'project_id' in ser.validated_data:
+            q = q & Q(project_id=ser.validated_data['project_id'])
         if 'project_version_id' in ser.validated_data:
             q = q & Q(
                 project_version_id=ser.validated_data['project_version_id'])
@@ -158,8 +158,8 @@ class DastVulsEndPoint(UserEndPoint, viewsets.ViewSet):
         q = Q(project__department__in=department)
         if 'vul_level_id' in ser.validated_data:
             q = q & Q(vul_level_id__in=ser.validated_data['vul_level_id'])
-        if 'bind_project_id' in ser.validated_data:
-            q = q & Q(project_id=ser.validated_data['bind_project_id'])
+        if 'project_id' in ser.validated_data:
+            q = q & Q(project_id=ser.validated_data['project_id'])
         if 'vul_type' in ser.validated_data:
             q = q & Q(vul_type__in=ser.validated_data['vul_type'])
         if 'project_id' in ser.validated_data:

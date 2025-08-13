@@ -57,7 +57,7 @@ class MyTestCase(DongTaiTestCase):
     def test_http_header(self):
         from dongtai_common.models.agent import IastAgent
 
-        agents = IastAgent.objects.filter(bind_project_id=1252).values("id")
+        agents = IastAgent.objects.filter(project_id=1252).values("id")
         from dongtai_common.models.agent_method_pool import MethodPool
 
         method_pools = MethodPool.objects.filter(agent_id__in=agents).values("req_header_fs")

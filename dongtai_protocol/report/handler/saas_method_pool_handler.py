@@ -228,7 +228,7 @@ class SaasMethodPoolHandler(IReportHandler):
             "update_time": timestamp,
             "uri_sha1": self.sha1(self.http_uri),
             "user_id": self.agent.user_id,
-            "bind_project_id": self.agent.bind_project_id,
+            "project_id": self.agent.project_id,
             "project_version_id": self.agent.project_version_id,
             "language": self.agent.language,
         }
@@ -376,7 +376,7 @@ class SaasMethodPoolHandler(IReportHandler):
             },
             (
                 "id",
-                "bind_project_id",
+                "project_id",
                 "project_version_id",
                 "project_name",
                 "language",
@@ -414,7 +414,7 @@ def add_new_api_route(agent: IastAgent, path, method):
         IastApiRouteV2.objects.filter(
             path=path,
             method=method,
-            project_id=agent.bind_project_id,
+            project_id=agent.project_id,
             project_version_id=agent.project_version_id,
         ).update(is_cover=1)
     except (IntegrityError, MultipleObjectsReturned) as e:

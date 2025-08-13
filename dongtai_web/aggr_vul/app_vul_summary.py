@@ -26,12 +26,12 @@ def get_annotate_cache_data(projects: QuerySet[IastProject]):
 
 
 @to_patch
-def get_annotate_data(projects: QuerySet[IastProject], bind_project_id: int, project_version_id: int) -> dict:
+def get_annotate_data(projects: QuerySet[IastProject], project_id: int, project_version_id: int) -> dict:
     cache_q = Q(is_del=0, project_id__gt=0, project__in=projects)
 
     # 从项目列表进入 绑定项目id
-    if bind_project_id:
-        cache_q = cache_q & Q(project_id=bind_project_id)
+    if project_id:
+        cache_q = cache_q & Q(project_id=project_id)
     # 项目版本号
     if project_version_id:
         cache_q = cache_q & Q(project_version_id=project_version_id)
@@ -97,19 +97,19 @@ class GetAppVulsSummary(UserEndPoint):
         projects = request.user.get_projects()
 
         ser = AggregationArgsSerializer(data=request.data)
-        bind_project_id = 0
+        project_id = 0
         project_version_id = 0
         try:
             if ser.is_valid(raise_exception=True):
-                if ser.validated_data.get("bind_project_id", 0):
-                    bind_project_id = ser.validated_data.get("bind_project_id", 0)
+                if ser.validated_data.get("project_id", 0):
+                    project_id = ser.validated_data.get("project_id", 0)
                 if ser.validated_data.get("project_version_id", 0):
                     project_version_id = ser.validated_data.get("project_version_id", 0)
 
             if ELASTICSEARCH_STATE:
-                result_summary = get_annotate_data_es(projects, bind_project_id, project_version_id)
-            elif bind_project_id or project_version_id:
-                result_summary = get_annotate_data(projects, bind_project_id, project_version_id)
+                result_summary = get_annotate_data_es(projects, project_id, project_version_id)
+            elif project_id or project_version_id:
+                result_summary = get_annotate_data(projects, project_id, project_version_id)
             else:
                 # 全局下走缓存
                 result_summary = get_annotate_cache_data(projects)
@@ -125,7 +125,7 @@ class GetAppVulsSummary(UserEndPoint):
 
 
 @to_patch
-def get_annotate_data_es(projects: QuerySet[IastProject], bind_project_id: int, project_version_id: int):
+def get_annotate_data_es(projects: QuerySet[IastProject], project_id: int, project_version_id: int):
     from elasticsearch import Elasticsearch
     from elasticsearch_dsl import A, Q
 
@@ -139,15 +139,15 @@ def get_annotate_data_es(projects: QuerySet[IastProject], bind_project_id: int, 
     strategy_ids = list(IastStrategyModel.objects.all().values_list("id", flat=True))
 
     must_query = [
-        Q("terms", bind_project_id=list(projects.values_list("id", flat=True))),
+        Q("terms", project_id=list(projects.values_list("id", flat=True))),
         Q("terms", is_del=[0]),
         Q("terms", is_del=[0]),
-        Q("range", bind_project_id={"gt": 0}),
+        Q("range", project_id={"gt": 0}),
         Q("range", strategy_id={"gt": 0}),
         Q("terms", strategy_id=strategy_ids),
     ]
-    if bind_project_id:
-        must_query.append(Q("terms", bind_project_id=[bind_project_id]))
+    if project_id:
+        must_query.append(Q("terms", project_id=[project_id]))
     if project_version_id:
         must_query.append(Q("terms", project_version_id=[project_version_id]))
     search = IastVulnerabilityDocument.search().query(Q("bool", must=must_query))[:0]

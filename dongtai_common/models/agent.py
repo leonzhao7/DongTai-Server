@@ -4,6 +4,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from dongtai_common import generate_token
 from dongtai_common.models import User
 from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.project import IastProject
@@ -18,10 +19,10 @@ def get_events():
 
 
 class IastAgent(models.Model):
-    token = models.CharField(max_length=255, blank=True)
+    token = models.CharField(max_length=128, default=generate_token)
     version = models.CharField(max_length=255, blank=True)
     latest_time = models.IntegerField()
-    user = models.ForeignKey(User, models.DO_NOTHING)
+    user = models.ForeignKey(User, models.DO_NOTHING, related_name="agents")
     server = models.ForeignKey(
         to=IastServer,
         on_delete=models.DO_NOTHING,
@@ -30,15 +31,14 @@ class IastAgent(models.Model):
         related_query_name="agent",
         verbose_name=_("server"),
     )
-    is_audit = models.IntegerField()
-    is_running = models.IntegerField()
-    is_core_running = models.IntegerField()
-    control = models.IntegerField()
-    is_control = models.IntegerField()
-    bind_project = models.ForeignKey(IastProject, on_delete=models.CASCADE, default=-1)
+    is_running = models.IntegerField(default=1)
+    is_core_running = models.IntegerField(default=1)
+    control = models.IntegerField(default=1)
+    is_control = models.IntegerField(default=1)
+    project = models.ForeignKey(IastProject, on_delete=models.CASCADE, default=-1)
     project_version = models.ForeignKey(IastProjectVersion, on_delete=models.CASCADE, default=-1)
     project_name = models.CharField(max_length=255, blank=True)
-    online = models.PositiveSmallIntegerField(default=0)
+    online = models.PositiveSmallIntegerField(default=1)
     language = models.CharField(max_length=10, blank=True)
     filepathsimhash = models.CharField(max_length=255, blank=True)
     servicetype = models.CharField(max_length=255, blank=True)
@@ -49,7 +49,6 @@ class IastAgent(models.Model):
     except_running_status = models.IntegerField(default=1)
     state_status = models.IntegerField(default=1)
     events = models.JSONField(default=get_events)
-    department = models.ForeignKey(UserDepartment, models.DO_NOTHING)
     allow_report = models.IntegerField(default=1)
 
     class Meta:

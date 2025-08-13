@@ -83,7 +83,7 @@ class DastWebhook(AnonymousAuthEndPoint):
             IastAgent.objects.filter(
                 pk__in=(int(i)
                         for i in ser.validated_data['agent_id'])).values_list(
-                            'bind_project_id',
+                            'project_id',
                             'project_version_id').distinct(), )
         dast_list = []
         vul_level_id = VUL_LEVEL_DICT[ser.validated_data['vul_level']]

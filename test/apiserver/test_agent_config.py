@@ -38,9 +38,9 @@ class AgentConfigTestCase(AgentTestCase):
     def test_rep_agent_config2(self):
         agent = IastAgent.objects.filter(pk=self.agent_id).first()
         assert agent is not None
-        agent.bind_project.log_level = "INFO"
-        agent.bind_project.enable_log = True
-        agent.bind_project.save()
+        agent.project.log_level = "INFO"
+        agent.project.enable_log = True
+        agent.project.save()
         res = self.client.get(
             f"/api/v1/agent/config?agent_id={self.agent_id}",
             content_type="application/json",
@@ -55,8 +55,8 @@ class AgentConfigTestCase(AgentTestCase):
     def test_rep_agent_config3(self):
         agent = IastAgent.objects.filter(pk=self.agent_id).first()
         assert agent is not None
-        agent.bind_project.log_level = "INFO"
-        agent.bind_project.save()
+        agent.project.log_level = "INFO"
+        agent.project.save()
         res = self.client.get(
             f"/api/v1/agent/config?agent_id={self.agent_id}",
             content_type="application/json",

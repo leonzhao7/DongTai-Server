@@ -44,7 +44,6 @@ class AgentSerializer(serializers.ModelSerializer):
             "alias",
             "register_time",
             "startup_time",
-            "is_audit",
         ]
 
     def get_latest_heartbeat(self, obj):

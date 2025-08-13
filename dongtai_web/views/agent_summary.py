@@ -26,7 +26,7 @@ class AgentSummary(UserEndPoint):
             .only(
                 "server__ip",
                 "server__container",
-                "bind_project_id",
+                "project_id",
                 "language",
                 "token",
             )
@@ -34,7 +34,7 @@ class AgentSummary(UserEndPoint):
         )
         if not agent:
             return R.failure()
-        project = IastProject.objects.filter(project_id=agent.bind_project_id)
+        project = IastProject.objects.filter(project_id=agent.project_id)
         data = get_summary_by_agent_ids([agent.id])
         data["ip"] = agent.server.ip
         data["middleware"] = agent.server.container

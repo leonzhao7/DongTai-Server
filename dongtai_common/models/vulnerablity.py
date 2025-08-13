@@ -125,9 +125,9 @@ class IastVulnerabilityDocument(Document):
     hook_type_id = fields.IntegerField(attr="hook_type_id")
     status_id = fields.IntegerField(attr="status_id")
     level_id = fields.IntegerField(attr="level_id")
-    bind_project_id = fields.IntegerField(attr="agent.bind_project_id")
+    project_id = fields.IntegerField(attr="agent.project_id")
     project_version_id = fields.IntegerField(attr="agent.project_version_id")
-    project_name = fields.IntegerField(attr="agent.bind_project.name")
+    project_name = fields.IntegerField(attr="agent.project.name")
     token = fields.IntegerField(attr="agent.token")
     server_id = fields.IntegerField(attr="server_id")
     department_id = fields.IntegerField(attr="agent.department_id")
@@ -149,7 +149,7 @@ class IastVulnerabilityDocument(Document):
         to the updating of a lot of items.
         """
         if isinstance(related_instance, IastAgent):
-            if related_instance.bind_project_id < 0:
+            if related_instance.project_id < 0:
                 return related_instance.iastvulnerabilitymodel_set.all()
             return None
         return None

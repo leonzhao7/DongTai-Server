@@ -190,7 +190,7 @@ class NormalVulnHandler(BaseVulnHandler):
             .order_by("-latest_time")
             .first()
         )
-        project = IastProject.objects.filter(pk=self.agent.bind_project_id).first()
+        project = IastProject.objects.filter(pk=self.agent.project_id).first()
         from dongtai_common.models.strategy_user import IastStrategyUser
 
         scan_template = IastStrategyUser.objects.filter(pk=project.scan_id).first()
@@ -241,14 +241,14 @@ class NormalVulnHandler(BaseVulnHandler):
                 top_stack=self.app_caller[index + 1],
                 bottom_stack=self.app_caller[index + 2],
                 project_version_id=self.agent.project_version_id,
-                project_id=self.agent.bind_project_id,
+                project_id=self.agent.project_id,
                 language=self.agent.language,
                 server_id=self.agent.server_id,
             )
             log_vul_found(
                 iast_vul.agent.user_id,
-                iast_vul.agent.bind_project.name,
-                iast_vul.agent.bind_project_id,
+                iast_vul.agent.project.name,
+                iast_vul.agent.project_id,
                 iast_vul.id,  # type: ignore
                 iast_vul.strategy.vul_name,
             )
@@ -262,14 +262,14 @@ class NormalVulnHandler(BaseVulnHandler):
             pk__lt=iast_vul.id,
         ).delete()
         if not IastHeaderVulnerability.objects.filter(
-            project_id=self.agent.bind_project_id,
+            project_id=self.agent.project_id,
             project_version_id=self.agent.project_version_id,
             url=self.http_uri,
             vul=iast_vul.id,
         ).exists():
             try:
                 IastHeaderVulnerability.objects.create(
-                    project_id=self.agent.bind_project_id,
+                    project_id=self.agent.project_id,
                     project_version_id=self.agent.project_version_id,
                     url=self.http_uri,
                     vul_id=iast_vul.id,

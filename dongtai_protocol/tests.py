@@ -65,7 +65,7 @@ class AgentHeartBeatTestCase(AgentTestCase):
         assert self.agent.server.hostname is not None
         project_agents = (
             IastAgent.objects.values_list("id", flat=True)
-            .filter(bind_project_id=self.agent.bind_project_id, language=self.agent.language)
+            .filter(project_id=self.agent.project_id, language=self.agent.language)
             .union(
                 addtional_agenti_ids_query_filepath_simhash(self.agent.filepathsimhash, language=self.agent.language),
                 addtional_agent_ids_query_deployway_and_path(

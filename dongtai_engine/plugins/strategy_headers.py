@@ -152,7 +152,7 @@ def save_vul(vul_type, method_pool, position="", data=""):
         .first()
     )
     timestamp = int(time.time())
-    project_time_stamp_update.apply_async((method_pool.agent.bind_project_id,), countdown=5)
+    project_time_stamp_update.apply_async((method_pool.agent.project_id,), countdown=5)
     project_version_time_stamp_update.apply_async((method_pool.agent.project_version_id,), countdown=5)
     if vul:
         vul.url = ""
@@ -221,14 +221,14 @@ def save_vul(vul_type, method_pool, position="", data=""):
             param_name="",
             method_pool_id=method_pool.id,
             project_version_id=method_pool.agent.project_version_id,
-            project_id=method_pool.agent.bind_project_id,
+            project_id=method_pool.agent.project_id,
             language=method_pool.agent.language,
             server_id=method_pool.agent.server_id,
         )
         log_vul_found(
             vul.agent.user_id,
-            vul.agent.bind_project.name,
-            vul.agent.bind_project_id,
+            vul.agent.project.name,
+            vul.agent.project_id,
             vul.id,
             vul.strategy.vul_name,
         )  # type: ignore
@@ -236,14 +236,14 @@ def save_vul(vul_type, method_pool, position="", data=""):
     cache.delete(cache_key)
     header_vul = None
     if not IastHeaderVulnerability.objects.filter(
-        project_id=method_pool.agent.bind_project_id,
+        project_id=method_pool.agent.project_id,
         project_version=method_pool.agent.project_version_id,
         url=method_pool.uri,
         vul=vul.id,
     ).exists():
         try:
             header_vul = IastHeaderVulnerability.objects.create(
-                project_id=method_pool.agent.bind_project_id,
+                project_id=method_pool.agent.project_id,
                 project_version_id=method_pool.agent.project_version_id,
                 url=method_pool.uri,
                 vul_id=vul.id,

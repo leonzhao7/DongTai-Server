@@ -84,7 +84,7 @@ def api_route_gather(agent_id, api_routes):
                 except Exception as e:
                     logger.exception("uncatched exception: ", exc_info=e)
             logger.info(_("API navigation log record successfully"))
-        project_time_stamp_update.apply_async((agent.bind_project_id,), countdown=5)
+        project_time_stamp_update.apply_async((agent.project_id,), countdown=5)
         project_version_time_stamp_update.apply_async((agent.project_version_id,), countdown=5)
     except Exception as e:
         logger.info(_("API navigation log failed, why: {}").format(e), exc_info=e)
@@ -101,7 +101,7 @@ def _route_dump(item, api_method, agent):
     item["agent"] = agent
     item["path"] = item["uri"]
     del item["uri"]
-    item["project_id"] = agent.bind_project_id
+    item["project_id"] = agent.project_id
     item["project_version_id"] = agent.project_version_id
     return item
 

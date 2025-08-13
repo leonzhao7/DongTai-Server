@@ -15,7 +15,7 @@ def is_strategy_enable(vul_type, method_pool):
         ).first()
         if vul_strategy is None:
             return False
-        project_id = method_pool.agent.bind_project_id
+        project_id = method_pool.agent.project_id
         project = IastProject.objects.filter(id=project_id).first()
         if project is None:
             return False

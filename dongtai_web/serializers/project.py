@@ -25,32 +25,32 @@ def get_vul_levels_dict(queryset: "QuerySet | _SupportsPagination", exclude_vul_
     )
     vul_levels_dict = defaultdict(list)
     for k in vul_levels:
-        k["agent__bind_project_id"] = k["project_id"]
-        vul_levels_dict[k["agent__bind_project_id"]].append(k)
+        k["agent__project_id"] = k["project_id"]
+        vul_levels_dict[k["agent__project_id"]].append(k)
     return vul_levels_dict
 
 
 def get_project_language(queryset: "QuerySet | _SupportsPagination") -> defaultdict:
     project_languages = (
-        IastAgent.objects.values("bind_project_id", "language")
-        .filter(bind_project_id__in=list(queryset.values_list("id", flat=True)))
+        IastAgent.objects.values("project_id", "language")
+        .filter(project_id__in=list(queryset.values_list("id", flat=True)))
         .distinct()
     )
     project_language_dict = defaultdict(list)
     for k in project_languages:
-        project_language_dict[k["bind_project_id"]].append(k["language"])
+        project_language_dict[k["project_id"]].append(k["language"])
     return project_language_dict
 
 
 def get_agent_count(queryset: "QuerySet | _SupportsPagination") -> defaultdict:
     agent_counts = (
-        IastAgent.objects.values("bind_project_id")
-        .filter(bind_project_id__in=list(queryset.values_list("id", flat=True)))
+        IastAgent.objects.values("project_id")
+        .filter(project_id__in=list(queryset.values_list("id", flat=True)))
         .annotate(agent_count=Count("id"))
     )
     agent_count_dict = defaultdict(int)
     for k in agent_counts:
-        agent_count_dict[k["bind_project_id"]] = k["agent_count"]
+        agent_count_dict[k["project_id"]] = k["agent_count"]
     return agent_count_dict
 
 

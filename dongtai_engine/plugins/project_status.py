@@ -31,7 +31,7 @@ def get_project_warning_time() -> dict[str, int]:
 def update_project_status() -> None:
     logger.info("检测项目状态更新开始")
     for project in IastProject.objects.all():
-        online_agent_count = IastAgent.objects.filter(bind_project=project, online=True).count()
+        online_agent_count = IastAgent.objects.filter(project=project, online=True).count()
 
         old_status = project.status
 

@@ -7,9 +7,9 @@ import string
 import time
 
 from django.db import transaction
+from django.db.transaction import atomic
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
-from shortuuid import ShortUUID
 
 from dongtai_common.endpoint import OpenApiEndPoint, R
 from dongtai_common.models.agent import IastAgent
@@ -26,10 +26,6 @@ from dongtai_protocol.decrypter import parse_data
 logger = logging.getLogger("dongtai.openapi")
 
 
-def generate_shoutuuid() -> str:
-    return ShortUUID(alphabet=string.ascii_letters + string.digits).random(length=22)
-
-
 def get_agent_allow_report(agent_id):
     return 1
 
@@ -43,47 +39,19 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
     description = "引擎注册"
 
     @staticmethod
-    def register_agent(token, version, language, project_name, user, project_version):
-        project = IastProject.objects.values("id").filter(name=project_name).first()
-        is_audit = AgentRegisterEndPoint.get_is_audit()
-        project_id = -1
-        project_version_id = -1
-        if project:
-            if project_version:
-                project_current_version = project_version
-            else:
-                project_current_version = project.current_version
-            project_id = project["id"]
-            project_version_id = project_current_version.id
-        agent_id = AgentRegisterEndPoint.get_agent_id(
-            token=token,
-            project_name=project_name,
-            user=user,
-            current_project_version_id=project_version_id,
-        )
-        allow_report = get_agent_allow_report(agent_id)
-        if agent_id == -1:
-            agent_id = AgentRegisterEndPoint.__register_agent(
-                exist_project=False,
-                token=token,
-                user=user,
-                version=version,
-                project_id=project_id,
-                project_name=project_name,
-                project_version_id=project_version_id,
-                language=language,
-                is_audit=is_audit,
-                allow_report=allow_report,
-            )
-        else:
-            IastAgent.objects.filter(pk=agent_id).update(
-                is_core_running=1, online=1, is_running=1, allow_report=allow_report
-            )
-        return agent_id
-
-    @staticmethod
-    def get_is_audit():
-        return 1
+    def register_agent(token, version, language, project, user, project_version):
+        with (transaction.atomic()):
+            agent = user.get_agents().filter(token=token, project=project, project_version=project_version).first()
+            if agent is None:
+                agent = IastAgent.objects.create(token=token,
+                    version=version,
+                    latest_time=int(time.time()),
+                    user=user,
+                    project=project,
+                    project_version=project_version,
+                    language=language,
+                )
+            return agent.id
 
     @staticmethod
     def get_command(envs):
@@ -245,61 +213,32 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
             cluster_version = param.get("clusterVersion", "")
             # end by song
             pid = param.get("pid")
-            param.get("autoCreateProject", 0)
             user = request.user
             version_name = param.get("projectVersion", "V1.0")
             version_name = version_name if version_name else "V1.0"
             template_id = param.get("projectTemplateId", None)
 
-            if template_id is not None:
-                template = IastProjectTemplate.objects.filter(pk=template_id).first()
-                if not template:
-                    template = IastProjectTemplate.objects.filter(is_system=1).first()
-            else:
-                template = IastProjectTemplate.objects.filter(is_system=1).first()
+            # if template_id is not None:
+            #     template = IastProjectTemplate.objects.filter(pk=template_id).first()
+            #     if not template:
+            #         template = IastProjectTemplate.objects.filter(is_system=1).first()
+            # else:
+            #     template = IastProjectTemplate.objects.filter(is_system=1).first()
 
             default_params = {
-                "scan_id": 5,
-                "agent_count": 0,
-                "mode": "插桩模式",
                 "latest_time": int(time.time()),
-                "template_id": template.id if template else -1,
-                "user": user,
-                "department_id": 1,
-                "token": generate_shoutuuid(),
+                "template_id": template_id,
             }
-
-            default_params.update(template.to_full_project_args() if template else {})
-            with transaction.atomic():
-                (
-                    obj,
-                    project_created,
-                    project_version,
-                    version_created,
-                    template,
-                ) = project_create(default_params, project_name, request.user, version_name, template)
-            if project_created:
-                logger.info(_("auto create project {}").format(obj.id))
-            if version_created:
-                logger.info(_("auto create project version {}").format(project_version.id))
-            if param.get("projectName", None) and param.get("projectVersion", None):
-                agent_id = self.register_agent(
-                    token=token,
-                    project_name=project_name,
-                    language=language,
-                    version=version,
-                    project_version=project_version,
-                    user=user,
-                )
-            else:
-                agent_id = self.register_agent(
-                    token=token,
-                    project_name=project_name,
-                    language=language,
-                    version=version,
-                    user=user,
-                    project_version=None,
-                )
+            project, project_version = user.create_project_version(project_name, version_name, default_params, {})
+            logger.info(_("auto create project {}").format(project.id))
+            logger.info(_("auto create project version {}").format(project_version.id))
+            agent_id = self.register_agent(
+                token=token,
+                project=project,
+                language=language,
+                version=version,
+                project_version=project_version,
+                user=user)
 
             self.register_server(
                 agent_id=agent_id,
@@ -316,7 +255,6 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
                 server_ipaddresslist=get_ipaddresslist(network),
             )
 
-            core_auto_start = 0
             if agent_id != -1:
                 agent = IastAgent.objects.filter(pk=agent_id).first()
                 if not agent:
@@ -324,9 +262,8 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
                 agent.register_time = int(time.time())
                 IastAgent.objects.filter(pk=agent_id).update(register_time=int(time.time()))
                 agent.save()
-                core_auto_start = agent.is_audit
 
-            return R.success(data={"id": agent_id, "coreAutoStart": core_auto_start})
+            return R.success(data={"id": agent_id, "coreAutoStart": 1})
         except Exception as e:
             logger.info(f"探针注册失败,原因:{e}", exc_info=True)
             return R.failure(msg="探针注册失败")
@@ -337,7 +274,7 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
         if project:
             queryset = IastAgent.objects.values("id").filter(
                 token=token,
-                bind_project=project,
+                project=project,
                 project_version_id=current_project_version_id,
             )
         else:
@@ -350,44 +287,6 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
         if agent:
             return agent["id"]
         return -1
-
-    @staticmethod
-    def __register_agent(
-        exist_project,
-        token,
-        user,
-        version,
-        project_id,
-        project_name,
-        project_version_id,
-        language,
-        is_audit,
-        allow_report,
-    ):
-        if exist_project:
-            IastAgent.objects.filter(
-                token=token,
-                online=1,
-            ).update(online=0)
-        agent = IastAgent.objects.create(
-            token=token,
-            version=version,
-            latest_time=int(time.time()),
-            user=user,
-            is_running=1,
-            bind_project_id=project_id,
-            project_name=project_name,
-            control=0,
-            is_control=0,
-            is_core_running=1,
-            online=1,
-            project_version_id=project_version_id,
-            language=language,
-            is_audit=is_audit,
-            allow_report=allow_report,
-            department_id=1,
-        )
-        return agent.id
 
 
 def get_ipaddress(network: str):
@@ -421,32 +320,3 @@ def get_ipaddresslist(network: str) -> list:
     except Exception as e:
         logger.exception("uncatched exception: ", exc_info=e)
     return []
-
-
-def project_create(default_params, project_name, user, version_name, template):
-    project_created = False
-    obj = IastProject.objects.filter(
-        name=project_name,
-    ).first()
-    if not obj:
-        obj, project_created = IastProject.objects.get_or_create(
-            name=project_name,
-            defaults=default_params,
-        )
-    project_version, version_created = IastProjectVersion.objects.get_or_create(
-        project_id=obj.id,
-        version_name=version_name,
-        defaults={
-            "user": user,
-            "version_name": version_name,
-            "status": 1,
-            "description": "",
-            "current_version": 0,
-        },
-    )
-    if version_created:
-        count = IastProjectVersion.objects.filter(project_id=obj.id).count()
-        if count == 1:
-            project_version.current_version = 1
-            project_version.save()
-    return obj, project_created, project_version, version_created, template

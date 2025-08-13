@@ -51,9 +51,10 @@ class AgentConfigAllinOneView(OpenApiEndPoint):
             return R.failure(msg="No agent found.")
         data: dict[str, Any] = {}
         data, agent_id = patch_point(data, agent_id)
-        if agent.bind_project is not None and agent.bind_project.enable_log is not None:
-            data["enable_log"] = agent.bind_project.enable_log
-        if agent.bind_project is not None and agent.bind_project.log_level is not None:
-            data["log_level"] = agent.bind_project.log_level
+        if agent.project:
+            (enable, level) = agent.project.get_log_level()
+            if enable:
+                data["enable_log"] = enable
+                data["log_level"] = level
         data[REPORT_VALIDATED_SINK_KEY] = get_report_validated_sink_profile()[REPORT_VALIDATED_SINK_KEY]
         return R.success(data=data)

@@ -29,7 +29,7 @@ class ScanStrategyTestCase(APITestCase):
             latest_time=int(time.time()),
             user=self.user,
             is_running=1,
-            bind_project_id=-1,
+            project_id=-1,
             project_name="test",
             control=0,
             is_control=0,
@@ -37,7 +37,6 @@ class ScanStrategyTestCase(APITestCase):
             online=1,
             project_version_id=1,
             language="JAVA",
-            is_audit=1,
         )
         vuln = IastVulnerabilityModel.objects.create(
             level_id=1,

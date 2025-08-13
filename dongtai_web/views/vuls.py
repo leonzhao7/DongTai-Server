@@ -249,7 +249,7 @@ class VulsEndPoint(UserEndPoint):
             else:
                 current_project_version = get_project_version_by_id(version_id)
             agents = auth_agents.filter(
-                bind_project_id=project_id,
+                project_id=project_id,
                 project_version_id=current_project_version.get("version_id", 0),
             )
             queryset = queryset.filter(agent_id__in=agents)

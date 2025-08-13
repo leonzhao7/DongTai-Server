@@ -55,6 +55,13 @@ class IastProjectTemplate(models.Model):
 
 
 class IastProject(models.Model):
+    LOG_LEVEL_NONE = 0
+    LOG_LEVEL_ERROR = 1
+    LOG_LEVEL_WARN = 2
+    LOG_LEVEL_INFO = 3
+    LOG_LEVEL_DEBUG = 4
+    LOG_LEVEL_TRACE = 5
+
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=True)
     mode = models.CharField(default="插桩模式", max_length=255, blank=True)
@@ -72,8 +79,7 @@ class IastProject(models.Model):
     tenant = models.ForeignKey(UserTenant, on_delete=models.CASCADE, related_name="projects")
     template = models.ForeignKey(IastProjectTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     current_version = models.ForeignKey("IastProjectVersion", on_delete=models.SET_NULL, null=True, blank=True)
-    enable_log = models.BooleanField(null=True)
-    log_level = models.CharField(max_length=16, null=True, blank=True)
+    log_level = models.IntegerField(default=LOG_LEVEL_ERROR)
     last_has_online_agent_time = models.IntegerField(default=get_timestamp)
     status = models.IntegerField(default=0, choices=ProjectStatus.choices)
 
@@ -88,3 +94,36 @@ class IastProject(models.Model):
 
     def get_url(self):
         return os.path.join(DOMAIN_VUL, "project/projectDetail", str(self.id))
+
+    def generate_log_level(self, enable, level_str):
+        if enable:
+            if level_str.toupper() == "ERROR":
+                return self.LOG_LEVEL_ERROR
+            elif level_str.toupper() == "WARN":
+                return self.LOG_LEVEL_WARN
+            elif level_str.toupper() == "INFO":
+                return self.LOG_LEVEL_INFO
+            elif level_str.toupper() == "DEBUG":
+                return self.LOG_LEVEL_DEBUG
+            elif level_str.toupper() == "TRACE":
+                return self.LOG_LEVEL_INFO
+
+        return self.LOG_LEVEL_NONE
+
+    def get_log_level(self):
+        if self.log_level == self.LOG_LEVEL_NONE:
+            return False, ""
+        else:
+            if self.log_level == self.LOG_LEVEL_ERROR:
+                level = "ERROR"
+            elif self.log_level == self.LOG_LEVEL_WARN:
+                level = "WARN"
+            elif self.log_level == self.LOG_LEVEL_INFO:
+                level = "INFO"
+            elif self.log_level == self.LOG_LEVEL_DEBUG:
+                level = "DEBUG"
+            elif self.log_level == self.LOG_LEVEL_TRACE:
+                level = "TRACE"
+            else:
+                level = ""
+            return True, level

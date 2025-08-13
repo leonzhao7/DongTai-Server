@@ -108,7 +108,7 @@ def search_and_save_vul(
             verify_time=timestamp,
             update_time=timestamp,
         )
-        project_time_stamp_update.apply_async((method_pool_model.agent.bind_project_id,), countdown=5)
+        project_time_stamp_update.apply_async((method_pool_model.agent.project_id,), countdown=5)
         project_version_time_stamp_update.apply_async((method_pool_model.agent.project_version_id,), countdown=5)
     validator_nodes = list(filter(lambda x: "policyType" in x and x["policyType"] == "validator", method_pool))
     for validator_node in validator_nodes:
@@ -189,7 +189,7 @@ def search_vul_from_method_pool(self, method_pool_sign, agent_id, retryable=Fals
         )
         check_response_header(method_pool_model)
         check_response_content(method_pool_model)
-        scan_id = get_scan_id(method_pool_model.agent.bind_project_id)
+        scan_id = get_scan_id(method_pool_model.agent.project_id)
         strategies = load_sink_strategy(scan_id=scan_id)
         engine = VulEngine()
         method_pool = json.loads(method_pool_model.method_pool) if method_pool_model else []
@@ -258,7 +258,7 @@ def search_vul_from_replay_method_pool(method_pool_id):
 
 def get_project_agents(agent):
     return IastAgent.objects.filter(
-        bind_project_id=agent.bind_project_id,
+        project_id=agent.project_id,
         project_version_id=agent.project_version_id,
         user=agent.user,
     )

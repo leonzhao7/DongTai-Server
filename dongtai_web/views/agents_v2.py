@@ -62,11 +62,11 @@ class AgentListv2(UserEndPoint, ViewSet):
         except ValidationError as e:
             return R.failure(data=e.detail)
         projects = request.user.get_projects()
-        filter_condiction = generate_filter(ser.validated_data["state"]) & Q(bind_project__in=projects)
+        filter_condiction = generate_filter(ser.validated_data["state"]) & Q(project__in=projects)
         if ser.validated_data["project_name"]:
-            filter_condiction = filter_condiction & Q(bind_project__name__icontains=ser.validated_data["project_name"])
+            filter_condiction = filter_condiction & Q(project__name__icontains=ser.validated_data["project_name"])
         if ser.validated_data["project_id"] is not None:
-            filter_condiction = filter_condiction & Q(bind_project_id=ser.validated_data["project_id"])
+            filter_condiction = filter_condiction & Q(project_id=ser.validated_data["project_id"])
         if ser.validated_data["allow_report"] is not None:
             filter_condiction = filter_condiction & Q(allow_report=ser.validated_data["allow_report"])
         if ser.validated_data["last_days"] is not None and ser.validated_data["last_days"] > 0:
@@ -118,7 +118,7 @@ class AgentListv2(UserEndPoint, ViewSet):
                 filter_condiction = filter_condiction & Q(heartbeat__dt__gte=int(time()) - 60 * 60 * 24 * last_days)
             res[type_] = IastAgent.objects.filter(
                 filter_condiction,
-                bind_project__in=projects,
+                project__in=projects,
             ).count()
 
         return R.success(data=res)
@@ -241,7 +241,7 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
         .values(
             "alias",
             "token",
-            "bind_project__name",
+            "project__name",
             "user",
             "language",
             "server__ip",
@@ -258,7 +258,7 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
             "is_control",
             "online",
             "id",
-            "bind_project__id",
+            "project__id",
             "version",
             "except_running_status",
             "actual_running_status",

@@ -36,11 +36,11 @@ class ProjectEngines(UserEndPoint):
         projects = request.user.get_projects()
         queryset = (
             IastAgent.objects.filter(
-                bind_project__in=projects,
+                project__in=projects,
             )
             .filter(
                 online=const.RUNNING,
-                bind_project_id__in=[0, pid],
+                project_id__in=[0, pid],
             )
             .values("id", "token", "alias")
         )

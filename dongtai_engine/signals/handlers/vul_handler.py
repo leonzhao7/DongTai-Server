@@ -273,7 +273,7 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
         strategy_id=strategy_id,
         pattern_uri=pattern_uri,
         http_method=vul_meta.http_method,
-        project_id=vul_meta.agent.bind_project_id,
+        project_id=vul_meta.agent.project_id,
         param_name=param_name,
         status_id=const.VUL_IGNORE,
     ).exists():
@@ -291,7 +291,7 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
         .order_by("-latest_time")
         .first()
     )
-    project_time_stamp_update.apply_async((vul_meta.agent.bind_project_id,), countdown=5)
+    project_time_stamp_update.apply_async((vul_meta.agent.project_id,), countdown=5)
     project_version_time_stamp_update.apply_async((vul_meta.agent.project_version_id,), countdown=5)
     if vul:
         vul.url = vul_meta.url
@@ -372,14 +372,14 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
             param_name=param_name,
             method_pool_id=vul_meta.id,
             project_version_id=vul_meta.agent.project_version_id,
-            project_id=vul_meta.agent.bind_project_id,
+            project_id=vul_meta.agent.project_id,
             language=vul_meta.agent.language,
             server_id=vul_meta.agent.server_id,
         )
         log_vul_found(
             vul.agent.user_id,
-            vul.agent.bind_project.name,  # type: ignore
-            vul.agent.bind_project_id,
+            vul.agent.project.name,  # type: ignore
+            vul.agent.project_id,
             vul.id,
             vul.strategy.vul_name,
         )  # type: ignore
@@ -421,7 +421,7 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
     for header in base64.b64decode(vul.req_header).decode("utf-8").split("\n"):
         if header.startswith("iast-server-replay-uuid:"):
             replay_uuid = header.removeprefix("iast-server-replay-uuid:")
-            msg = f"id为{vul.agent.bind_project.id}的项目{vul.agent.bind_project.name}在UUID为{replay_uuid}的漏洞重放中检测到漏洞{vul.strategy.vul_name}"
+            msg = f"id为{vul.agent.project.id}的项目{vul.agent.project.name}在UUID为{replay_uuid}的漏洞重放中检测到漏洞{vul.strategy.vul_name}"
             IastVulLog.objects.create(
                 msg_type=MessageTypeChoices.VUL_REPLAY,
                 msg=msg,
@@ -436,7 +436,7 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
 
 
 def create_vul_recheck_task(vul_id, agent, timestamp):
-    project = IastProject.objects.filter(id=agent.bind_project_id).first()
+    project = IastProject.objects.filter(id=agent.project_id).first()
     if project and project.vul_validation == VulValidation.DISABLE:
         return
     enable_validate = False
@@ -496,7 +496,7 @@ def handler_replay_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, b
         vul.status_id = settings.CONFIRMED
         vul.latest_time = timestamp
         vul.save(update_fields=["status_id", "latest_time", "latest_time_desc"])
-        project_time_stamp_update.apply_async((vul_meta.agent.bind_project_id,), countdown=5)
+        project_time_stamp_update.apply_async((vul_meta.agent.project_id,), countdown=5)
         project_version_time_stamp_update.apply_async((vul_meta.agent.project_version_id,), countdown=5)
 
         IastReplayQueue.objects.filter(id=kwargs["replay_id"]).update(

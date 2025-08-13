@@ -96,9 +96,9 @@ class IReportHandler:
         return "no permission"
 
     def get_project_agents(self, agent):
-        if agent.bind_project_id != 0:
+        if agent.project_id != 0:
             agents = IastAgent.objects.filter(
-                Q(project_name=self.project_name) | Q(bind_project_id=agent.bind_project_id),
+                Q(project_name=self.project_name) | Q(project_id=agent.project_id),
                 online=1,
                 project_version_id=agent.project_version_id,
             )
@@ -115,7 +115,7 @@ class IReportHandler:
             },
             (
                 "id",
-                "bind_project_id",
+                "project_id",
                 "project_version_id",
                 "project_name",
                 "language",

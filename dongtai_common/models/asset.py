@@ -121,7 +121,7 @@ class IastAssetDocument(Document):
         to the updating of a lot of items.
         """
         if isinstance(related_instance, IastAgent):
-            if related_instance.bind_project_id < 0:
+            if related_instance.project_id < 0:
                 return Asset.objects.filter(agent_id=related_instance.pk).all()
             return None
         return None

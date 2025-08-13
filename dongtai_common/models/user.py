@@ -2,8 +2,9 @@
 # datetime:2021/1/25 下午6:43
 
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q, QuerySet
+from django.db.transaction import atomic
 from django.utils import timezone
 
 from dongtai_common import generate_token
@@ -21,7 +22,7 @@ class User(AbstractUser):
     deleted = models.BooleanField(default=False)
     failed_login_count = models.IntegerField(default=0)
     failed_login_time = models.DateTimeField(default=timezone.now)
-    token = models.CharField(max_length=32, blank=True, default=generate_token)
+    token = models.CharField(max_length=32, default=generate_token)
 
     class Meta:
         db_table = "user"
@@ -78,6 +79,10 @@ class User(AbstractUser):
 
         return User.objects.filter(id=self.id).all()
 
+    # 过滤当前用户可见的agent
+    def get_agents(self) -> QuerySet:
+        return self.agents.all()
+
     def has_privilege(self, role_level, tenant_id) -> bool:
         if self.role_level == UserRole.LEVEL_SUPER:
             return True
@@ -93,3 +98,20 @@ class User(AbstractUser):
         if self.is_normal():
             return self.department == project.department
         return False
+
+    @transaction.atomic
+    def create_project_version(self, project_name, version_name, project_defaults, version_defaults):
+        from dongtai_common.models import IastProjectVersion
+
+        project, created =self.get_projects().update_or_create(name=project_name,
+                                                               tenant=self.tenant,
+                                                               defaults=project_defaults)
+        version, version_created = IastProjectVersion.objects.update_or_create(version_name=version_name,
+                                                                               project=project,
+                                                                               defaults=version_defaults)
+        if self.is_tenant_admin():
+            project.departments.clear()
+        else:
+            project.departments.set(self.departments.all())
+        return project, version
+

@@ -57,7 +57,7 @@ class HardEncodeVulHandler(IReportHandler):
             return
         from dongtai_common.models.strategy_user import IastStrategyUser
 
-        scan_template = IastStrategyUser.objects.filter(pk=self.agent.bind_project.scan_id).first()
+        scan_template = IastStrategyUser.objects.filter(pk=self.agent.project.scan_id).first()
         if scan_template:
             strategy_ids = [int(i) for i in scan_template.content.split(",")]
             if strategy.id not in strategy_ids:
@@ -115,7 +115,7 @@ class HardEncodeVulHandler(IReportHandler):
                 bottom_stack=f"硬编码值:{self.value}",
                 agent=self.agent,
                 project_version_id=self.agent.project_version_id,
-                project_id=self.agent.bind_project_id,
+                project_id=self.agent.project_id,
                 language=self.agent.language,
                 server_id=self.agent.server_id,
             )
@@ -128,8 +128,8 @@ class HardEncodeVulHandler(IReportHandler):
         ).delete()
         log_vul_found(
             iast_vul.agent.user_id,
-            iast_vul.agent.bind_project.name,
-            iast_vul.agent.bind_project_id,
+            iast_vul.agent.project.name,
+            iast_vul.agent.project_id,
             iast_vul.id,  # type: ignore
             iast_vul.strategy.vul_name,
         )

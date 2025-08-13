@@ -96,7 +96,7 @@ class HeartBeatHandler(IReportHandler):
                 project_agents = (
                     IastAgent.objects.values_list("id", flat=True)
                     .filter(
-                        bind_project_id=self.agent.bind_project_id,
+                        project_id=self.agent.project_id,
                         language=self.agent.language,
                     )
                     .union(
@@ -213,7 +213,7 @@ def addtional_agenti_ids_query_filepath_simhash(filepathsimhash: str, language: 
 
 
 def get_project_vul_validation_state(agent_id):
-    state = IastAgent.objects.filter(pk=agent_id).values_list("bind_project__vul_validation", flat=True).first()
+    state = IastAgent.objects.filter(pk=agent_id).values_list("project__vul_validation", flat=True).first()
     if state is None:
         state = VulValidation.FOLLOW_GLOBAL
     return state

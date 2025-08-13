@@ -196,7 +196,7 @@ class RequestReplayEndPoint(UserEndPoint):
                 agent = IastAgent.objects.filter(pk=agent_id).first()
                 check_failure = self.check_agent_active(agent)
                 if check_failure and agent is not None:
-                    agent = IastAgent.objects.filter(bind_project_id=agent.bind_project_id, online=1).first()
+                    agent = IastAgent.objects.filter(project_id=agent.project_id, online=1).first()
                 check_failure = self.check_agent_active(agent)
             else:
                 check_failure = self.check_agent_active(method_pool_model.agent)
