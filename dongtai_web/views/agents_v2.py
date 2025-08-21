@@ -32,7 +32,6 @@ class StateType(IntegerChoices):
     STOP = 3
     UNINSTALL = 4
     ONLINE = 5
-    ALLOW_REPORT = 6
 
 
 class AgentListv2ArgsSerializer(serializers.Serializer):
@@ -42,7 +41,6 @@ class AgentListv2ArgsSerializer(serializers.Serializer):
     last_days = serializers.IntegerField(default=None, required=False, help_text=_("Last days"))
     project_id = serializers.IntegerField(default=None, required=False, help_text=_("project_id"))
     project_name = serializers.CharField(default=None, help_text=_("project_name"))
-    allow_report = serializers.IntegerField(default=None, required=False, help_text=_("allow_report"))
     version = serializers.CharField(default=None, help_text="agent 版本")
 
 
@@ -67,8 +65,6 @@ class AgentListv2(UserEndPoint, ViewSet):
             filter_condiction = filter_condiction & Q(project__name__icontains=ser.validated_data["project_name"])
         if ser.validated_data["project_id"] is not None:
             filter_condiction = filter_condiction & Q(project_id=ser.validated_data["project_id"])
-        if ser.validated_data["allow_report"] is not None:
-            filter_condiction = filter_condiction & Q(allow_report=ser.validated_data["allow_report"])
         if ser.validated_data["last_days"] is not None and ser.validated_data["last_days"] > 0:
             filter_condiction = filter_condiction & Q(
                 heartbeat__dt__gte=int(time()) - 60 * 60 * 24 * ser.validated_data["last_days"]
@@ -175,8 +171,6 @@ def generate_filter(state: StateType) -> Q:
         return Q(online=0)
     if state == StateType.ONLINE:
         return Q(online=1)
-    if state == StateType.ALLOW_REPORT:
-        return Q(allow_report=1)
     return Q()
 
 
@@ -262,8 +256,6 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
             "version",
             "except_running_status",
             "actual_running_status",
-            "state_status",
-            "allow_report",
         )
         .order_by("-latest_time")
     )

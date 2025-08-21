@@ -62,7 +62,7 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
             return R.failure(status=202, msg=_("Operation Failed"))
 
     @transaction.atomic
-    def stop(self, request:Request):
+    def lock(self, request:Request):
         try:
             user_id = request.data.get("id", -1)
             user = request.user.get_users().filter(id=user_id).first()
@@ -71,6 +71,22 @@ class UserManage(UserEndPoint, viewsets.ViewSet):
 
             user.deleted = True
             user.is_active = False
+            user.save()
+            return R.success()
+        except Exception as e:
+            logger.exception("uncatched exception: ", exc_info=e)
+            return R.failure(status=202, msg=_("Operation Failed"))
+
+    @transaction.atomic
+    def unlock(self, request: Request):
+        try:
+            user_id = request.data.get("id", -1)
+            user = request.user.get_users().filter(id=user_id).first()
+            if user is None:
+                return R.failure(msg="用户不存在")
+
+            user.deleted = False
+            user.is_active = True
             user.save()
             return R.success()
         except Exception as e:

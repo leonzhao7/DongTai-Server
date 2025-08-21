@@ -323,48 +323,6 @@ def update_agent_status():
 
 
 @shared_task(queue="dongtai-periodic-task")
-def heartbeat():
-    """
-    发送心跳
-    :return:
-    """
-    # 查询agent数量
-
-    logger.info("dongtai_engine.tasks.heartbeat is running")
-    agents = IastAgent.objects.all()
-    agent_enable = agents.values("id").filter(is_running=1).count()
-    agent_counts = agents.values("id").count()
-    heartbeat = IastHeartbeat.objects.values("id").filter(agent__in=agents).annotate(Sum("req_count")).count()
-    project_count = IastProject.objects.values("id").count()
-    user_count = User.objects.values("id").count()
-    vul_count = IastVulnerabilityModel.objects.values("id").count()
-    method_pool_count = MethodPool.objects.values("id").count()
-    heartbeat_raw = {
-        "status": 200,
-        "msg": "engine is running",
-        "agentCount": agent_counts,
-        "reqCount": heartbeat,
-        "agentEnableCount": agent_enable,
-        "projectCount": project_count,
-        "userCount": user_count,
-        "vulCount": vul_count,
-        "methodPoolCount": method_pool_count,
-        "timestamp": int(time.time()),
-    }
-    try:
-        logger.info("[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service.")
-        resp = requests.post(
-            url="http://openapi.iast.huoxian.cn:8000/api/v1/engine/heartbeat",
-            json=heartbeat_raw,
-        )
-        if resp.status_code == 200:
-            logger.info("[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service Successful.")
-        logger.info("[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service Failure.")
-    except Exception as e:
-        logger.info(f"[dongtai_engine.tasks.heartbeat] send heartbeat data to OpenApi Service Error. reason is {e}")
-
-
-@shared_task(queue="dongtai-periodic-task")
 def vul_recheck():
     """
     定时处理漏洞验证

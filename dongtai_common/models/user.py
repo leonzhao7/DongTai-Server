@@ -69,6 +69,14 @@ class User(AbstractUser):
             departs = self.get_departments()
             return IastProject.objects.filter(departments__in=departs.values_list("id")).all()
 
+    def get_project_templates(self) -> QuerySet:
+        from dongtai_common.models.project import IastProjectTemplate
+
+        if self.is_system_admin():
+            return IastProjectTemplate.objects.filter(tenant__isnull=True).all()
+        else:
+            return IastProjectTemplate.objects.filter(Q(tenant__isnull=True) | Q(tenant=self.tenant)).all()
+
     # 过滤当前用户可见的user
     def get_users(self) -> QuerySet:
         if self.is_super_admin():
@@ -113,5 +121,8 @@ class User(AbstractUser):
             project.departments.clear()
         else:
             project.departments.set(self.departments.all())
+        if not project.current_version:
+            project.current_version = version
+            project.save()
         return project, version
 

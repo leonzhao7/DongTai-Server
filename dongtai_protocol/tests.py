@@ -59,7 +59,6 @@ class AgentHeartBeatTestCase(AgentTestCase):
         assert self.agent is not None
         assert self.agent.filepathsimhash is not None
         assert self.agent.language is not None
-        assert self.agent.servicetype is not None
         assert self.agent.server is not None
         assert self.agent.server.path is not None
         assert self.agent.server.hostname is not None
@@ -69,7 +68,6 @@ class AgentHeartBeatTestCase(AgentTestCase):
             .union(
                 addtional_agenti_ids_query_filepath_simhash(self.agent.filepathsimhash, language=self.agent.language),
                 addtional_agent_ids_query_deployway_and_path(
-                    self.agent.servicetype,
                     self.agent.server.path,
                     self.agent.server.hostname,
                     language=self.agent.language,

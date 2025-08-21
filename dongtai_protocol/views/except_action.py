@@ -27,7 +27,6 @@ class AgentActionV2EndPoint(OpenApiEndPoint, ViewSet):
             param = parse_data(request.read())
             agent_id = int(param.get("agentId", None))
             actual_running_status = int(param.get("actualRunningStatus", None))
-            state_status = int(param.get("stateStatus", None))
         except Exception as exception:
             logger.error(exception, exc_info=True)
             return R.failure(msg="参数错误")
@@ -40,7 +39,6 @@ class AgentActionV2EndPoint(OpenApiEndPoint, ViewSet):
             if actual_running_status in EVENT_MAPPING:
                 agent.append_events(EVENT_MAPPING[actual_running_status])
         agent.actual_running_status = actual_running_status
-        agent.state_status = state_status
         agent.save()
         return R.success(msg="success update")
 
@@ -60,6 +58,5 @@ class AgentActionV2EndPoint(OpenApiEndPoint, ViewSet):
             return R.failure(msg=_("Agent not found"))
         data = {
             "exceptRunningStatus": agent.except_running_status,
-            "allowReport": agent.allow_report,
         }
         return R.success(msg="success update", data=data)

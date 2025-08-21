@@ -217,18 +217,12 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
             version_name = param.get("projectVersion", "V1.0")
             version_name = version_name if version_name else "V1.0"
             template_id = param.get("projectTemplateId", None)
-
-            # if template_id is not None:
-            #     template = IastProjectTemplate.objects.filter(pk=template_id).first()
-            #     if not template:
-            #         template = IastProjectTemplate.objects.filter(is_system=1).first()
-            # else:
-            #     template = IastProjectTemplate.objects.filter(is_system=1).first()
-
+            template = user.get_project_templates().filter(id=template_id).first()
             default_params = {
                 "latest_time": int(time.time()),
-                "template_id": template_id,
             }
+            if template:
+                default_params["template_id"] = template.id
             project, project_version = user.create_project_version(project_name, version_name, default_params, {})
             logger.info(_("auto create project {}").format(project.id))
             logger.info(_("auto create project version {}").format(project_version.id))

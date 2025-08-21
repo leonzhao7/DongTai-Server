@@ -75,7 +75,6 @@ class MyTestCase(DongTaiTestCase):
         import django
 
         django.setup()
-        heartbeat()
 
 
 if __name__ == "__main__":

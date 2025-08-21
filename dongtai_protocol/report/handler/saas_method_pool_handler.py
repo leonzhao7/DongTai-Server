@@ -383,7 +383,6 @@ class SaasMethodPoolHandler(IReportHandler):
                 "project_version_id",
                 "server_id",
                 "filepathsimhash",
-                "servicetype",
                 "user_id",
             ),
         )

@@ -104,7 +104,6 @@ class HeartBeatHandler(IReportHandler):
                             self.agent.filepathsimhash, language=self.agent.language
                         ),
                         addtional_agent_ids_query_deployway_and_path(
-                            self.agent.servicetype,
                             self.agent.server.path,
                             self.agent.server.hostname,
                             language=self.agent.language,
@@ -185,25 +184,13 @@ def get_k8s_deployment_id(hostname: str) -> str:
     return hostname[hostname.rindex("-")]
 
 
-def addtional_agent_ids_query_deployway_and_path(deployway: str, path: str, hostname: str, language: str) -> QuerySet:
-    if deployway == "k8s":
-        deployment_id = get_k8s_deployment_id(hostname)
-        logger.info(f"deployment_id : {deployment_id}")
-        server_q = (
-            Q(server__hostname__startswith=deployment_id)
-            & Q(server__path=path)
-            & Q(server__path="")
-            & ~Q(server__hostname="")
-        )
-    elif deployway == "docker":
-        server_q = Q(server__path=path) & ~Q(server__path="")
-    else:
-        server_q = (
-            Q(server__path=str(path))
-            & Q(server__hostname=str(hostname))
-            & ~Q(server__path="")
-            & ~Q(server__hostname="")
-        )
+def addtional_agent_ids_query_deployway_and_path(path: str, hostname: str, language: str) -> QuerySet:
+    server_q = (
+        Q(server__path=str(path))
+        & Q(server__hostname=str(hostname))
+        & ~Q(server__path="")
+        & ~Q(server__hostname="")
+    )
     final_q = server_q & Q(language=language)
     return IastAgent.objects.filter(final_q).values_list("id", flat=True)
 

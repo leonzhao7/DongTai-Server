@@ -57,7 +57,8 @@ class ProjectDetail(UserEndPoint):
                 scan_id = 0
                 scan_name = ""
 
-            current_project_version = get_project_version(project.id)
+            current_project_version = project.get_current_version_data()
+            (enable, level) = project.get_log_level()
             return R.success(
                 data={
                     "name": project.name,
@@ -73,8 +74,8 @@ class ProjectDetail(UserEndPoint):
                     "test_req_header_value": project.test_req_header_value,
                     "department_id": 1,
                     "template_id": project.template_id,
-                    "enable_log": project.enable_log,
-                    "log_level": project.log_level,
+                    "enable_log": enable,
+                    "log_level": level,
                 }
             )
         return R.failure(status=203, msg=_("no permission"))

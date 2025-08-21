@@ -122,6 +122,5 @@ class IReportHandler:
                 "project_version_id",
                 "server_id",
                 "filepathsimhash",
-                "servicetype",
             ),
         )

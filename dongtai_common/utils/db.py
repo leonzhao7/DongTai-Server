@@ -45,3 +45,6 @@ class SearchLanguageMode(Expression):
 
 def get_timestamp():
     return int(time.time())
+
+def default_json():
+    return {}

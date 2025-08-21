@@ -4,8 +4,8 @@ import logging
 import time
 from urllib.parse import urlparse, urlunparse
 
-import requests
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -77,7 +77,6 @@ class ProjectAdd(UserEndPoint):
                 mode = "插桩模式"
                 scan_id = int(request.data.get("scan_id", 5))
                 template_id = int(request.data.get("template_id", 1))
-                projects = request.user.get_projects()
                 scan = IastStrategyUser.objects.filter(id=scan_id).first()
                 base_url = request.data.get("base_url", None)
                 test_req_header_key = request.data.get("test_req_header_key", None)
@@ -86,8 +85,8 @@ class ProjectAdd(UserEndPoint):
                 pid = request.data.get("pid", 0)
                 enable_log = request.data.get("enable_log", None)
                 log_level = request.data.get("log_level", None)
-                if len(name) > 30:
-                    return R.failure(msg="项目名长度需在30个字符以内")
+                if len(name) > 64:
+                    return R.failure(msg="项目名长度需在64个字符以内")
                 if base_url and not url_validate(base_url):
                     return R.failure(status=202, msg=_("base_url validate failed"))
                 if not scan_id or not name or not mode:
@@ -95,20 +94,25 @@ class ProjectAdd(UserEndPoint):
                     return R.failure(status=202, msg=_("Required scan strategy and name"))
 
                 if pid:
-                    project = projects.filter(id=pid).first()
+                    project = request.user.get_projects().filter(id=pid).first()
                 else:
-                    project = projects.filter(name=name).first()
+                    project = request.user.get_projects().filter(name=name).first()
                     if not project:
                         project = IastProject.objects.create(name=name, tenant=request.user.tenant)
                     else:
-                        return R.failure(
-                            status=203,
-                            msg=_("Failed to create, the application name already exists"),
-                        )
+                        return R.failure(status=203, msg=_("Failed to create, the application name already exists"))
+                if not project:
+                    return R.failure(status=203, msg="操作失败")
 
+                vid = request.data.get("vid")
                 version_name = request.data.get("version_name", "V1.0")
                 description = request.data.get("description", "")
-                version = IastProjectVersion.objects.create(version_name=version_name, description=description, project=project)
+                if vid:
+                    version = IastProjectVersion.objects.filter(Q(id=vid) & Q(project=project)).update(
+                        version_name=version_name, description=description)
+                else:
+                    version = IastProjectVersion.objects.create(
+                        version_name=version_name, description=description, project=project)
                 if not version:
                     return R.failure(status=203, msg="操作失败",)
 
@@ -138,7 +142,6 @@ class ProjectAdd(UserEndPoint):
                         "test_req_header_key",
                         "test_req_header_value",
                         "template_id",
-                        "enable_log",
                         "log_level",
                         "current_version_id",
                     ]
@@ -159,10 +162,7 @@ class ProjectAdd(UserEndPoint):
 
 def url_validate(url):
     parse_re = urlparse(url)
-    if parse_re.scheme not in ("http", "https") or parse_re.hostname in (
-        "127.0.0.1",
-        "localhost",
-    ):
+    if parse_re.scheme not in ("http", "https") or parse_re.hostname in ("127.0.0.1", "localhost"):
         return False
     return ip_validate(parse_re.hostname) if is_ip(parse_re.hostname) else True
 

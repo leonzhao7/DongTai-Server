@@ -131,7 +131,7 @@ class IastProjectTemplateView(TalentAdminEndPoint, viewsets.ViewSet):
         page_size = ser.validated_data['page_size']
         page = ser.validated_data['page']
         summary, templates = self.get_paginator(
-            IastProjectTemplate.objects.filter(tenant=request.user.tenant).values().order_by(
+            IastProjectTemplate.objects.filter(Q(tenant=request.user.tenant) | Q(tenant__isnull=True)).values().order_by(
                 '-latest_time').all(), page, page_size)
         return R.success(
             data=ProjectTemplateCreateArgsSerializer(templates,

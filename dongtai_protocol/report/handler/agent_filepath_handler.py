@@ -15,13 +15,12 @@ logger = logging.getLogger("dongtai.openapi")
 class FilePathHandler(IReportHandler):
     def parse(self):
         self.filepath = self.detail.get("serviceDir")
-        self.servicetype = self.detail.get("serviceType")
 
     def save(self):
         try:
             simhash = _data_dump(self.filepath)
-            IastAgent.objects.filter(pk=self.agent_id).update(filepathsimhash=simhash, servicetype=self.servicetype)
-            logger.info(_("filepath simhash log successed : {} servicetype: {}").format(simhash, self.servicetype))
+            IastAgent.objects.filter(pk=self.agent_id).update(filepathsimhash=simhash)
+            logger.info(_("filepath simhash log successed : {}").format(simhash))
         except Exception as e:
             logger.info(_("filepath simhash log failed, why: {}").format(e))
 

@@ -63,7 +63,7 @@ class UserLogin(UserEndPoint):
                         user_login.save()
                         return R.failure(status=202, msg=_("Login failed"))
                     else:
-                        return R.failure(status=205, msg="用户已被禁用")
+                        return R.failure(status=202, msg="用户已被禁用")
                 else:
                     return R.failure(status=202, msg=_("Login failed"))
 

@@ -97,15 +97,15 @@ class IastProject(models.Model):
 
     def generate_log_level(self, enable, level_str):
         if enable:
-            if level_str.toupper() == "ERROR":
+            if level_str.upper() == "ERROR":
                 return self.LOG_LEVEL_ERROR
-            elif level_str.toupper() == "WARN":
+            elif level_str.upper() == "WARN":
                 return self.LOG_LEVEL_WARN
-            elif level_str.toupper() == "INFO":
+            elif level_str.upper() == "INFO":
                 return self.LOG_LEVEL_INFO
-            elif level_str.toupper() == "DEBUG":
+            elif level_str.upper() == "DEBUG":
                 return self.LOG_LEVEL_DEBUG
-            elif level_str.toupper() == "TRACE":
+            elif level_str.upper() == "TRACE":
                 return self.LOG_LEVEL_INFO
 
         return self.LOG_LEVEL_NONE
@@ -127,3 +127,17 @@ class IastProject(models.Model):
             else:
                 level = ""
             return True, level
+
+    def get_current_version_data(self):
+        if self.current_version:
+            return {
+                "version_id": self.current_version.id,
+                "version_name": self.current_version.version_name,
+                "description": self.current_version.description,
+            }
+        else:
+            return {
+                "version_id": 0,
+                "version_name": "",
+                "description": "",
+            }
