@@ -263,8 +263,8 @@ class MethodPoolSearchProxy(AnonymousAndUserEndPoint):
             .all()
             .values("project_id", "token", "id", "user_id", "actual_status")
         )
-        projects = IastProject.objects.filter(pk__in=[i["project_id"] for i in agents]).values(
-            "id", "name", "user_id"
+        projects = request.user.get_projects().filter(pk__in=[i["project_id"] for i in agents]).values(
+            "id", "name"
         )
         vulnerablity = (
             IastVulnerabilityModel.objects.filter(method_pool_id__in=[i["id"] for i in method_pools])
