@@ -68,13 +68,13 @@ def data_cleanup(days: int):
             # qs = MethodPool.objects.filter(pk__lte=latest_id)
             # qs._raw_delete(qs.db)
 
-        logger.info(f'Delete offline agent 30 days ago')
-        agent_latest_id = IastAgent.objects.filter(
-            latest_time__lte=delete_time_stamp).order_by('-id').values_list(
-            'id', flat=True).first()
-        if any([agent_latest_id]):
-            IastAgent.objects.filter(pk__lte=agent_latest_id,
-                                     online=0).delete()
+        # logger.info(f'Delete offline agent 30 days ago')
+        # agent_latest_id = IastAgent.objects.filter(
+        #     latest_time__lte=delete_time_stamp).order_by('-id').values_list(
+        #     'id', flat=True).first()
+        # if any([agent_latest_id]):
+        #     IastAgent.objects.filter(pk__lte=agent_latest_id,
+        #                              online=0).delete()
 
 
 @sync_to_async(thread_sensitive=False)

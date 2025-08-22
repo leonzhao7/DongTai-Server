@@ -220,6 +220,7 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
             template = user.get_project_templates().filter(id=template_id).first()
             default_params = {
                 "latest_time": int(time.time()),
+                "scan_id": 1,
             }
             if template:
                 default_params["template_id"] = template.id
@@ -248,15 +249,6 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
                 pid=pid,
                 server_ipaddresslist=get_ipaddresslist(network),
             )
-
-            if agent_id != -1:
-                agent = IastAgent.objects.filter(pk=agent_id).first()
-                if not agent:
-                    return R.failure(msg="探针注册失败")
-                agent.register_time = int(time.time())
-                IastAgent.objects.filter(pk=agent_id).update(register_time=int(time.time()))
-                agent.save()
-
             return R.success(data={"id": agent_id, "coreAutoStart": 1})
         except Exception as e:
             logger.info(f"探针注册失败,原因:{e}", exc_info=True)

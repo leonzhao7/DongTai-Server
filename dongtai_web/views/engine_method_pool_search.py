@@ -261,7 +261,7 @@ class MethodPoolSearchProxy(AnonymousAndUserEndPoint):
         agents = (
             IastAgent.objects.filter(pk__in=[i["agent_id"] for i in method_pools])
             .all()
-            .values("project_id", "token", "id", "user_id", "online")
+            .values("project_id", "token", "id", "user_id", "actual_status")
         )
         projects = IastProject.objects.filter(pk__in=[i["project_id"] for i in agents]).values(
             "id", "name", "user_id"
@@ -291,7 +291,7 @@ class MethodPoolSearchProxy(AnonymousAndUserEndPoint):
             if agent:
                 item["agent_id"] = agent["id"]
                 item["agent_name"] = agent["token"]
-                item["agent_is_running"] = agent["online"]
+                item["agent_is_running"] = 1 if agent["actual_status"] == IastAgent.STATUS_RUNNING else 0
                 project = projects.get(agent["project_id"], None)
                 if project:
                     item["project_id"] = project["id"]

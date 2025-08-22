@@ -23,13 +23,6 @@ class VulValidation(models.IntegerChoices):
     __empty__ = 0
 
 
-class ProjectStatus(models.IntegerChoices):
-    NORMAL = 0, "正常"
-    ERROR = 1, "错误"
-    OFFLINE = 2, "离线"
-    __empty__ = 0
-
-
 class IastProjectTemplate(models.Model):
     template_name = models.CharField(max_length=255)
     latest_time = models.IntegerField(default=get_timestamp)
@@ -80,8 +73,6 @@ class IastProject(models.Model):
     template = models.ForeignKey(IastProjectTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     current_version = models.ForeignKey("IastProjectVersion", on_delete=models.SET_NULL, null=True, blank=True)
     log_level = models.IntegerField(default=LOG_LEVEL_ERROR)
-    last_has_online_agent_time = models.IntegerField(default=get_timestamp)
-    status = models.IntegerField(default=0, choices=ProjectStatus.choices)
 
     class Meta:
         managed = get_managed()

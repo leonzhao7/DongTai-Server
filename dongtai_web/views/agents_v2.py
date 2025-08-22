@@ -78,25 +78,17 @@ class AgentListv2(UserEndPoint, ViewSet):
             ser.validated_data["page_size"],
         )
         queryset = list(queryset)
-        agent_dict = {}
         for agent in queryset:
             agent["state"] = cal_state(agent)
             agent["memory_rate"] = get_memory(agent["heartbeat__memory"])
             agent["cpu_rate"] = get_cpu(agent["heartbeat__cpu"])
             agent["disk_rate"] = get_disk(agent["heartbeat__disk"])
-            agent["is_control"] = get_is_control(
-                agent["actual_running_status"],
-                agent["except_running_status"],
-                agent["online"],
-            )
+            agent["is_control"] = get_is_control(agent["actual_status"], agent["expect_status"])
             agent["ipaddresses"] = get_service_addrs(json.loads(agent["server__ipaddresslist"]), agent["server__port"])
-            if not agent["events"]:
-                agent["events"] = ["注册成功"]
-            agent_dict[agent["id"]] = {}
-        agent_events = IastAgentEvent.objects.filter(agent__id__in=agent_dict.keys()).values().all()
-        agent_events_dict = {k: list(g) for k, g in groupby(agent_events, key=lambda x: x["agent_id"])}
-        for agent in queryset:
-            agent["new_events"] = agent_events_dict[agent["id"]] if agent["id"] in agent_events_dict else {}
+            agent["new_events"] = [
+                {"agent_id": agent["id"], "id": 1, "name": "注册成功", "time": agent["register_time"]},
+                {"agent_id": agent["id"], "id": 2, "name": "启动成功", "time": agent["startup_time"]}
+            ]
         data = {"agents": queryset, "summary": summary}
         return R.success(data=data)
 
@@ -161,21 +153,17 @@ def get_agent_stat(agent_id: int, projects: QuerySet[IastProject]) -> dict:
 
 
 def generate_filter(state: StateType) -> Q:
-    if state == StateType.ALL:
-        return Q()
     if state == StateType.RUNNING:
-        return Q(online=1) & Q(actual_running_status=1)
+        return Q(actual_status=IastAgent.STATUS_RUNNING)
     if state == StateType.STOP:
-        return Q(online=1) & ~Q(actual_running_status=1)
+        return Q(actual_status=IastAgent.STATUS_PAUSED)
     if state == StateType.UNINSTALL:
-        return Q(online=0)
-    if state == StateType.ONLINE:
-        return Q(online=1)
+        return Q(actual_status=IastAgent.STATUS_OFFLINE)
     return Q()
 
 
-def get_is_control(actual_running_status: int, except_running_status: int, online: int) -> int:
-    if online and actual_running_status != except_running_status:
+def get_is_control(actual_status: int, expect_status: int) -> int:
+    if actual_status != expect_status and actual_status != IastAgent.STATUS_OFFLINE:
         return 1
     return 0
 
@@ -220,9 +208,9 @@ def get_memory(jsonstr: str | None) -> str:
 
 
 def cal_state(agent: dict) -> StateType:
-    if agent["online"] == 1 and agent["actual_running_status"] == 1:
+    if agent["actual_status"] == IastAgent.STATUS_RUNNING:
         return StateType.RUNNING
-    if agent["online"] == 1 and agent["actual_running_status"] != 1:
+    if agent["actual_status"] == IastAgent.STATUS_PAUSED:
         return StateType.STOP
     return StateType.UNINSTALL
 
@@ -248,14 +236,13 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
             "heartbeat__cpu",
             "heartbeat__disk",
             "register_time",
-            "is_core_running",
-            "is_control",
-            "online",
+            "startup_time",
             "id",
             "project__id",
+            "project_version__version_name",
             "version",
-            "except_running_status",
-            "actual_running_status",
+            "expect_status",
+            "actual_status",
         )
         .order_by("-latest_time")
     )

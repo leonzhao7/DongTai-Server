@@ -80,9 +80,8 @@ class RequestReplayEndPoint(UserEndPoint):
         auth_agents = RequestReplayEndPoint.get_auth_agents_with_user(user)
         if method_pool_id == -1:
             method_pool_model = namedtuple("method_pool_model", ["id", "agent"])
-            agent = namedtuple("agent", ["id", "is_running"])
+            agent = namedtuple("agent", ["id"])
             agent.id = 0
-            agent.is_running = 0
             method_pool_model.agent = agent
             method_pool_model.id = -1
         else:
@@ -99,7 +98,7 @@ class RequestReplayEndPoint(UserEndPoint):
         """
         if not agent:
             return True
-        return agent.online == 0
+        return agent.actual_status != IastAgent.STATUS_RUNNING
 
     @staticmethod
     def send_request_to_replay_queue(relation_id, agent_id, replay_request, replay_type):
@@ -196,7 +195,7 @@ class RequestReplayEndPoint(UserEndPoint):
                 agent = IastAgent.objects.filter(pk=agent_id).first()
                 check_failure = self.check_agent_active(agent)
                 if check_failure and agent is not None:
-                    agent = IastAgent.objects.filter(project_id=agent.project_id, online=1).first()
+                    agent = IastAgent.objects.filter(project_id=agent.project_id, actual_status=IastAgent.STATUS_RUNNING).first()
                 check_failure = self.check_agent_active(agent)
             else:
                 check_failure = self.check_agent_active(method_pool_model.agent)

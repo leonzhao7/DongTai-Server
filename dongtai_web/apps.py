@@ -15,7 +15,6 @@ class IastConfig(DongTaiAppConfigPatch, AppConfig):
         from dongtai_conf.settings import AUTO_UPDATE_HOOK_STRATEGY
 
         # do not remove this import, used in celery
-        from dongtai_engine.plugins.project_status import update_project_status  # noqa: F401
         from dongtai_web.aggr_vul.tasks import update_vul_tantivy_index  # noqa: F401
 
         if AUTO_UPDATE_HOOK_STRATEGY and not validate_hook_strategy_update():

@@ -217,9 +217,9 @@ class EndPoint(APIView):
             users = User.objects.filter(username=const.USER_BUGENV)
         elif user.is_system_admin():
             users = User.objects.all()
-        elif user.is_talent_admin():
+        elif user.is_tenant_admin():
             talent = user.get_talent()
-            users = talent.users
+            users = talent.users.all()
         else:
             users = User.objects.filter(id=user.id).all()
         return users

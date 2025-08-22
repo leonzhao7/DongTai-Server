@@ -20,6 +20,10 @@ def get_events():
 
 
 class IastAgent(models.Model):
+    STATUS_RUNNING = 1
+    STATUS_PAUSED = 2
+    STATUS_OFFLINE = 3
+
     token = models.CharField(max_length=128, default=generate_token)
     version = models.CharField(max_length=128, blank=True)
     latest_time = models.IntegerField()
@@ -32,21 +36,16 @@ class IastAgent(models.Model):
         related_query_name="agent",
         verbose_name=_("server"),
     )
-    is_running = models.IntegerField(default=1)
-    is_core_running = models.IntegerField(default=1)
-    control = models.IntegerField(default=1)
-    is_control = models.IntegerField(default=1)
     project = models.ForeignKey(IastProject, on_delete=models.CASCADE, default=-1)
     project_version = models.ForeignKey(IastProjectVersion, on_delete=models.CASCADE, default=-1)
     project_name = models.CharField(max_length=255, blank=True)
-    online = models.PositiveSmallIntegerField(default=1)
     language = models.CharField(max_length=10, blank=True)
     filepathsimhash = models.CharField(max_length=255, blank=True)
     alias = models.CharField(max_length=255, blank=True)
-    startup_time = models.IntegerField(default=0)
-    register_time = models.IntegerField(default=0)
-    actual_running_status = models.IntegerField(default=1)
-    except_running_status = models.IntegerField(default=1)
+    startup_time = models.DateTimeField(default=timezone.now)
+    register_time = models.DateTimeField(default=timezone.now)
+    actual_status = models.IntegerField(default=STATUS_RUNNING)
+    expect_status = models.IntegerField(default=STATUS_RUNNING)
     events = models.JSONField(default=get_events)
 
     ip = models.CharField(max_length=255, blank=True)

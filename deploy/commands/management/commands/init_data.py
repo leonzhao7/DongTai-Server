@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
+from dongtai_common.models.sensitive_info import IastPatternType
 from dongtai_common.models.user_role import UserRole, RoleLevel
 from dongtai_common.models.user import User
 from dongtai_common.models.user_department import UserDepartment
@@ -76,7 +77,6 @@ class Command(BaseCommand):
 
         strategy, created = IastStrategyUser.objects.get_or_create(name="全部漏洞策略", defaults={
             'name': '全部漏洞策略',
-            'user': admin,
             'status': True,
             'content': '2,8,9,14,15,17,18,19,20,23,24,25,26,28,30,33,37,22,34,1,10,11,12,13,16,21,27,29,31,32,3,4,5,6,7,35,36,38,41,45,44,43,40,39,42'})
         IastProjectTemplate.objects.get_or_create(template_name="全面扫描模板", defaults={
@@ -107,3 +107,10 @@ class Command(BaseCommand):
         ]
         for vul_status in vul_status_list:
             IastVulnerabilityStatus.objects.get_or_create(name=vul_status["name"], defaults=vul_status)
+
+        pattern_type_list = [
+            {"name": "正则匹配", "value": 1},
+            {"name": "JSON字段解析", "value": 2},
+        ]
+        for pattern_type in pattern_type_list:
+            IastPatternType.objects.get_or_create(name=pattern_type["name"], defaults=pattern_type)

@@ -21,7 +21,6 @@ from dongtai_web.versioncontrol.urls import urlpatterns as versioncontrol_urls
 from dongtai_web.views.agent import Agent
 from dongtai_web.views.agent_deploy import AgentDeploy
 from dongtai_web.views.agent_start import AgentStart
-from dongtai_web.views.agent_status_update import AgentStatusUpdate
 from dongtai_web.views.agent_stop import AgentStop
 from dongtai_web.views.agent_summary import AgentSummary
 from dongtai_web.views.agents_v2 import AgentListv2
@@ -111,7 +110,6 @@ from dongtai_web.views.user_manage import UserManage
 from dongtai_web.views.user_department_manage import DepartmentManage
 from dongtai_web.views.user_tenant_manage import TenantManage
 from dongtai_web.views.user_role import RoleManage
-from dongtai_web.views.version_update import MethodPoolVersionUpdate
 from dongtai_web.views.vul_count_for_plugin import VulCountForPluginEndPoint
 from dongtai_web.views.vul_delete import VulDelete
 from dongtai_web.views.vul_details import (
@@ -197,7 +195,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("strategy/user/list", StrategyList.as_view()),
     path("agent/<int:id_>", Agent.as_view()),
     path("agent/deploy", AgentDeploy.as_view()),
-    path("agent/status/update", AgentStatusUpdate.as_view()),
     path("agent/start", AgentStart.as_view()),
     path("agent/stop", AgentStop.as_view()),
     path("openapi", OpenApiEndpoint.as_view()),
@@ -223,7 +220,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("engine/hook/rule_types", EngineHookRuleTypesEndPoint.as_view()),
     path("engine/hook/rules", EngineHookRulesEndPoint.as_view()),
     path("documents", DocumentsEndpoint.as_view()),
-    path("version_update/K23DiutPrwpoqAddqNbHUk", MethodPoolVersionUpdate.as_view()),
     path("i18n/setlang", LanguageSetting.as_view()),
     path('api_route/search', ApiRouteSearch.as_view()),
     path('api_route/relationrequest', ApiRouteRelationRequest.as_view()),

@@ -99,7 +99,7 @@ class IReportHandler:
         if agent.project_id != 0:
             agents = IastAgent.objects.filter(
                 Q(project_name=self.project_name) | Q(project_id=agent.project_id),
-                online=1,
+                actual_status=IastAgent.STATUS_RUNNING,
                 project_version_id=agent.project_version_id,
             )
         else:
@@ -111,7 +111,7 @@ class IReportHandler:
             agent_id,
             {
                 "pk": agent_id,
-                "online": 1,
+                "actual_status": IastAgent.STATUS_RUNNING,
             },
             (
                 "id",

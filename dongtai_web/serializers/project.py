@@ -93,7 +93,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             "latest_time",
             "agent_language",
             "vul_validation",
-            "status",
         ]
 
     def get_agents(self, obj):

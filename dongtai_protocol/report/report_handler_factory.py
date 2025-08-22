@@ -32,22 +32,15 @@ class ReportHandler:
                 isCoreInstalled = reports.get("detail", {}).get("isCoreInstalled", None)
                 isCoreRunning = reports.get("detail", {}).get("isCoreRunning", None)
                 agentId = reports.get("detail", {}).get("agentId", 0)
-                # is_core_running 0 未运行,1运行中,2已卸载
                 if isCoreInstalled is None and isCoreRunning is None:
                     pass
                 elif isCoreInstalled == 0:
-                    is_core_running = 2
-                    IastAgent.objects.filter(user=user, id=agentId).update(actual_running_status=2)
-                    IastAgent.objects.filter(user=user, id=agentId).update(is_core_running=is_core_running)
+                    IastAgent.objects.filter(user=user, id=agentId).update(actual_status=IastAgent.STATUS_PAUSED)
                 else:
                     if isCoreRunning == 1:
-                        is_core_running = 1
-                        IastAgent.objects.filter(user=user, id=agentId).update(actual_running_status=1)
+                        IastAgent.objects.filter(user=user, id=agentId).update(actual_status=IastAgent.STATUS_RUNNING)
                     else:
-                        is_core_running = 0
-                        IastAgent.objects.filter(user=user, id=agentId).update(actual_running_status=2)
-
-                    IastAgent.objects.filter(user=user, id=agentId).update(is_core_running=is_core_running)
+                        IastAgent.objects.filter(user=user, id=agentId).update(actual_status=IastAgent.STATUS_PAUSED)
             # web hook
             #     timeout=60)
             class_of_handler = ReportHandler.HANDLERS.get(report_type)

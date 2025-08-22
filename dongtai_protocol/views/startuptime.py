@@ -9,6 +9,7 @@
 
 import logging
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 
 from dongtai_common.endpoint import OpenApiEndPoint, R
@@ -25,10 +26,9 @@ class StartupTimeEndPoint(OpenApiEndPoint):
     @extend_schema(tags=["Agent服务端交互协议"], summary="agent启动时间", deprecated=True)
     def post(self, request: Request):
         agent_id = request.data.get("agentId", None)
-        startup_time = request.data.get("startupTime", None)
-        agent = IastAgent.objects.filter(pk=agent_id).first()
+        agent = request.user.get_agents().filter(pk=agent_id).first()
         if agent:
-            agent.startup_time = startup_time
+            agent.startup_time = timezone.now()
             agent.save(update_fields=["startup_time"])
             return R.success(data=None)
         logger.error("agent not found")

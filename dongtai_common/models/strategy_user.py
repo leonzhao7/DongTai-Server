@@ -9,7 +9,7 @@ class IastStrategyUser(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=200, blank=True)
     content = models.TextField(blank=True)
-    user = models.ForeignKey(User, models.DO_NOTHING)
+    user = models.ForeignKey(User, models.DO_NOTHING, null=True, blank=True, default=None)
     status = models.IntegerField(blank=True)
     created_at = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     department = models.ForeignKey(UserDepartment, models.DO_NOTHING, blank=True, null=True)

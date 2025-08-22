@@ -28,13 +28,8 @@ class ScanStrategyTestCase(APITestCase):
             version="121231",
             latest_time=int(time.time()),
             user=self.user,
-            is_running=1,
             project_id=-1,
             project_name="test",
-            control=0,
-            is_control=0,
-            is_core_running=1,
-            online=1,
             project_version_id=1,
             language="JAVA",
         )

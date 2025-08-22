@@ -35,11 +35,7 @@ class AgentStop(UserEndPoint):
             agent = IastAgent.objects.filter(project__in=projects, id=agent_id).first()
             if agent is None:
                 return R.failure(msg=_("Engine does not exist or no permission to access"))
-            if agent.is_control == 1 and agent.control != 3 and agent.control != 4:
-                return R.failure(msg=_("Agent is stopping service, please try again later"))
-            agent.control = 4
-            agent.is_control = 1
-            agent.except_running_status = 2
+            agent.expect_status = IastAgent.STATUS_PAUSED
             agent.latest_time = int(time.time())
             agent.save()
         if agent_ids:
@@ -47,12 +43,8 @@ class AgentStop(UserEndPoint):
                 agent = IastAgent.objects.filter(project__in=projects, id=agent_id).first()
                 if agent is None:
                     continue
-                if agent.is_control == 1 and agent.control != 3 and agent.control != 4:
-                    continue
-                agent.control = 4
-                agent.is_control = 1
                 agent.latest_time = int(time.time())
-                agent.except_running_status = 2
+                agent.expect_status = IastAgent.STATUS_PAUSED
                 agent.save()
 
         return R.success(msg=_("Suspending ..."))

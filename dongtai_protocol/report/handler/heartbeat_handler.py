@@ -34,7 +34,7 @@ def check_agent_incache(agent_id):
 @shared_task(base=Singleton, unique_on=["agent_id"], lock_expiry=20)
 def update_heartbeat(agent_id: int, defaults: dict[str, Any]):
     IastHeartbeat.objects.update_or_create(agent_id=agent_id, defaults=defaults)
-    IastAgent.objects.update_or_create(pk=agent_id, defaults={"is_running": 1, "online": 1})
+    IastAgent.objects.update_or_create(pk=agent_id, defaults={"actual_status": IastAgent.STATUS_RUNNING})
 
 
 @ReportHandler.register(const.REPORT_HEART_BEAT)
@@ -178,10 +178,6 @@ class HeartBeatHandler(IReportHandler):
 
     def get_agent(self, agent_id):
         return IastAgent.objects.filter(id=agent_id).first()
-
-
-def get_k8s_deployment_id(hostname: str) -> str:
-    return hostname[hostname.rindex("-")]
 
 
 def addtional_agent_ids_query_deployway_and_path(path: str, hostname: str, language: str) -> QuerySet:

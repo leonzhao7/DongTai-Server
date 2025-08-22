@@ -12,11 +12,6 @@ class MyTestCase(DongTaiTestCase):
     def test_something(self):
         self.assertEqual(True, False)
 
-    def test_vul_recheck(self):
-        from dongtai_engine.tasks import vul_recheck
-
-        vul_recheck()
-
     def test_search_vul_from_replay_method_pool(self):
         from dongtai_engine.tasks import search_vul_from_replay_method_pool
 
@@ -34,24 +29,6 @@ class MyTestCase(DongTaiTestCase):
         from dongtai_engine.tasks import update_agent_status
 
         update_agent_status()
-
-    def test_verify_agent_status(self):
-        import time
-
-        from dongtai_common.models.agent import IastAgent
-        from dongtai_engine.tasks import is_alive
-
-        timestamp = int(time.time())
-        stopped_agents = IastAgent.objects.values("id").filter(is_running=0)
-        is_running_agents = []
-        for agent in stopped_agents:
-            agent_id = agent["id"]
-            if is_alive(agent_id=agent_id, timestamp=timestamp):
-                is_running_agents.append(agent_id)
-            else:
-                continue
-        if is_running_agents:
-            IastAgent.objects.filter(id__in=is_running_agents).update(is_running=1, is_core_running=1)
 
 
     def test_http_header(self):

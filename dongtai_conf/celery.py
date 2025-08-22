@@ -108,14 +108,6 @@ configs["task_routes"] = {
         "exchange": "dongtai-replay-vul-scan",
         "routing_key": "dongtai-replay-vul-scan",
     },
-    "dongtai_web.dongtai_sca.scan.tasks.update_one_sca": {
-        "exchange": "dongtai-sca-task",
-        "routing_key": "dongtai-sca-task",
-    },
-    "dongtai_web.dongtai_sca.scan.tasks.new_update_one_sca": {
-        "exchange": "dongtai-sca-task",
-        "routing_key": "dongtai-sca-task",
-    },
     "dongtai_engine.preheat.function_flush": {
         "exchange": "dongtai-function-flush-data",
         "routing_key": "dongtai-function-flush-data",
@@ -138,10 +130,6 @@ configs["task_routes"] = {
     },
     # cronjob
     "dongtai_engine.tasks.update_agent_status": {
-        "exchange": "dongtai-periodic-task",
-        "routing_key": "dongtai-periodic-task",
-    },
-    "dongtai_engine.tasks.heartbeat": {
         "exchange": "dongtai-periodic-task",
         "routing_key": "dongtai-periodic-task",
     },

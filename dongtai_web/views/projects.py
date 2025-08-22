@@ -7,7 +7,6 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_common.models.project import ProjectStatus
 from dongtai_common.utils.request_type import Request
 from dongtai_web.serializers.project import (
     ProjectSerializer,
@@ -26,12 +25,6 @@ class _ProjectsArgsSerializer(serializers.Serializer):
     name = serializers.CharField(
         default=None,
         help_text=_("The name of the item to be searched, supports fuzzy search."),
-    )
-    status = serializers.ChoiceField(
-        ProjectStatus.choices,
-        default=None,
-        allow_null=True,
-        help_text="".join([f" {i.label}: {i.value} " for i in ProjectStatus]),
     )
     exclude_vul_status = serializers.IntegerField(
         default=None,
@@ -63,7 +56,6 @@ class Projects(UserEndPoint):
                 page: int = ser.validated_data.get("page", 1)
                 page_size: int = ser.validated_data.get("pageSize", 20)
                 name: str = ser.validated_data.get("name")
-                status: int | None = ser.validated_data.get("status")
                 exclude_vul_status: int | None = ser.validated_data.get("exclude_vul_status")
             else:
                 return R.failure(data="Can not validation data.")
@@ -73,8 +65,6 @@ class Projects(UserEndPoint):
         queryset = request.user.get_projects().order_by("-latest_time")
         if name:
             queryset = queryset.filter(name__icontains=name)
-        if status is not None:
-            queryset = queryset.filter(status=status)
         page_summary, page_data = self.get_paginator(queryset, page, page_size)
         vul_levels_dict = get_vul_levels_dict(page_data, exclude_vul_status=exclude_vul_status)
         project_language_dict = get_project_language(page_data)

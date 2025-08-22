@@ -256,26 +256,6 @@ def search_vul_from_replay_method_pool(method_pool_id):
 #
 
 
-def get_project_agents(agent):
-    return IastAgent.objects.filter(
-        project_id=agent.project_id,
-        project_version_id=agent.project_version_id,
-        user=agent.user,
-    )
-
-
-def sha_1(raw):
-    return hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
-
-
-def is_alive(agent_id: int, timestamp: int) -> bool:
-    """
-    Whether the probe is alive or not, the judgment condition: there is a heartbeat log within 2 minutes
-    """
-    heartbeat_key = f"heartbeat-{agent_id}"
-    return cache.get(heartbeat_key) is not None
-
-
 @shared_task(queue="dongtai-periodic-task")
 def update_agent_status():
     """
@@ -290,12 +270,12 @@ def update_agent_status():
     before_agent_status_update()
     logger.info("检测引擎状态更新开始")
     timestamp = int(time.time())
-    running_agents_ids = list(IastAgent.objects.values("id").filter(online=1).values_list("pk", flat=True).all())
+    running_agents_ids = list(IastAgent.objects.values("id").filter(actual_status=IastAgent.STATUS_RUNNING).values_list("pk", flat=True).all())
     heartbeat_keys = {f"heartbeat-{x}" for x in running_agents_ids}
     exists_keys = set(cache.get_many(heartbeat_keys).keys())
     keys_missing = heartbeat_keys - exists_keys
     stop_agent_ids = [int(x.replace("heartbeat-", "")) for x in keys_missing]
-    IastAgent.objects.filter(id__in=stop_agent_ids).update(is_running=0, is_core_running=0, online=0)
+    IastAgent.objects.filter(id__in=stop_agent_ids).update(actual_status=IastAgent.STATUS_OFFLINE)
     vul_id_qs = (
         IastReplayQueue.objects.filter(update_time__lte=timestamp - 60 * 5, verify_time__isnull=True, replay_type=1)
         .values("relation_id")

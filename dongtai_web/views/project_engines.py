@@ -39,7 +39,7 @@ class ProjectEngines(UserEndPoint):
                 project__in=projects,
             )
             .filter(
-                online=const.RUNNING,
+                actual_status=IastAgent.STATUS_RUNNING,
                 project_id__in=[0, pid],
             )
             .values("id", "token", "alias")

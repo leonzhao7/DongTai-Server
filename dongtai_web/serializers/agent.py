@@ -34,7 +34,6 @@ class AgentSerializer(serializers.ModelSerializer):
             "owner",
             "latest_time",
             "project_name",
-            "is_core_running",
             "language",
             "flow",
             "is_control",
@@ -126,7 +125,7 @@ class AgentSerializer(serializers.ModelSerializer):
 class ProjectEngineSerializer(serializers.ModelSerializer):
     class Meta:
         model = IastAgent
-        fields = ["id", "token", "is_core_running"]
+        fields = ["id", "token"]
 
 
 class AgentToggleArgsSerializer(serializers.Serializer):

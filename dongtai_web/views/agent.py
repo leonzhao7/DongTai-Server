@@ -18,9 +18,6 @@ class _AgentResponseDataAgentSerializer(serializers.ModelSerializer):
     id = serializers.CharField(help_text=_("The id of agent"))
     version = serializers.CharField(help_text=_("The version of agent"))
     latest_time = serializers.IntegerField(help_text=_("The latest update time of agent"))
-    is_running = serializers.IntegerField(help_text=_("The running status of agent"))
-    is_core_running = serializers.IntegerField(help_text=_("The running status of agent"))
-    control = serializers.IntegerField(help_text=_("agent control bit, 1-install, 2-uninstall, 0-no control"))
     is_control = serializers.IntegerField(help_text=_("Whether it is in control, 0-No, 1-Yes"))
     project_id = serializers.IntegerField(
         help_text=_("Bundled project ID, if it exists, it will be bundled."), default=0
@@ -42,9 +39,6 @@ class _AgentResponseDataAgentSerializer(serializers.ModelSerializer):
             "token",
             "version",
             "latest_time",
-            "is_running",
-            "is_core_running",
-            "control",
             "is_control",
             "project_id",
             "project_name",
