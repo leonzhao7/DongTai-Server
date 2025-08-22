@@ -27,7 +27,6 @@ from dongtai_engine.common.queryset import get_agent, get_scan_id, load_sink_str
 from dongtai_engine.filters.main import vul_filter
 from dongtai_engine.plugins.project_time_update import (
     project_time_stamp_update,
-    project_version_time_stamp_update,
 )
 from dongtai_engine.plugins.strategy_headers import check_response_header
 from dongtai_engine.plugins.strategy_sensitive import check_response_content
@@ -109,7 +108,6 @@ def search_and_save_vul(
             update_time=timestamp,
         )
         project_time_stamp_update.apply_async((method_pool_model.agent.project_id,), countdown=5)
-        project_version_time_stamp_update.apply_async((method_pool_model.agent.project_version_id,), countdown=5)
     validator_nodes = list(filter(lambda x: "policyType" in x and x["policyType"] == "validator", method_pool))
     for validator_node in validator_nodes:
         validator_node["taint_input"] = validator_node["sourceValues"]

@@ -113,10 +113,10 @@ class ProjectAdd(UserEndPoint):
                 else:
                     version = IastProjectVersion.objects.create(
                         version_name=version_name, description=description, project=project)
+                    project.current_version = version
                 if not version:
                     return R.failure(status=203, msg="操作失败",)
 
-                project.current_version_id = version
                 project.name = name
                 project.scan = scan
                 project.mode = mode

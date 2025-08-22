@@ -27,7 +27,6 @@ from dongtai_conf import settings
 from dongtai_engine.filters.utils import parse_headers_dict_from_bytes
 from dongtai_engine.plugins.project_time_update import (
     project_time_stamp_update,
-    project_version_time_stamp_update,
 )
 from dongtai_engine.signals import send_notify, vul_found
 from dongtai_engine.signals.handlers.parse_param_name import (
@@ -292,7 +291,6 @@ def save_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, bottom_stac
         .first()
     )
     project_time_stamp_update.apply_async((vul_meta.agent.project_id,), countdown=5)
-    project_version_time_stamp_update.apply_async((vul_meta.agent.project_version_id,), countdown=5)
     if vul:
         vul.url = vul_meta.url
         vul.uri = vul_meta.uri
@@ -497,7 +495,6 @@ def handler_replay_vul(vul_meta, vul_level, strategy_id, vul_stack, top_stack, b
         vul.latest_time = timestamp
         vul.save(update_fields=["status_id", "latest_time", "latest_time_desc"])
         project_time_stamp_update.apply_async((vul_meta.agent.project_id,), countdown=5)
-        project_version_time_stamp_update.apply_async((vul_meta.agent.project_version_id,), countdown=5)
 
         IastReplayQueue.objects.filter(id=kwargs["replay_id"]).update(
             state=const.SOLVED,

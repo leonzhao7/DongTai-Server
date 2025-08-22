@@ -97,7 +97,7 @@ class IastProject(models.Model):
             elif level_str.upper() == "DEBUG":
                 return self.LOG_LEVEL_DEBUG
             elif level_str.upper() == "TRACE":
-                return self.LOG_LEVEL_INFO
+                return self.LOG_LEVEL_TRACE
 
         return self.LOG_LEVEL_NONE
 

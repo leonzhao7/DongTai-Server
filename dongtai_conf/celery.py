@@ -100,10 +100,6 @@ configs["task_routes"] = {
         "queue": "dongtai-project-time-stamp-update",
         "routing_key": "dongtai-project-time-stamp-update",
     },
-    "dongtai_engine.plugins.project_time_update.project_version_time_stamp_update": {
-        "queue": "dongtai-project-time-stamp-update",
-        "routing_key": "dongtai-project-time-stamp-update",
-    },
     "dongtai_engine.tasks.search_vul_from_replay_method_pool": {
         "exchange": "dongtai-replay-vul-scan",
         "routing_key": "dongtai-replay-vul-scan",

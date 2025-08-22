@@ -372,7 +372,6 @@ class SaasMethodPoolHandler(IReportHandler):
             {
                 "pk": agent_id,
                 "actual_status": IastAgent.STATUS_RUNNING,
-                "allow_report": 1,
             },
             (
                 "id",

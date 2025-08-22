@@ -29,7 +29,7 @@ def init_schema() -> None:
             continue
         try:
             filepath = inspect.getfile(view.__class__)
-            with add_trace_message(getattr(view, "__class__", view).__name__):
+            with add_trace_message(getattr(view, "__class__", view)):
                 operation = view.schema.get_operation(path, path_regex, path_prefix, method, generator.registry)
                 VIEW_CLASS_TO_SCHEMA.setdefault(view.__class__, {})
                 VIEW_CLASS_TO_SCHEMA[view.__class__][method.upper()] = (
