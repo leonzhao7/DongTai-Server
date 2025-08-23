@@ -132,10 +132,10 @@ class GetAppVulsList(UserEndPoint):
                 es_query = {}
                 tantivy_query = {}
                 # 从项目列表进入 绑定项目id
-                if ser.validated_data.get("project_id", 0):
-                    queryset = queryset.filter(project_id=ser.validated_data.get("project_id"))
-                    es_query["project_id"] = ser.validated_data.get("project_id")
-                    tantivy_query["project_id"] = ser.validated_data.get("project_id")
+                if ser.validated_data.get("bind_project_id", 0):
+                    queryset = queryset.filter(project_id=ser.validated_data.get("bind_project_id"))
+                    es_query["bind_project_id"] = ser.validated_data.get("bind_project_id")
+                    tantivy_query["project_id"] = ser.validated_data.get("bind_project_id")
                 # 项目版本号
                 if ser.validated_data.get("project_version_id", 0):
                     queryset = queryset.filter(project_version_id=ser.validated_data.get("project_version_id"))

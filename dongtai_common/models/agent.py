@@ -2,6 +2,7 @@
 # datetime:2020/11/30 下午5:29
 
 from django.db import models
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -82,6 +83,10 @@ class IastAgent(models.Model):
     def update_events_if_need(self):
         if self.is_need_to_update():
             self.update_events()
+
+    @staticmethod
+    def get_online_agents() -> QuerySet:
+        return IastAgent.objects.exclude(actual_status=IastAgent.STATUS_OFFLINE).all()
 
 
 class IastAgentEvent(models.Model):

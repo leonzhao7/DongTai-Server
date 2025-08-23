@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # datetime:2021/1/26 下午7:27
-
+import json
 import os
 
 from celery import Celery
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 # set the default Django settings module for the 'celery' program.
 from kombu import Exchange, Queue
@@ -175,6 +176,7 @@ app.autodiscover_tasks()
 def ready(self):
     super().ready()
     checkout_preheat_online(DONGTAI_CELERY_CACHE_PREHEAT)
+    create_update_agent_task()
 
 
 app.ready = ready
@@ -182,12 +184,8 @@ print(f"preheat settings now : {DONGTAI_CELERY_CACHE_PREHEAT}")
 
 
 def checkout_preheat_online(status):
-    import json
-
-    from django_celery_beat.models import IntervalSchedule, PeriodicTask
-
     if not status:
-        PeriodicTask.objects.delete(name="preheat functions")
+        PeriodicTask.objects.filter(name="preheat functions").delete()
     else:
         schedule, _ = IntervalSchedule.objects.get_or_create(every=10, period=IntervalSchedule.MINUTES)
         task = PeriodicTask.objects.get_or_create(
@@ -200,3 +198,15 @@ def checkout_preheat_online(status):
             },
         )
         print(task)
+
+def create_update_agent_task():
+    schedule, _ = IntervalSchedule.objects.get_or_create(every=10, period=IntervalSchedule.MINUTES)
+    PeriodicTask.objects.get_or_create(
+        name="update_agent_status",  # simply describes this periodic task.
+        defaults={
+            "interval": schedule,  # we created this above.
+            "task": "dongtai_engine.tasks.update_agent_status",  # name of task.
+            "args": json.dumps([]),
+            "kwargs": json.dumps({}),
+        },
+    )

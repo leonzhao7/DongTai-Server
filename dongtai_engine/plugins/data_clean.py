@@ -43,8 +43,8 @@ def chunked_queryset(queryset, chunk_size):
 
 
 @shared_task(queue='dongtai-periodic-task',
-             time_limit=60 * 60 * 2,
-             soft_time_limit=60 * 60 * 4)
+             time_limit=60 * 60 * 4,
+             soft_time_limit=60 * 60 * 2)
 def data_cleanup(days: int):
     delete_time_stamp = int(time()) - 60 * 60 * 24 * days
     if ELASTICSEARCH_STATE:
