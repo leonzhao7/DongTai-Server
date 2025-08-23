@@ -77,7 +77,7 @@ class HardEncodeVulHandler(IReportHandler):
         if iast_vul:
             iast_vul.uri = (self.detail.get("file", ""),)
             iast_vul.url = (self.detail.get("class", ""),)
-            iast_vul.latest_time = (timestamp,)
+            iast_vul.latest_time = timestamp
             iast_vul.taint_position = (self.field,)
             iast_vul.taint_value = (self.value,)
             iast_vul.level_id = (strategy.level_id,)

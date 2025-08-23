@@ -11,7 +11,7 @@ class IastConfig(DongTaiAppConfigPatch, AppConfig):
         from deploy.commands.management.commands.load_hook_strategy import Command
         from dongtai_common.utils.init_schema import init_schema
         from dongtai_common.utils.validate import validate_hook_strategy_update
-        from dongtai_conf.celery import app as celery_app  # noqa: F401
+        from dongtai_conf.celery import create_update_agent_task, app as celery_app  # noqa: F401
         from dongtai_conf.settings import AUTO_UPDATE_HOOK_STRATEGY
 
         # do not remove this import, used in celery
@@ -22,3 +22,4 @@ class IastConfig(DongTaiAppConfigPatch, AppConfig):
             Command().handle()
 
         init_schema()
+        create_update_agent_task()

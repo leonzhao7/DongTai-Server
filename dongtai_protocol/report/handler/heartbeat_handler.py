@@ -34,8 +34,7 @@ def check_agent_incache(agent_id):
 @shared_task(base=Singleton, unique_on=["agent_id"], lock_expiry=20)
 def update_heartbeat(agent_id: int, defaults: dict[str, Any]):
     IastHeartbeat.objects.update_or_create(agent_id=agent_id, defaults=defaults)
-    IastAgent.objects.update_or_create(pk=agent_id, actual_status=IastAgent.STATUS_OFFLINE,
-                                       defaults={"actual_status": IastAgent.STATUS_RUNNING})
+    IastAgent.objects.filter(pk=agent_id, actual_status=IastAgent.STATUS_OFFLINE).update(actual_status=IastAgent.STATUS_RUNNING)
 
 
 @ReportHandler.register(const.REPORT_HEART_BEAT)

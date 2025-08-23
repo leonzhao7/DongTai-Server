@@ -4,7 +4,6 @@ import json
 import os
 
 from celery import Celery
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 # set the default Django settings module for the 'celery' program.
 from kombu import Exchange, Queue
@@ -184,6 +183,8 @@ print(f"preheat settings now : {DONGTAI_CELERY_CACHE_PREHEAT}")
 
 
 def checkout_preheat_online(status):
+    from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
     if not status:
         PeriodicTask.objects.filter(name="preheat functions").delete()
     else:
@@ -200,6 +201,8 @@ def checkout_preheat_online(status):
         print(task)
 
 def create_update_agent_task():
+    from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
     schedule, _ = IntervalSchedule.objects.get_or_create(every=10, period=IntervalSchedule.MINUTES)
     PeriodicTask.objects.get_or_create(
         name="update_agent_status",  # simply describes this periodic task.
