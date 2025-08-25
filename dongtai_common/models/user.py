@@ -67,7 +67,7 @@ class User(AbstractUser):
             return self.tenant.projects.all()
         else:
             departs = self.get_departments()
-            return IastProject.objects.filter(departments__in=departs.values_list("id")).all()
+            return IastProject.objects.filter(Q(departments__in=departs) | Q(tenant=self.tenant, departments__isnull=True)).all()
 
     def get_project_templates(self) -> QuerySet:
         from dongtai_common.models.project import IastProjectTemplate

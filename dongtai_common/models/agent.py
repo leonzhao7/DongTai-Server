@@ -16,10 +16,6 @@ from dongtai_common.utils.db import get_timestamp, default_json
 from dongtai_common.utils.settings import get_managed
 
 
-def get_events():
-    return ["注册成功"]
-
-
 class IastAgent(models.Model):
     STATUS_RUNNING = 1
     STATUS_PAUSED = 2
@@ -47,7 +43,6 @@ class IastAgent(models.Model):
     register_time = models.DateTimeField(default=timezone.now)
     actual_status = models.IntegerField(default=STATUS_RUNNING)
     expect_status = models.IntegerField(default=STATUS_RUNNING)
-    events = models.JSONField(default=get_events)
 
     ip = models.CharField(max_length=255, blank=True)
     hostname = models.CharField(max_length=255, blank=True, null=True, default="")
@@ -59,45 +54,9 @@ class IastAgent(models.Model):
         managed = get_managed()
         db_table = "iast_agent"
 
-    def append_events(self, event: str):
-        self.update_events_if_need()
-        events_list = self.events if self.events else ["注册成功"]
-        events_list.append(event)
-        self.events = events_list
-        self.save()
-        IastAgentEvent.objects.create(agent_id=self.id, name=event)
-
-    def only_register(self):
-        events_list = self.events if self.events else ["注册成功"]
-        return events_list == ["注册成功"]
-
-    def update_events(self):
-        for event in self.events:
-            IastAgentEvent.objects.create(agent_id=self.id, name=event, time=None)
-
-    def is_need_to_update(self):
-        if self.events and len(self.events) <= self.new_events.count():
-            return False
-        return True
-
-    def update_events_if_need(self):
-        if self.is_need_to_update():
-            self.update_events()
-
     @staticmethod
     def get_online_agents() -> QuerySet:
         return IastAgent.objects.exclude(actual_status=IastAgent.STATUS_OFFLINE).all()
-
-
-class IastAgentEvent(models.Model):
-    agent = models.ForeignKey(IastAgent, on_delete=models.CASCADE, related_name="new_events")
-    name = models.CharField(max_length=255, blank=True)
-    time = models.IntegerField(default=get_timestamp, blank=True, null=True)
-
-    class Meta:
-        managed = get_managed()
-        db_table = "iast_agent_event"
-
 
 # class IastAgent(models.Model):
 #

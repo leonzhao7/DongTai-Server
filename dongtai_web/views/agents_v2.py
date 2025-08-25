@@ -13,9 +13,9 @@ from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ViewSet
 
 from dongtai_common.endpoint import R, UserEndPoint
-from dongtai_common.models.agent import IastAgent, IastAgentEvent
-from dongtai_common.models.api_route import FromWhereChoices, IastApiRoute
-from dongtai_common.models.asset import Asset
+from dongtai_common.models import IastApiRouteV2
+from dongtai_common.models.agent import IastAgent
+from dongtai_common.models.api_route import FromWhereChoices
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.vulnerablity import IastVulnerabilityModel
 from dongtai_web.utils import extend_schema_with_envcheck
@@ -85,10 +85,6 @@ class AgentListv2(UserEndPoint, ViewSet):
             agent["disk_rate"] = get_disk(agent["heartbeat__disk"])
             agent["is_control"] = get_is_control(agent["actual_status"], agent["expect_status"])
             agent["ipaddresses"] = get_service_addrs(json.loads(agent["server__ipaddresslist"]), agent["server__port"])
-            agent["new_events"] = [
-                {"agent_id": agent["id"], "id": 1, "name": "注册成功", "time": agent["register_time"]},
-                {"agent_id": agent["id"], "id": 2, "name": "启动成功", "time": agent["startup_time"]}
-            ]
         data = {"agents": queryset, "summary": summary}
         return R.success(data=data)
 
@@ -142,12 +138,10 @@ def get_service_addrs(ip_list: list, port: int) -> list:
 
 def get_agent_stat(agent_id: int, projects: QuerySet[IastProject]) -> dict:
     res = {}
-    res["api_count"] = IastApiRoute.objects.filter(
+    res["api_count"] = IastApiRouteV2.objects.filter(
         agent__id=agent_id,
-        from_where=FromWhereChoices.FROM_AGENT,
-        project__in=projects,
+        from_where=FromWhereChoices.FROM_AGENT
     ).count()
-    res["sca_count"] = Asset.objects.filter(agent__id=agent_id, project__in=projects).count()
     res["vul_count"] = IastVulnerabilityModel.objects.filter(agent__id=agent_id, project__in=projects).count()
     return res
 
@@ -230,7 +224,6 @@ def query_agent(filter_condiction=None) -> "ValuesQuerySet":
             "server__port",
             "server__path",
             "server__ipaddresslist",
-            "events",
             "server__hostname",
             "heartbeat__memory",
             "heartbeat__cpu",
