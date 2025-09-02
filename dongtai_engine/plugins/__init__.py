@@ -4,6 +4,7 @@
 from dongtai_common.models.project import IastProject
 from dongtai_common.models.strategy import IastStrategyModel
 from dongtai_common.utils import const
+from dongtai_common.global_data import global_data
 
 
 def is_strategy_enable(vul_type, method_pool):
@@ -11,7 +12,7 @@ def is_strategy_enable(vul_type, method_pool):
         vul_strategy = IastStrategyModel.objects.filter(
             vul_type=vul_type,
             state=const.STRATEGY_ENABLE,
-            user_id__in=(1, method_pool.agent.user.id),
+            user_id__in=(global_data.data["admin_id"], method_pool.agent.user.id),
         ).first()
         if vul_strategy is None:
             return False

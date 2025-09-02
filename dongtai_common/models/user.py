@@ -11,6 +11,7 @@ from dongtai_common import generate_token
 from dongtai_common.models.user_department import UserDepartment
 from dongtai_common.models.user_role import UserRole
 from dongtai_common.models.user_tenant import UserTenant
+from dongtai_common.global_data import global_data
 
 
 class User(AbstractUser):
@@ -95,6 +96,12 @@ class User(AbstractUser):
     # 过滤当前用户可见的agent
     def get_agents(self) -> QuerySet:
         return self.agents.all()
+
+    # 过滤用户可见的扫描策略
+    def get_strategys(self) -> QuerySet:
+        from dongtai_common.models.strategy import IastStrategyModel
+
+        return IastStrategyModel.objects.filter(user_id__in=[global_data.data["admin_id"], self.id]).all()
 
     def has_privilege(self, role_level, tenant_id) -> bool:
         if self.role_level == UserRole.LEVEL_SUPER:

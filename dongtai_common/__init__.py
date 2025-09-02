@@ -5,5 +5,5 @@ import uuid
 
 default_app_config = "dongtai_common.apps.DongTaiConfig"
 
-def generate_token() -> string:
+def generate_token() -> str:
     return uuid.uuid4().hex

@@ -10,6 +10,7 @@ from dongtai_common.models.hook_strategy import HookStrategy
 from dongtai_common.models.hook_type import HookType
 from dongtai_common.models.strategy import IastStrategyModel
 from dongtai_common.utils import const
+from dongtai_common.global_data import global_data
 
 # note: 当前依赖必须保留,否则无法通过hooktype反向查找策略
 from dongtai_protocol.api_schema import DongTaiParameter
@@ -39,7 +40,7 @@ class HookProfilesEndPoint(OpenApiEndPoint):
         hook_types = IastStrategyModel.objects.filter(
             Q(
                 state__in=["enable"] if not full else ["enable", "disable"],
-                user_id__in={1, user.id} if user else [1],
+                user_id__in={global_data.data["admin_id"], user.id} if user else [global_data.data["admin_id"]],
             )
             & (Q(system_type=1) if system_only else Q())
         ).order_by("id")

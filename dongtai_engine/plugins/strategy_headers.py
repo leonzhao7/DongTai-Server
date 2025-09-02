@@ -16,6 +16,7 @@ from dongtai_common.models.header_vulnerablity import (
 from dongtai_common.models.strategy import IastStrategyModel
 from dongtai_common.models.vulnerablity import IastVulnerabilityModel
 from dongtai_common.utils import const
+from dongtai_common.global_data import global_data
 from dongtai_engine.plugins import is_strategy_enable
 from dongtai_engine.plugins.project_time_update import (
     project_time_stamp_update,
@@ -126,7 +127,7 @@ def save_vul(vul_type, method_pool, position="", data=""):
     vul_strategy = IastStrategyModel.objects.filter(
         vul_type=vul_type,
         state=const.STRATEGY_ENABLE,
-        user_id__in=(1, method_pool.agent.user.id),
+        user_id__in=(global_data.data["admin_id"], method_pool.agent.user.id),
     ).first()
     if vul_strategy is None:
         logger.warning(f"There is no corresponding strategy for the current vulnerability: {vul_type}")

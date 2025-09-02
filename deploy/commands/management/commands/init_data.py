@@ -30,16 +30,15 @@ class Command(BaseCommand):
         User.objects.all().delete()
         UserDepartment.objects.all().delete()
 
-        # 创建用户
+        # 创建用户角色
         UserRole.objects.get_or_create(level=UserRole.LEVEL_NORMAL,
                                        defaults={"name": "项目用户", "status": 1, "permission": {}})
         UserRole.objects.get_or_create(level=UserRole.LEVEL_TENANT,
                                        defaults={"name": "租户管理员", "status": 1, "permission": {}})
         role, _ = UserRole.objects.get_or_create(level=UserRole.LEVEL_SUPER,
                                                        defaults={"name": "超级管理员", "status": 1, "permission": {}})
-        # tenant, _ = UserTenant.objects.get_or_create(name='公司')
-        # kwargs = {'name': '全部门', 'parent': None, 'tenant': tenant}
-        # depart, created = UserDepartment.objects.get_or_create(name='默认部门', tenant=tenant, defaults=kwargs)
+
+        # 创建超级管理员
         kwargs = {'role': role,
                   'phone': '13912345678',
                   'default_language': 'zh',}
@@ -109,8 +108,8 @@ class Command(BaseCommand):
             IastVulnerabilityStatus.objects.get_or_create(name=vul_status["name"], defaults=vul_status)
 
         pattern_type_list = [
-            {"name": "正则匹配", "value": 1},
-            {"name": "JSON字段解析", "value": 2},
+            {"name": "正则匹配", "id": 1},
+            {"name": "JSON字段解析", "id": 2},
         ]
         for pattern_type in pattern_type_list:
             IastPatternType.objects.get_or_create(name=pattern_type["name"], defaults=pattern_type)

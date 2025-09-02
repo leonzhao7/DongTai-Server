@@ -52,7 +52,7 @@ class HardEncodeVulHandler(IReportHandler):
             setattr(self, k, v)
 
     def save(self):
-        strategy = IastStrategyModel.objects.filter(user_id=1, vul_type="硬编码").first()
+        strategy = self.user.get_strategys().filter(vul_type="硬编码").first()
         if not strategy or strategy.state != "enable":
             return
         from dongtai_common.models.strategy_user import IastStrategyUser
