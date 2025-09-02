@@ -17,7 +17,7 @@ class IastServer(models.Model):
     cluster_name = models.CharField(max_length=255, blank=True)
     cluster_version = models.CharField(max_length=100, blank=True)
     command = models.TextField(blank=True)
-    env = models.CharField(max_length=4096, blank=True)
+    env = models.JSONField(null=False, default=list)
     runtime = models.CharField(max_length=255, blank=True)
     create_time = models.IntegerField()
     update_time = models.IntegerField()

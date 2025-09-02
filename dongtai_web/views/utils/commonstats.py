@@ -1,7 +1,7 @@
 import time
 from collections.abc import Iterable
 
-from django.db.models import Count, Q, Value
+from django.db.models import Count, Q, Value, CharField
 from django.db.models.query import QuerySet
 
 from dongtai_common.models.hook_type import HookType
@@ -191,6 +191,7 @@ def get_summary_by_project(project_id: int, project_version_id: int):
         days = days - 1
     timestamp_gt = current_timestamp
     queryset_list = []
+    final_query_set = list()
     queryset_ = IastVulnerabilityModel.objects.filter(
         project_id=project_id,
         project_version_id=project_version_id,
@@ -270,7 +271,7 @@ def geneatre_vul_timerange_count_queryset(
     return (
         vul_queryset.filter(latest_time__gt=time_gt, latest_time__lt=time_lt)
         .values("level_id")
-        .annotate(count=Count("level_id"), day_label=Value(day_label))
+        .annotate(count=Count("level_id"), day_label=Value(day_label, output_field=CharField()))
         .order_by("level_id")
         .all()
     )

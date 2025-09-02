@@ -80,7 +80,6 @@ INSTALLED_APPS = [
     "health_check",  # required
     "health_check.db",  # stock Django health checkers
     "health_check.contrib.redis",
-    "django_prometheus",
 ]
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
@@ -170,6 +169,7 @@ PROMETHEUS_LATENCY_BUCKETS = (
     float("inf"),
 )
 if os.getenv("METRICS", None) == "true":
+    INSTALLED_APPS.append("django_prometheus")
     MIDDLEWARE.extend(
         [
             "django_prometheus.middleware.PrometheusBeforeMiddleware",

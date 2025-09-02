@@ -77,6 +77,11 @@ class User(AbstractUser):
         else:
             return IastProjectTemplate.objects.filter(Q(tenant__isnull=True) | Q(tenant=self.tenant)).all()
 
+    def get_scan_templates(self) -> QuerySet:
+        from dongtai_common.models.strategy_user import IastStrategyUser
+
+        return IastStrategyUser.objects.filter(Q(user=self) | Q(user__isnull=True)).all()
+
     # 过滤当前用户可见的user
     def get_users(self) -> QuerySet:
         if self.is_super_admin():

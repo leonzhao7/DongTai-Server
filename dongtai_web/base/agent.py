@@ -60,16 +60,6 @@ def get_user_agent_pro(auth_users, bindId):
     return result
 
 
-def get_all_server(ids):
-    alls = IastServer.objects.filter(id__in=ids).values("id", "container")
-    result = {}
-    if alls:
-        for item in alls:
-            result[item["id"]] = item["container"]
-    return result
-
-
-
 # add by song
 def get_project_vul_count(users, queryset, auth_agents, project_id=None):
     result = []

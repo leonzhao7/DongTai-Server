@@ -126,13 +126,14 @@ from dongtai_web.views.vul_summary import VulSummary
 from dongtai_web.views.vul_summary_project import VulSummaryProject
 from dongtai_web.views.vul_summary_type import VulSummaryType
 from dongtai_web.views.vulnerability_status import VulnerabilityStatusView
-from dongtai_web.views.vuls import VulsEndPoint
 from dongtai_web.vul_log.vul_log_view import VulLogViewSet
 from dongtai_web.vul_recheck_payload.vul_recheck_payload import VulReCheckPayloadViewSet
 from dongtai_web.views.api_route_v2_search import ApiRouteV2Search
+from dongtai_web.views.health import HealthView
 from static.i18n.views.setlang import LanguageSetting
 
 urlpatterns: list[URLResolver | URLPattern] = [
+    path("health", HealthView.as_view()),
     path("user/changePassword", UserPassword.as_view()),
     path("user/login", UserLogin.as_view()),
     path("user/logout", UserLogout.as_view()),
@@ -172,7 +173,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     path("project/version/delete", ProjectVersionDelete.as_view()),
     path("project/version/current", ProjectVersionCurrent.as_view()),
     path("project/version/list/<int:project_id>", ProjectVersionList.as_view()),
-    path("vulns", VulsEndPoint.as_view()),
     path("vuln/summary", VulSummary.as_view()),
     path("vuln/summary_type", VulSummaryType.as_view()),
     path("vuln/summary_project", VulSummaryProject.as_view()),
