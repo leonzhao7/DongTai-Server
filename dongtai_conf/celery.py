@@ -4,6 +4,7 @@ import json
 import os
 
 from celery import Celery
+from celery.signals import worker_init, beat_init
 
 # set the default Django settings module for the 'celery' program.
 from kombu import Exchange, Queue
@@ -173,14 +174,24 @@ app.autodiscover_tasks()
 
 
 def ready(self):
+    print(f"celery ready")
     super().ready()
     checkout_preheat_online(DONGTAI_CELERY_CACHE_PREHEAT)
-    create_update_agent_task()
 
 
 app.ready = ready
 print(f"preheat settings now : {DONGTAI_CELERY_CACHE_PREHEAT}")
 
+@worker_init.connect
+def on_worker_init(sender, **kwargs):
+    print(f"celery worker inti")
+    pass
+
+@beat_init.connect
+def on_beat_init(sender, **kwargs):
+    print(f"celery beat inti")
+    create_update_agent_task()
+    pass
 
 def checkout_preheat_online(status):
     from django_celery_beat.models import IntervalSchedule, PeriodicTask

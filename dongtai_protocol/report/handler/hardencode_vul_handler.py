@@ -80,7 +80,7 @@ class HardEncodeVulHandler(IReportHandler):
             iast_vul.latest_time = timestamp
             iast_vul.taint_position = (self.field,)
             iast_vul.taint_value = (self.value,)
-            iast_vul.level_id = (strategy.level_id,)
+            iast_vul.level_id = strategy.level_id
             iast_vul.full_stack = (json.dumps(self.detail),)
             iast_vul.top_stack = (f"字段:{self.field}",)
             iast_vul.bottom_stack = (f"硬编码值:{self.value}",)

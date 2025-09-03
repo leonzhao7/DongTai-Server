@@ -28,6 +28,7 @@ class IReportHandler:
         self._report = None
         self._detail = None
         self._user_id = None
+        self.user = None
         self.agent_id = 0
         self.project_name = None
         self.agent: IastAgent = IastAgent()
@@ -82,6 +83,7 @@ class IReportHandler:
         logger.info(_("[{}] Report resolution start").format(self.__class__.__name__))
         self.report = report
         self.user_id = user
+        self.user = user
         self.common_header()
         if self.has_permission():
             self.parse()

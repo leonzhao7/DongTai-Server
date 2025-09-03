@@ -22,4 +22,3 @@ class IastConfig(DongTaiAppConfigPatch, AppConfig):
             Command().handle()
 
         init_schema()
-        create_update_agent_task()

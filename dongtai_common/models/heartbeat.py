@@ -29,3 +29,4 @@ class IastHeartbeat(models.Model):
     class Meta:
         managed = get_managed()
         db_table = "iast_heartbeat"
+        unique_together = ("agent",)

@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework.authtoken.models import Token
 
-from dongtai_common.endpoint import OpenApiEndPoint, R
+from dongtai_common.endpoint import UserEndPoint, R
 from dongtai_conf.settings import BUCKET_NAME_BASE_URL, VERSION
 from dongtai_protocol.api_schema import DongTaiParameter
 
@@ -262,7 +262,7 @@ class GoAgentDownload:
         return True
 
 
-class AgentDownload(OpenApiEndPoint):
+class AgentDownload(UserEndPoint):
     """
     Agent 下载接口
     """
@@ -312,11 +312,11 @@ class AgentDownload(OpenApiEndPoint):
     def get(self, request):
         try:
             base_url = request.query_params.get("url", "https://www.huoxian.cn")
-            project_name = request.query_params.get("projectName", "Demo Project")
-            project_version = request.query_params.get("projectVersion", "V1.0")
+            project_name = request.query_params.get("projectName", "")
+            project_version = request.query_params.get("projectVersion", "")
             language = request.query_params.get("language")
             department_token = request.query_params.get("department_token")
-            template_id = request.query_params.get("template_id", 5)
+            template_id = request.query_params.get("template_id", 1)
             user_token = request.query_params.get("token", None)
             if department_token:
                 final_token = department_token

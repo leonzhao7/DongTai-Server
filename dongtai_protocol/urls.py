@@ -15,7 +15,6 @@ from dongtai_protocol.views.agent_update import AgentUpdateEndPoint
 from dongtai_protocol.views.engine_auto_deploy import AutoDeployEndPoint
 from dongtai_protocol.views.engine_download import EngineDownloadEndPoint
 from dongtai_protocol.views.except_action import AgentActionV2EndPoint
-from dongtai_protocol.views.health import HealthView
 from dongtai_protocol.views.health_oss import OSSHealthView
 from dongtai_protocol.views.hook_profiles import HookProfilesEndPoint
 from dongtai_protocol.views.hook_profilesv2 import HookProfilesV2EndPoint
@@ -43,7 +42,6 @@ urlpatterns = [
     path("properties", PropertiesEndPoint.as_view()),
     path("report/upload", ReportUploadEndPoint.as_view()),
     # todo 增加重放请求获取接口,用于后续逻辑漏洞/漏洞验证等功能,暂时先不实现
-    path("health", HealthView.as_view()),
     path("oss/health", OSSHealthView.as_view()),
     path("except_action", AgentActionV2EndPoint.as_view({"get": "except_running_status"})),
     path(
@@ -54,5 +52,5 @@ urlpatterns = [
 ]
 
 urlpatterns = [
-    path("api/v1/", include(urlpatterns), name="OpenAPI"),
+    path("openapi/api/v1/", include(urlpatterns), name="OpenAPI"),
 ]
