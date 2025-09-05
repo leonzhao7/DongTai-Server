@@ -8,7 +8,6 @@ from dongtai_protocol.views.agent_config import (
     AgentConfigView,
 )
 from dongtai_protocol.views.agent_configv2 import AgentConfigAllinOneView
-from dongtai_protocol.views.agent_download import AgentDownload
 from dongtai_protocol.views.agent_limit import LimitView
 from dongtai_protocol.views.agent_register import AgentRegisterEndPoint
 from dongtai_protocol.views.agent_update import AgentUpdateEndPoint
@@ -26,7 +25,6 @@ from dongtai_protocol.views.startuptime import (
 )
 
 urlpatterns = [
-    path("agent/download", AgentDownload.as_view()),
     path("agent/limit", LimitView.as_view()),
     path("agent/startuptime", StartupTimeEndPoint.as_view()),
     path("agent/gzipstartuptime", StartupTimeGzipEndPoint.as_view()),

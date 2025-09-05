@@ -183,7 +183,7 @@ try:
 except ImportError:
     pass
 
-XFF_TRUSTED_PROXY_DEPTH = 20
+XFF_TRUSTED_PROXY_DEPTH = 1
 
 CSRF_COOKIE_NAME = "DTCsrfToken"
 CSRF_HEADER_NAME = "HTTP_CSRF_TOKEN"
@@ -1061,5 +1061,3 @@ LOG_SERVICE_TIMEOUT = config.getint("log_service", "port", fallback=10)
 
 # enable token login
 TOKEN_LOGIN = config.getboolean("other", "token_login", fallback=False)
-
-XFF_TRUSTED_PROXY_DEPTH = 2
