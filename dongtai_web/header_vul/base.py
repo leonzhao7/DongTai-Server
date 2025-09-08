@@ -63,7 +63,7 @@ class HeaderVulViewSet(UserEndPoint, viewsets.ViewSet):
             return R.failure(data=e.detail)
         projects = request.user.get_projects()
         q = Q(project__in=projects) & Q(vul_id=vul_id)
-        queryset = IastHeaderVulnerability.objects.filter(q).all()
+        queryset = IastHeaderVulnerability.objects.filter(q).order_by("id").all()
         page_summary, page_data = self.get_paginator(queryset, page, page_size)
         return R.success(data=HeaderVulSerializer(page_data, many=True).data, page=page_summary)
 

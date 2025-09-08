@@ -99,7 +99,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         try:
             all_agents = obj.project_agents
         except Exception:
-            all_agents = obj.iastagent_set.all()
+            all_agents = obj.agents.all()
             obj.project_agents = all_agents
         return all_agents
 
@@ -129,12 +129,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         if "project_language_dict" in self.context:
             res = self.context["project_language_dict"][obj.id]
         else:
-            res = obj.iastagent_set.values_list("language", flat=True).distinct()
+            res = obj.agents.values_list("language", flat=True).distinct()
         return list(res)
 
     def get_agent_count(self, obj) -> int:
         if "agent_count_dict" in self.context:
             res = self.context["agent_count_dict"][obj.id]
         else:
-            res = obj.iastagent_set.count()
+            res = obj.agents.count()
         return res

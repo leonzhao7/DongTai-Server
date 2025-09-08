@@ -46,20 +46,6 @@ def get_user_project_name(auth_users):
     return projects_info
 
 
-def get_user_agent_pro(auth_users, bindId):
-    agentInfo = IastAgent.objects.filter(user__in=auth_users, project_id__in=bindId).values(
-        "id", "project_id", "server_id"
-    )
-    result = {"pidArr": {}, "serverArr": {}, "server_ids": []}
-
-    if agentInfo:
-        for item in agentInfo:
-            result["pidArr"][item["id"]] = item["project_id"]
-            result["serverArr"][item["id"]] = item["server_id"]
-            result["server_ids"].append(item["server_id"])
-    return result
-
-
 # add by song
 def get_project_vul_count(users, queryset, auth_agents, project_id=None):
     result = []

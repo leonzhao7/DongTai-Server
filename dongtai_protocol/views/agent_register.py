@@ -6,6 +6,7 @@ import logging
 import string
 import time
 import uuid
+import os
 from datetime import datetime
 
 from django.db import transaction
@@ -40,86 +41,72 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
     name = "api-v1-agent-register"
     description = "引擎注册"
 
-    def make_project_name(self, param):
-        project_name = param.get("projectName")
-        if project_name:
-            return project_name
-        server_env = param.get("serverEnv")
-        if server_env:
-            env = base64.b64decode(server_env).decode("utf-8")
-            env = env.replace("{", "").replace("}", "")
-            envs = env.split(",")
-            for env in envs:
-                if "sun.java.command" in env.lower():
-                    return "=".join(env.split("=")[1:]).split(" ")[0]
-        return uuid.uuid4().hex
+    @staticmethod
+    def register_project(user, param, command):
+        project_name = param.get("projectName", None)
+        if not project_name:
+            if command:
+                linux_cmd = command.replace("\\", "/")
+                project_name = os.path.basename(linux_cmd).split(" ")[0]
+            if not project_name:
+                project_name = uuid.uuid4().hex
+        default_params = {
+            "latest_time": int(time.time()),
+        }
+        template_id = param.get("projectTemplateId", -1)
+        template = user.get_project_templates().filter(id=template_id).first()
+        if template:
+            default_params["template_id"] = template.id
+        scan = user.get_scan_templates().first()
+        if scan:
+            default_params["scan_id"] = scan.id
+        project, created = user.get_projects().update_or_create(name=project_name,
+                                                                tenant=user.tenant,
+                                                                defaults=default_params)
+        if user.is_tenant_admin():
+            project.departments.clear()
+        else:
+            project.departments.set(user.departments.all())
+        return project, created
 
-    def create_project_version(self, project_name, version_name, user, project_defaults, version_defaults):
-        from dongtai_common.models import IastProjectVersion
-
-        project, created =user.get_projects().update_or_create(name=project_name,
-                                                               tenant=user.tenant,
-                                                               defaults=project_defaults)
+    @staticmethod
+    def register_project_version(user, project, created, param):
+        version_name = param.get("projectVersion")
         if not created and not version_name and project.current_version:
             version = project.current_version
         else:
             if not version_name:
                 version_name = datetime.now().strftime("%Y-%m-%d")
             version, _ = IastProjectVersion.objects.update_or_create(version_name=version_name,
-                                                                               project=project,
-                                                                               defaults=version_defaults)
-        if user.is_tenant_admin():
-            project.departments.clear()
-        else:
-            project.departments.set(user.departments.all())
+                                                                               project=project)
         if not project.current_version:
             project.current_version = version
             project.save()
         return project, version
 
     @staticmethod
-    def register_agent(token, version, language, project, user, project_version, param):
-        try:
-            port = int(param.get("serverPort"))
-        except Exception:
-            logger.info(_("The server port does not exist, has been set to the default: 0"))
+    def register_agent(user, project, project_version, param, env_list, command):
+        token = param.get("name")
+        agent_version = param.get("version")
+        port = param.get("serverPort", 0)
+        if not port:
             port = 0
-        server_env = param.get("serverEnv")
-        if server_env:
-            env = base64.b64decode(server_env).decode("utf-8")
-            env = env.replace("{", "").replace("}", "")
-            envs = env.split(",")
-            command = AgentRegisterEndPoint.get_command(envs)
-        else:
-            command = ""
-            env = ""
-            envs = []
         network = param.get("network")
         agent, agent_created = user.get_agents().update_or_create(
-            token=token, project=project, project_version=project_version, version=version,
+            token=token, project=project, project_version=project_version, version=agent_version, user=user,
             defaults={
                 "hostname": param.get("hostname"),
-                "language": language,
+                "language": param.get("language"),
                 "latest_time": int(time.time()),
                 "ip": param.get("serverAddr"),
-                # "path": param.get("serverPath"),
-                # "port": port,
+                "port": port,
+                "path": param.get("serverPath"),
                 "cmdline": command,
-                "env": env,
-                "user": user,
-                # "ipaddress": get_ipaddresslist(network),
+                "env": env_list,
+                "pid": param.get("pid"),
+                "ipaddresslist": get_ipaddresslist(network),
             }
         )
-        # agent = user.get_agents().filter(token=token, project=project, project_version=project_version).first()
-        # if agent is None:
-        #     agent = IastAgent.objects.create(token=token,
-        #         version=version,
-        #         latest_time=int(time.time()),
-        #         user=user,
-        #         project=project,
-        #         project_version=project_version,
-        #         language=language,
-        #     )
         return agent
 
     @staticmethod
@@ -262,46 +249,32 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
         try:
             param = parse_data(request.read())
             token = param.get("name")
-            language = param.get("language")
             version = param.get("version")
             if not token or not version:
                 logger.error(f"参数错误, token={token}, version={version}")
                 return R.failure(msg="参数错误")
-            hostname = param.get("hostname")
-            network = param.get("network")
-            container_name = param.get("containerName")
-            server_addr = param.get("serverAddr")
-            server_port = param.get("serverPort")
-            server_path = param.get("serverPath")
             server_env = param.get("serverEnv")
-            # add by song
-            cluster_name = param.get("clusterName", "")
-            cluster_version = param.get("clusterVersion", "")
-            # end by song
-            pid = param.get("pid")
-            user = request.user
-            project_name = self.make_project_name(param)
-            version_name = param.get("projectVersion")
-            template_id = param.get("projectTemplateId", None)
-            template = user.get_project_templates().filter(id=template_id).first()
-            default_params = {
-                "latest_time": int(time.time()),
-                "scan_id": 1,
-            }
-            if template:
-                default_params["template_id"] = template.id
+            if server_env:
+                env = base64.b64decode(server_env).decode("utf-8")
+                env = env.replace("{", "").replace("}", "")
+                env_list = env.split(",")
+            else:
+                env = ""
+                env_list = []
+            command = AgentRegisterEndPoint.get_command(env_list)
             with (transaction.atomic()):
-                project, project_version = self.create_project_version(project_name, version_name, request.user, default_params, {})
-                logger.info(_("Register project, name={}, version={}").format(project.name, project_version.version_name))
-                agent = self.register_agent(
-                    token=token,
-                    project=project,
-                    language=language,
-                    version=version,
-                    project_version=project_version,
-                    user=user,
-                    param=param)
+                project, created = self.register_project(request.user, param, command)
+                project, project_version = self.register_project_version(request.user, project, created, param)
+                # logger.info(_("Register project, name={}, version={}").format(project.name, project_version.version_name))
+                agent = self.register_agent(request.user, project, project_version, param, env_list, command)
 
+                hostname = param.get("hostname")
+                network = param.get("network")
+                container_name = param.get("containerName")
+                server_addr = param.get("serverAddr")
+                server_port = param.get("serverPort")
+                server_path = param.get("serverPath")
+                pid = param.get("pid")
                 self.register_server(
                     agent=agent,
                     hostname=hostname,
@@ -310,8 +283,8 @@ class AgentRegisterEndPoint(OpenApiEndPoint):
                     server_addr=get_ipaddress(network) if get_ipaddress(network) else server_addr,
                     server_port=server_port,
                     server_path=server_path,
-                    cluster_name=cluster_name,
-                    cluster_version=cluster_version,
+                    cluster_name=param.get("clusterName", ""),
+                    cluster_version=param.get("clusterVersion", ""),
                     server_env=server_env,
                     pid=pid,
                     server_ipaddresslist=get_ipaddresslist(network),

@@ -2,11 +2,13 @@
 
 import logging
 
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from dongtai_common.endpoint import R, UserEndPoint
 from dongtai_common.models import IastProject
+from dongtai_common.models.agent import delete_agent
 from dongtai_web.utils import extend_schema_with_envcheck, get_response_serializer
 
 
@@ -39,8 +41,11 @@ class ProjectDel(UserEndPoint):
             project_id = request.data.get("id", 0)
             project = request.user.get_projects().filter(id=project_id).first()
             if project:
-                project.versions.delete()
-                project.delete()
+                with (transaction.atomic()):
+                    for agent in project.agents.all():
+                        delete_agent(agent)
+                    project.versions.all().delete()
+                    project.delete()
             else:
                 return R.failure(msg="参数错误")
 
