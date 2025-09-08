@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework.authtoken.models import Token
 
-from dongtai_common.endpoint import UserEndPoint, R
+from dongtai_common.endpoint import OpenApiEndPoint, R
 from dongtai_conf.settings import BUCKET_NAME_BASE_URL, VERSION
 from dongtai_protocol.api_schema import DongTaiParameter
 
@@ -262,7 +262,7 @@ class GoAgentDownload:
         return True
 
 
-class AgentDownload(UserEndPoint):
+class AgentDownload(OpenApiEndPoint):
     """
     Agent 下载接口
     """

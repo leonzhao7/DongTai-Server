@@ -22,7 +22,7 @@ from dongtai_web.views.agent import Agent
 from dongtai_web.views.agent_deploy import AgentDeploy
 from dongtai_web.views.agent_start import AgentStart
 from dongtai_web.views.agent_stop import AgentStop
-from dongtai_web.views.agent_download import AgentDownload
+from dongtai_protocol.views.agent_download import AgentDownload
 from dongtai_web.views.agent_summary import AgentSummary
 from dongtai_web.views.agents_v2 import AgentListv2
 from dongtai_web.views.captcha_create import CaptchaCreate

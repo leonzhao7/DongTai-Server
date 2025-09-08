@@ -3,7 +3,7 @@
 import os
 import multiprocessing
 
-bind = '127.0.0.1:18888' # 指定监听的地址和端口，nginx转发到这里
+bind = '127.0.0.1:18080' # 指定监听的地址和端口，nginx转发到这里
 backlog = 1024 # 服务器中排队等待的最大连接数，建议值64-2048，超过时客户端连接会得到一个error
 # workers = multiprocessing.cpu_count() + 1 # 用于处理工作的进程数，这里用建议值
 workers = 1

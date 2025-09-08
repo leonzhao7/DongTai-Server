@@ -11,6 +11,7 @@ from dongtai_protocol.views.agent_configv2 import AgentConfigAllinOneView
 from dongtai_protocol.views.agent_limit import LimitView
 from dongtai_protocol.views.agent_register import AgentRegisterEndPoint
 from dongtai_protocol.views.agent_update import AgentUpdateEndPoint
+from dongtai_protocol.views.agent_download import AgentDownload
 from dongtai_protocol.views.engine_auto_deploy import AutoDeployEndPoint
 from dongtai_protocol.views.engine_download import EngineDownloadEndPoint
 from dongtai_protocol.views.except_action import AgentActionV2EndPoint
@@ -26,6 +27,7 @@ from dongtai_protocol.views.startuptime import (
 
 urlpatterns = [
     path("agent/limit", LimitView.as_view()),
+    path("agent/download", AgentDownload.as_view()),
     path("agent/startuptime", StartupTimeEndPoint.as_view()),
     path("agent/gzipstartuptime", StartupTimeGzipEndPoint.as_view()),
     # agent get destroy strategy

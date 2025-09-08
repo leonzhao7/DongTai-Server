@@ -4,16 +4,13 @@ After=network.target
 
 [Service]
 Type=simple
-pidfile=/tmp/gunicorn.pid
 User=root
 Group=root
 
-RuntimeDirectory=gunicorn
 WorkingDirectory=/home/kali/code/DongTai-Server
 ExecStart=/home/kali/code/DongTai-Server/.venv/bin/gunicorn -c /home/kali/code/DongTai-Server/deploy/gunicorn/config.py DongTai-Server.wsgi:application
-ExecReload=kill -s hup $mainpid
-ExecStop=kill -s quit $mainpid
-PrivateTmp=true
+ExecReload=/bin/kill -s hup $mainpid
+ExecStop=/bin/kill -s quit $mainpid
 
 [Install]
 WantedBy=multi-user.target
